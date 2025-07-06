@@ -44,6 +44,46 @@
     </div>
     <div class="view_payments_modal">
     </div>
+    
+    <!-- Order Info Modal -->
+    <div class="modal fade" id="orderInfoModal" tabindex="-1" role="dialog" aria-labelledby="orderInfoModalLabel">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+            <h4 class="modal-title" id="orderInfoModalLabel">Thông tin chi tiết đơn hàng</h4>
+          </div>
+          <div class="modal-body" id="orderInfoContent" style="max-height: 600px; overflow-y: auto;">
+            <div class="text-center">
+              <i class="fa fa-spinner fa-spin fa-2x"></i>
+              <p>Đang tải dữ liệu...</p>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Đóng</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <style>
+      .order-info-modal .panel {
+        margin-bottom: 15px;
+      }
+      .order-info-modal .panel-heading {
+        background-color: #f5f5f5;
+        border-bottom: 1px solid #ddd;
+      }
+      .order-info-modal .table-condensed td {
+        padding: 5px 8px;
+        border: none;
+      }
+      .order-info-modal .table-condensed tr:nth-child(even) {
+        background-color: #f9f9f9;
+      }
+    </style>
 
     <!-- Main content -->
     <?= form_open('#', array('class' => '', 'id' => 'table_form')); ?>
@@ -256,6 +296,13 @@
                     multi_delete();
                 }
             },
+            {
+                className: 'btn bg-blue color-palette btn-flat hidden order_info_btn pull-left',
+                text: 'Thông tin đơn hàng',
+                action: function ( e, dt, node, config ) {
+                    show_order_info();
+                }
+            },
             { extend: 'copy', className: 'btn bg-teal color-palette btn-flat',exportOptions: { columns: [1,2,3,4,5,6,7,8,9,10]} },
             { extend: 'excel', className: 'btn bg-teal color-palette btn-flat',exportOptions: { columns: [1,2,3,4,5,6,7,8,9,10]} },
             { extend: 'pdf', className: 'btn bg-teal color-palette btn-flat',exportOptions: { columns: [1,2,3,4,5,6,7,8,9,10]} },
@@ -361,6 +408,165 @@ $("#sales_from_date,#sales_to_date,#user_created_by,#search_customer_id").on("ch
           $('#example2').DataTable().destroy();
           load_datatable();
       });
+
+// Function to show order information
+function show_order_info() {
+    var selectedIds = [];
+    $(".column_checkbox:checked").each(function() {
+        selectedIds.push($(this).val());
+    });
+    
+    if (selectedIds.length === 0) {
+        alert("Vui lòng chọn ít nhất một đơn hàng!");
+        return;
+    }
+    
+    // Show modal
+    $('#orderInfoModal').modal('show');
+    
+    // Reset modal content
+    $('#orderInfoContent').html('<div class="text-center"><i class="fa fa-spinner fa-spin fa-2x"></i><p>Đang tải dữ liệu...</p></div>');
+    
+    // AJAX call to get order details
+    $.ajax({
+        url: "<?php echo site_url('sales/get_order_details'); ?>",
+        type: "POST",
+        data: {
+            order_ids: selectedIds
+        },
+        dataType: "json",
+        success: function(response) {
+            if (response.success) {
+                var html = buildOrderInfoHTML(response.data);
+                $('#orderInfoContent').html(html);
+            } else {
+                $('#orderInfoContent').html('<div class="alert alert-danger">Có lỗi xảy ra: ' + response.message + '</div>');
+            }
+        },
+        error: function() {
+            $('#orderInfoContent').html('<div class="alert alert-danger">Không thể tải thông tin đơn hàng. Vui lòng thử lại!</div>');
+        }
+    });
+}
+
+// Function to build HTML from JSON data
+function buildOrderInfoHTML(orders) {
+    var html = '<div class="order-info-modal">';
+    
+    orders.forEach(function(order) {
+        // Build status label
+        var statusLabel = getStatusLabel(order.sales_status);
+        var paymentStatus = getPaymentStatus(order.due_amount);
+        
+        html += '<div class="panel panel-default">';
+        html += '<div class="panel-heading">';
+        html += '<h4 class="panel-title">';
+        html += '<strong>Đơn hàng: ' + order.sales_code + '</strong>';
+        html += '<span class="pull-right">' + statusLabel + '</span>';
+        html += '</h4>';
+        html += '</div>';
+        html += '<div class="panel-body">';
+        
+        // Basic info row
+        html += '<div class="row">';
+        html += '<div class="col-md-6">';
+        html += '<table class="table table-condensed">';
+        html += '<tr><td><strong>Ngày bán:</strong></td><td>' + formatDate(order.sales_date) + '</td></tr>';
+        html += '<tr><td><strong>Khách hàng:</strong></td><td>' + (order.customer_name || 'N/A') + '</td></tr>';
+        html += '<tr><td><strong>Điện thoại:</strong></td><td>' + (order.mobile || 'N/A') + '</td></tr>';
+        html += '<tr><td><strong>Địa chỉ:</strong></td><td>' + (order.address || 'N/A') + '</td></tr>';
+        html += '</table>';
+        html += '</div>';
+        
+        // Financial info
+        html += '<div class="col-md-6">';
+        html += '<table class="table table-condensed">';
+        html += '<tr><td><strong>Tổng tiền:</strong></td><td>' + formatCurrency(order.grand_total) + '</td></tr>';
+        html += '<tr><td><strong>Đã thanh toán:</strong></td><td>' + formatCurrency(order.paid_amount) + '</td></tr>';
+        html += '<tr><td><strong>Trạng thái TT:</strong></td><td>' + paymentStatus + '</td></tr>';
+        html += '<tr><td><strong>Người tạo:</strong></td><td>' + (order.created_by || 'N/A') + '</td></tr>';
+        html += '</table>';
+        html += '</div>';
+        html += '</div>';
+        
+        // Sales note
+        if (order.sales_note && order.sales_note.trim() !== '') {
+            html += '<div class="row">';
+            html += '<div class="col-md-12"><strong>Ghi chú:</strong> ' + order.sales_note + '</div>';
+            html += '</div>';
+        }
+        
+        // Items details
+        if (order.items && order.items.length > 0) {
+            html += '<div class="row">';
+            html += '<div class="col-md-12">';
+            html += '<h5><strong>Chi tiết sản phẩm:</strong></h5>';
+            html += '<table class="table table-bordered table-condensed">';
+            html += '<thead>';
+            html += '<tr>';
+            html += '<th>Mã SP</th>';
+            html += '<th>Tên sản phẩm</th>';
+            html += '<th>Số lượng</th>';
+            html += '<th>Đơn giá</th>';
+            html += '<th>Thành tiền</th>';
+            html += '</tr>';
+            html += '</thead>';
+            html += '<tbody>';
+            
+            order.items.forEach(function(item) {
+                html += '<tr>';
+                html += '<td>' + (item.item_code || 'N/A') + '</td>';
+                html += '<td>' + (item.item_name || 'N/A') + '</td>';
+                html += '<td>' + item.sales_qty + '</td>';
+                html += '<td>' + formatCurrency(item.price_per_unit) + '</td>';
+                html += '<td>' + formatCurrency(item.total_cost) + '</td>';
+                html += '</tr>';
+            });
+            
+            html += '</tbody>';
+            html += '</table>';
+            html += '</div>';
+            html += '</div>';
+        }
+        
+        html += '</div>'; // Close panel-body
+        html += '</div>'; // Close panel
+    });
+    
+    html += '</div>'; // Close order-info-modal
+    return html;
+}
+
+// Helper functions
+function getStatusLabel(status) {
+    switch(status) {
+        case 'Final':
+            return '<span class="label label-success">Đã giao hàng</span>';
+        case 'Shipping':
+            return '<span class="label label-info">Đã xuất kho</span>';
+        case 'Quotation':
+            return '<span class="label label-warning">Đang giao dịch</span>';
+        default:
+            return '<span class="label label-default">' + status + '</span>';
+    }
+}
+
+function getPaymentStatus(dueAmount) {
+    if (dueAmount <= 0) {
+        return '<span class="label label-success">Đã thanh toán</span>';
+    } else {
+        return '<span class="label label-danger">Còn nợ: ' + formatCurrency(dueAmount) + '</span>';
+    }
+}
+
+function formatCurrency(amount) {
+    return new Intl.NumberFormat('vi-VN').format(amount) + ' đ';
+}
+
+function formatDate(dateString) {
+    var date = new Date(dateString);
+    return date.toLocaleDateString('vi-VN') + ' ' + date.toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
+}
 </script>
 <script src="<?php echo $theme_link; ?>js/sales.js?v=<?= time(); ?>"></script>
 <script type="text/javascript">

@@ -421,4 +421,75 @@ class Sales extends MY_Controller {
 		$sales_id=$this->input->post('sales_id');
 		echo $this->sales->view_payments_modal($sales_id);
 	}
+	
+	public function get_order_details(){
+		$this->permission_check_with_msg('sales_view');
+		$order_ids = $this->input->post('order_ids');
+		
+		if (empty($order_ids)) {
+			echo json_encode(['success' => false, 'message' => 'Không có đơn hàng nào được chọn']);
+			return;
+		}
+		
+		try {
+			// Query để lấy thông tin chi tiết đơn hàng
+			$order_ids_str = implode(',', array_map('intval', $order_ids));
+			
+			$query = "SELECT 
+						s.id,
+						s.sales_code,
+						s.sales_date,
+						s.sales_status,
+						s.grand_total,
+						s.paid_amount,
+						s.sales_note,
+						c.customer_name,
+						c.mobile,
+						c.address,
+						u.username as created_by
+					FROM db_sales s 
+					LEFT JOIN db_customers c ON s.customer_id = c.id 
+					LEFT JOIN db_users u ON s.created_by = u.id 
+					WHERE s.id IN ($order_ids_str)
+					ORDER BY s.sales_date DESC";
+					
+			$orders = $this->db->query($query)->result();
+			
+			$orders_data = [];
+			foreach ($orders as $order) {
+				// Lấy thông tin chi tiết sản phẩm
+				$items_query = "SELECT 
+								si.item_name,
+								si.sales_qty,
+								si.price_per_unit,
+								si.total_cost,
+								i.item_code
+							FROM db_salesitems si 
+							LEFT JOIN db_items i ON si.item_id = i.id 
+							WHERE si.sales_id = " . $order->id;
+				$items = $this->db->query($items_query)->result();
+				
+				$orders_data[] = [
+					'id' => $order->id,
+					'sales_code' => $order->sales_code,
+					'sales_date' => $order->sales_date,
+					'sales_status' => $order->sales_status,
+					'grand_total' => $order->grand_total,
+					'paid_amount' => $order->paid_amount,
+					'due_amount' => $order->grand_total - $order->paid_amount,
+					'sales_note' => $order->sales_note,
+					'customer_name' => $order->customer_name,
+					'mobile' => $order->mobile,
+					'address' => $order->address,
+					'created_by' => $order->created_by,
+					'items' => $items
+				];
+			}
+			
+			echo json_encode(['success' => true, 'data' => $orders_data]);
+			
+		} catch (Exception $e) {
+			echo json_encode(['success' => false, 'message' => 'Có lỗi xảy ra: ' . $e->getMessage()]);
+		}
+	}
 }
