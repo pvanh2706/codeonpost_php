@@ -82,6 +82,15 @@
     padding: 8px 4px;
     vertical-align: middle;
   }
+  .order-info-modal .table-bordered th {
+    font-size: 11px;
+  }
+  .order-info-modal .item-bill-discount-percent,
+  .order-info-modal .item-bill-discount-amount {
+    font-size: 11px;
+    color: #e74c3c;
+    font-weight: bold;
+  }
   .order-info-modal .form-group {
     margin-bottom: 10px;
   }
@@ -241,6 +250,52 @@ function calculateItemTotal(row) {
     row.find('.item-discount-amount').text(formatCurrency(discountAmount));
     row.find('.item-tax-amount').text(formatCurrency(taxAmount));
     row.find('.item-total').text(formatCurrency(total));
+    
+    // Calculate bill discount allocation for this item
+    calculateBillDiscountAllocation(row);
+}
+
+// Calculate bill discount allocation for each item
+function calculateBillDiscountAllocation(row) {
+    var billDiscountAmount = parseFloat($('#bill_discount_amount').val().replace(/,/g, '')) || 0;
+    
+    if (billDiscountAmount > 0) {
+        // Get this item's subtotal (before item discount)
+        var qty = parseFloat(row.find('.item-qty-input').val()) || 0;
+        var price = parseFloat(row.find('.item-price-input').val().replace(/,/g, '')) || 0;
+        var itemSubtotal = qty * price;
+        
+        // Calculate total subtotal of all items
+        var totalSubtotal = 0;
+        $('.item-row').each(function() {
+            var itemQty = parseFloat($(this).find('.item-qty-input').val()) || 0;
+            var itemPrice = parseFloat($(this).find('.item-price-input').val().replace(/,/g, '')) || 0;
+            totalSubtotal += itemQty * itemPrice;
+        });
+        
+        if (totalSubtotal > 0) {
+            // Calculate this item's share of bill discount
+            var itemBillDiscountAmount = (itemSubtotal / totalSubtotal) * billDiscountAmount;
+            var itemBillDiscountPercent = itemSubtotal > 0 ? (itemBillDiscountAmount / itemSubtotal) * 100 : 0;
+            
+            // Update display
+            row.find('.item-bill-discount-percent').text(itemBillDiscountPercent.toFixed(2) + '%');
+            row.find('.item-bill-discount-amount').text(formatCurrency(itemBillDiscountAmount));
+        } else {
+            row.find('.item-bill-discount-percent').text('0%');
+            row.find('.item-bill-discount-amount').text(formatCurrency(0));
+        }
+    } else {
+        row.find('.item-bill-discount-percent').text('0%');
+        row.find('.item-bill-discount-amount').text(formatCurrency(0));
+    }
+}
+
+// Update all items bill discount allocation
+function updateAllBillDiscountAllocation() {
+    $('.item-row').each(function() {
+        calculateBillDiscountAllocation($(this));
+    });
 }
 
 // Update grand total with bill discount
@@ -268,6 +323,9 @@ function updateGrandTotal() {
     $('.item-row').each(function() {
         calculateItemTotal($(this));
     });
+    
+    // Update bill discount allocation for all items
+    updateAllBillDiscountAllocation();
     
     // Also update old displays if they exist
     if ($('#grand_total_display').length) {
@@ -524,6 +582,9 @@ function saveOrderChanges() {
                     });
                     updateGrandTotal();
                     
+                    // Update bill discount allocation
+                    updateAllBillDiscountAllocation();
+                    
                     // Format price inputs
                     $('.item-price-input').each(function() {
                         var value = parseFloat($(this).val().replace(/,/g, '')) || 0;
@@ -633,6 +694,9 @@ function calculateItemTotal(row) {
     row.find('.item-discount-amount').text(formatCurrency(discountAmount));
     row.find('.item-tax-amount').text(formatCurrency(taxAmount));
     row.find('.item-total').text(formatCurrency(total));
+    
+    // Calculate bill discount allocation for this item
+    calculateBillDiscountAllocation(row);
 }
 
 // Main modal initialization
@@ -688,6 +752,9 @@ $(document).ready(function() {
                         calculateItemTotal($(this));
                     });
                     updateGrandTotal();
+                    
+                    // Update bill discount allocation
+                    updateAllBillDiscountAllocation();
                     
                     // Format price inputs
                     $('.item-price-input').each(function() {
@@ -762,6 +829,9 @@ $(document).ready(function() {
                 calculateItemTotal($(this));
             });
             updateGrandTotal();
+            
+            // Update bill discount allocation
+            updateAllBillDiscountAllocation();
             
             // Format price inputs
             $('.item-price-input').each(function() {
@@ -844,6 +914,9 @@ $(document).ready(function() {
                         calculateItemTotal($(this));
                     });
                     updateGrandTotal();
+                    
+                    // Update bill discount allocation
+                    updateAllBillDiscountAllocation();
                     
                     // Format price inputs
                     $('.item-price-input').each(function() {
@@ -1066,8 +1139,10 @@ function buildOrderInfoHTML(orders) {
             html += '<th>Tên sản phẩm</th>';
             html += '<th>Số lượng</th>';
             html += '<th>Đơn giá</th>';
-            html += '<th>% Giảm giá</th>';
-            html += '<th>Tiền giảm</th>';
+            html += '<th>% Giảm giá SP</th>';
+            html += '<th>Tiền giảm SP</th>';
+            html += '<th>% Giảm giá HĐ</th>';
+            html += '<th>Tiền giảm HĐ</th>';
             html += '<th>% Thuế</th>';
             html += '<th>Tiền thuế</th>';
             html += '<th>Thành tiền</th>';
@@ -1102,6 +1177,16 @@ function buildOrderInfoHTML(orders) {
                 // Discount amount - calculated
                 html += '<td>';
                 html += '<span class="item-discount-amount">' + formatCurrency(item.discount_amount || 0) + '</span>';
+                html += '</td>';
+                
+                // Bill discount percentage for this item - calculated
+                html += '<td>';
+                html += '<span class="item-bill-discount-percent">0%</span>';
+                html += '</td>';
+                
+                // Bill discount amount for this item - calculated
+                html += '<td>';
+                html += '<span class="item-bill-discount-amount">' + formatCurrency(0) + '</span>';
                 html += '</td>';
                 
                 // Tax percentage - editable
