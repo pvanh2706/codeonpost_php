@@ -422,74 +422,264 @@ class Sales extends MY_Controller {
 		echo $this->sales->view_payments_modal($sales_id);
 	}
 	
-	public function get_order_details(){
-		$this->permission_check_with_msg('sales_view');
+	public function get_order_details() {
+		$this->permission_check('sales_view');
+		
 		$order_ids = $this->input->post('order_ids');
 		
-		if (empty($order_ids)) {
-			echo json_encode(['success' => false, 'message' => 'Không có đơn hàng nào được chọn']);
+		if (!$order_ids || !is_array($order_ids)) {
+			$response = array(
+				'success' => false,
+				'message' => 'Không có đơn hàng nào được chọn'
+			);
+			echo json_encode($response);
 			return;
 		}
 		
 		try {
-			// Query để lấy thông tin chi tiết đơn hàng
-			$order_ids_str = implode(',', array_map('intval', $order_ids));
+			$orders = array();
 			
-			$query = "SELECT 
-						s.id,
-						s.sales_code,
-						s.sales_date,
-						s.sales_status,
-						s.grand_total,
-						s.paid_amount,
-						s.sales_note,
-						c.customer_name,
-						c.mobile,
-						c.address,
-						u.username as created_by
-					FROM db_sales s 
-					LEFT JOIN db_customers c ON s.customer_id = c.id 
-					LEFT JOIN db_users u ON s.created_by = u.id 
-					WHERE s.id IN ($order_ids_str)
-					ORDER BY s.sales_date DESC";
-					
-			$orders = $this->db->query($query)->result();
-			
-			$orders_data = [];
-			foreach ($orders as $order) {
-				// Lấy thông tin chi tiết sản phẩm
-				$items_query = "SELECT 
-								si.item_name,
-								si.sales_qty,
-								si.price_per_unit,
-								si.total_cost,
-								i.item_code
-							FROM db_salesitems si 
-							LEFT JOIN db_items i ON si.item_id = i.id 
-							WHERE si.sales_id = " . $order->id;
-				$items = $this->db->query($items_query)->result();
+			foreach ($order_ids as $order_id) {
+				// Lấy thông tin đơn hàng
+				$order_query = $this->db->query("
+					SELECT s.*, c.customer_name, c.mobile, c.address, c.sales_due as due_amount, u.username as created_by
+					FROM db_sales s
+					LEFT JOIN db_customers c ON s.customer_id = c.id
+					LEFT JOIN db_users u ON s.created_by = u.id
+					WHERE s.id = ?
+				", array($order_id));
 				
-				$orders_data[] = [
-					'id' => $order->id,
-					'sales_code' => $order->sales_code,
-					'sales_date' => $order->sales_date,
-					'sales_status' => $order->sales_status,
-					'grand_total' => $order->grand_total,
-					'paid_amount' => $order->paid_amount,
-					'due_amount' => $order->grand_total - $order->paid_amount,
-					'sales_note' => $order->sales_note,
-					'customer_name' => $order->customer_name,
-					'mobile' => $order->mobile,
-					'address' => $order->address,
-					'created_by' => $order->created_by,
-					'items' => $items
-				];
+				if ($order_query->num_rows() > 0) {
+					$order = $order_query->row();
+					
+					// Lấy chi tiết sản phẩm
+					$items_query = $this->db->query("
+						SELECT si.*, i.item_code, i.item_name
+						FROM db_salesitems si
+						LEFT JOIN db_items i ON si.item_id = i.id
+						WHERE si.sales_id = ?
+					", array($order_id));
+					
+					$items = array();
+					if ($items_query->num_rows() > 0) {
+						foreach ($items_query->result() as $item) {
+							$items[] = array(
+								'item_id' => $item->item_id,
+								'item_code' => $item->item_code,
+								'item_name' => $item->item_name,
+								'sales_qty' => $item->sales_qty,
+								'price_per_unit' => $item->price_per_unit,
+								'discount_percent' => isset($item->discount_percent) ? $item->discount_percent : 0,
+								'discount_amount' => isset($item->discount_amount) ? $item->discount_amount : 0,
+								'tax_percent' => isset($item->tax_percent) ? $item->tax_percent : 0,
+								'tax_amount' => isset($item->tax_amount) ? $item->tax_amount : 0,
+								'total_cost' => $item->total_cost
+							);
+						}
+					}
+					
+					// Tạo array cho đơn hàng
+					$order_data = array(
+						'id' => $order->id,
+						'sales_code' => $order->sales_code,
+						'sales_date' => $order->sales_date,
+						'customer_name' => $order->customer_name,
+						'mobile' => $order->mobile,
+						'address' => $order->address,
+						'grand_total' => $order->grand_total,
+						'paid_amount' => $order->paid_amount,
+						'due_amount' => $order->due_amount,
+						'sales_status' => $order->sales_status,
+						'sales_note' => $order->sales_note,
+						'created_by' => $order->created_by,
+						'subtotal_amount' => isset($order->subtotal_amount) ? $order->subtotal_amount : 0,
+						'bill_discount_percent' => isset($order->bill_discount_percent) ? $order->bill_discount_percent : 0,
+						'bill_discount_amount' => isset($order->bill_discount_amount) ? $order->bill_discount_amount : 0,
+						'items' => $items
+					);
+					
+					$orders[] = $order_data;
+				}
 			}
 			
-			echo json_encode(['success' => true, 'data' => $orders_data]);
+			$response = array(
+				'success' => true,
+				'data' => $orders
+			);
 			
 		} catch (Exception $e) {
-			echo json_encode(['success' => false, 'message' => 'Có lỗi xảy ra: ' . $e->getMessage()]);
+			$response = array(
+				'success' => false,
+				'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
+			);
 		}
+		
+		echo json_encode($response);
+	}
+	
+	public function update_order_details() {
+		$this->permission_check('sales_edit');
+		
+		$order_data = $this->input->post('order_data');
+		
+		if (!$order_data || !isset($order_data['id'])) {
+			$response = array(
+				'success' => false,
+				'message' => 'Dữ liệu đơn hàng không hợp lệ'
+			);
+			echo json_encode($response);
+			return;
+		}
+		
+		$this->db->trans_start();
+		
+		try {
+			$order_id = $order_data['id'];
+			
+			// Update sales table
+			$sales_update = array(
+				'sales_status' => $order_data['sales_status'],
+				'sales_note' => $order_data['sales_note']
+			);
+			
+			$this->db->where('id', $order_id);
+			$this->db->update('db_sales', $sales_update);
+			
+			// Update customer information
+			$customer_id_query = $this->db->select('customer_id')->where('id', $order_id)->get('db_sales');
+			if ($customer_id_query->num_rows() > 0) {
+				$customer_id = $customer_id_query->row()->customer_id;
+				
+				$customer_update = array(
+					'customer_name' => $order_data['customer_name'],
+					'mobile' => $order_data['mobile'],
+					'address' => $order_data['address']
+				);
+				
+				$this->db->where('id', $customer_id);
+				$this->db->update('db_customers', $customer_update);
+			}
+			
+			// Update sales items
+			$grand_total = 0;
+			$subtotal_amount = 0;
+			if (isset($order_data['items']) && is_array($order_data['items'])) {
+				foreach ($order_data['items'] as $item) {
+					$item_update = array(
+						'sales_qty' => $item['sales_qty'],
+						'price_per_unit' => $item['price_per_unit'],
+						'discount_percent' => isset($item['discount_percent']) ? $item['discount_percent'] : 0,
+						'discount_amount' => isset($item['discount_amount']) ? $item['discount_amount'] : 0,
+						'tax_percent' => isset($item['tax_percent']) ? $item['tax_percent'] : 0,
+						'tax_amount' => isset($item['tax_amount']) ? $item['tax_amount'] : 0,
+						'total_cost' => $item['total_cost']
+					);
+					
+					$this->db->where('sales_id', $order_id);
+					$this->db->where('item_id', $item['item_id']);
+					$this->db->update('db_salesitems', $item_update);
+					
+					// Update item name if provided
+					if (isset($item['item_name']) && !empty($item['item_name'])) {
+						$this->db->where('id', $item['item_id']);
+						$this->db->update('db_items', array('item_name' => $item['item_name']));
+					}
+					
+					$subtotal_amount += $item['total_cost'];
+				}
+			}
+			
+			// Calculate grand total with bill discount
+			$bill_discount_amount = isset($order_data['bill_discount_amount']) ? $order_data['bill_discount_amount'] : 0;
+			$grand_total = $subtotal_amount - $bill_discount_amount;
+			
+			// Update sales table with totals and bill discount
+			$sales_totals_update = array(
+				'grand_total' => $grand_total,
+				'subtotal_amount' => $subtotal_amount,
+				'bill_discount_percent' => isset($order_data['bill_discount_percent']) ? $order_data['bill_discount_percent'] : 0,
+				'bill_discount_amount' => $bill_discount_amount
+			);
+			
+			$this->db->where('id', $order_id);
+			$this->db->update('db_sales', $sales_totals_update);
+			
+			$this->db->trans_complete();
+			
+			if ($this->db->trans_status() === FALSE) {
+				throw new Exception('Lỗi cập nhật cơ sở dữ liệu');
+			}
+			
+			// Get updated order data
+			$updated_order_query = $this->db->query("
+				SELECT s.*, c.customer_name, c.mobile, c.address, c.sales_due as due_amount, u.username as created_by
+				FROM db_sales s
+				LEFT JOIN db_customers c ON s.customer_id = c.id
+				LEFT JOIN db_users u ON s.created_by = u.id
+				WHERE s.id = ?
+			", array($order_id));
+			
+			$updated_order = $updated_order_query->row();
+			
+			// Get updated items
+			$items_query = $this->db->query("
+				SELECT si.*, i.item_code, i.item_name
+				FROM db_salesitems si
+				LEFT JOIN db_items i ON si.item_id = i.id
+				WHERE si.sales_id = ?
+			", array($order_id));
+			
+			$items = array();
+			if ($items_query->num_rows() > 0) {
+				foreach ($items_query->result() as $item) {
+					$items[] = array(
+						'item_id' => $item->item_id,
+						'item_code' => $item->item_code,
+						'item_name' => $item->item_name,
+						'sales_qty' => $item->sales_qty,
+						'price_per_unit' => $item->price_per_unit,
+						'discount_percent' => isset($item->discount_percent) ? $item->discount_percent : 0,
+						'discount_amount' => isset($item->discount_amount) ? $item->discount_amount : 0,
+						'tax_percent' => isset($item->tax_percent) ? $item->tax_percent : 0,
+						'tax_amount' => isset($item->tax_amount) ? $item->tax_amount : 0,
+						'total_cost' => $item->total_cost
+					);
+				}
+			}
+			
+			$updated_order_data = array(
+				'id' => $updated_order->id,
+				'sales_code' => $updated_order->sales_code,
+				'sales_date' => $updated_order->sales_date,
+				'customer_name' => $updated_order->customer_name,
+				'mobile' => $updated_order->mobile,
+				'address' => $updated_order->address,
+				'grand_total' => $updated_order->grand_total,
+				'paid_amount' => $updated_order->paid_amount,
+				'due_amount' => $updated_order->due_amount,
+				'sales_status' => $updated_order->sales_status,
+				'sales_note' => $updated_order->sales_note,
+				'created_by' => $updated_order->created_by,
+				'subtotal_amount' => isset($updated_order->subtotal_amount) ? $updated_order->subtotal_amount : 0,
+				'bill_discount_percent' => isset($updated_order->bill_discount_percent) ? $updated_order->bill_discount_percent : 0,
+				'bill_discount_amount' => isset($updated_order->bill_discount_amount) ? $updated_order->bill_discount_amount : 0,
+				'items' => $items
+			);
+			
+			$response = array(
+				'success' => true,
+				'message' => 'Cập nhật thành công',
+				'data' => $updated_order_data
+			);
+			
+		} catch (Exception $e) {
+			$this->db->trans_rollback();
+			$response = array(
+				'success' => false,
+				'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
+			);
+		}
+		
+		echo json_encode($response);
 	}
 }
