@@ -8,6 +8,9 @@
         </button>
         <h4 class="modal-title" id="orderInfoModalLabel">Thông tin chi tiết đơn hàng</h4>
         <div class="pull-right" style="margin-top: -25px; margin-right: 30px;">
+          <button type="button" class="btn btn-sm btn-info" id="configEInvoiceBtn">
+            <i class="fa fa-cog"></i> Cấu hình HĐ điện tử
+          </button>
           <button type="button" class="btn btn-sm btn-primary" id="editOrderBtn" style="display: none;">
             <i class="fa fa-edit"></i> Sửa
           </button>
@@ -27,6 +30,108 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Đóng</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- E-Invoice Configuration Modal -->
+<div class="modal fade" id="eInvoiceConfigModal" tabindex="-1" role="dialog" aria-labelledby="eInvoiceConfigModalLabel">
+  <div class="modal-dialog modal-md" role="document" style="width: 70%; max-width: 800px;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title" id="eInvoiceConfigModalLabel">
+          <i class="fa fa-cog"></i> Cấu hình kết nối hóa đơn điện tử
+        </h4>
+      </div>
+      <div class="modal-body">
+        <form id="eInvoiceConfigForm">
+          <div class="row">
+            <div class="col-md-12">
+              <div class="panel panel-info">
+                <div class="panel-heading">
+                  <h5 class="panel-title">
+                    <i class="fa fa-plug"></i> Thông tin kết nối API
+                  </h5>
+                </div>
+                <div class="panel-body">
+                  <div class="form-group">
+                    <label for="api_url">
+                      <i class="fa fa-link"></i> Link kết nối API <span class="text-danger">*</span>
+                    </label>
+                    <input type="url" class="form-control" id="api_url" name="api_url" 
+                           placeholder="https://api.example.com/einvoice" required>
+                    <small class="help-block">Nhập đường dẫn API đầy đủ của nhà cung cấp hóa đơn điện tử</small>
+                  </div>
+                  
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label for="api_username">
+                          <i class="fa fa-user"></i> Tài khoản kết nối API <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" class="form-control" id="api_username" name="api_username" 
+                               placeholder="username" required>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label for="api_password">
+                          <i class="fa fa-lock"></i> Mật khẩu kết nối API <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group">
+                          <input type="password" class="form-control" id="api_password" name="api_password" 
+                                 placeholder="••••••••" required>
+                          <span class="input-group-btn">
+                            <button type="button" class="btn btn-default" id="togglePassword">
+                              <i class="fa fa-eye"></i>
+                            </button>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label for="provider_code">
+                      <i class="fa fa-building"></i> Mã nhà cung cấp <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" class="form-control" id="provider_code" name="provider_code" 
+                           placeholder="PROVIDER_CODE" required>
+                    <small class="help-block">Mã định danh do nhà cung cấp hóa đơn điện tử cấp</small>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="panel panel-warning">
+                <div class="panel-heading">
+                  <h5 class="panel-title">
+                    <i class="fa fa-test-tube"></i> Kiểm tra kết nối
+                  </h5>
+                </div>
+                <div class="panel-body">
+                  <div class="form-group">
+                    <button type="button" class="btn btn-warning" id="testConnectionBtn">
+                      <i class="fa fa-plug"></i> Kiểm tra kết nối API
+                    </button>
+                    <div id="connectionStatus" class="mt-2"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">
+          <i class="fa fa-times"></i> Đóng
+        </button>
+        <button type="button" class="btn btn-primary" id="saveEInvoiceConfigBtn">
+          <i class="fa fa-save"></i> Lưu cấu hình
+        </button>
       </div>
     </div>
   </div>
@@ -144,6 +249,54 @@
   #bill_discount_percent,
   #bill_discount_amount {
     display: block !important;
+  }
+  
+  /* E-Invoice Config Modal Styles */
+  #eInvoiceConfigModal .panel {
+    margin-bottom: 20px;
+  }
+  #eInvoiceConfigModal .panel-heading {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+  }
+  #eInvoiceConfigModal .panel-title {
+    font-size: 14px;
+    font-weight: bold;
+  }
+  #eInvoiceConfigModal .form-group label {
+    font-weight: bold;
+    color: #495057;
+  }
+  #eInvoiceConfigModal .text-danger {
+    color: #dc3545 !important;
+  }
+  #eInvoiceConfigModal .help-block {
+    color: #6c757d;
+    font-size: 12px;
+  }
+  #eInvoiceConfigModal .input-group-btn .btn {
+    border-left: none;
+  }
+  #connectionStatus {
+    margin-top: 10px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 13px;
+  }
+  #connectionStatus.success {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+  }
+  #connectionStatus.error {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+  }
+  #connectionStatus.testing {
+    background-color: #fff3cd;
+    border: 1px solid #ffeaa7;
+    color: #856404;
   }
 </style>
 
@@ -1034,7 +1187,151 @@ $(document).ready(function() {
     setTimeout(function() {
         updateGrandTotal();
     }, 500);
+    
+    // E-Invoice Configuration Modal Event Handlers
+    $(document).on('click', '#configEInvoiceBtn', function() {
+        $('#eInvoiceConfigModal').modal('show');
+        loadEInvoiceConfig();
+    });
+    
+    $(document).on('click', '#togglePassword', function() {
+        var passwordField = $('#api_password');
+        var icon = $(this).find('i');
+        
+        if (passwordField.attr('type') === 'password') {
+            passwordField.attr('type', 'text');
+            icon.removeClass('fa-eye').addClass('fa-eye-slash');
+        } else {
+            passwordField.attr('type', 'password');
+            icon.removeClass('fa-eye-slash').addClass('fa-eye');
+        }
+    });
+    
+    $(document).on('click', '#testConnectionBtn', function() {
+        testEInvoiceConnection();
+    });
+    
+    $(document).on('click', '#saveEInvoiceConfigBtn', function() {
+        saveEInvoiceConfig();
+    });
 });
+
+// E-Invoice Configuration Functions
+function loadEInvoiceConfig() {
+    // Show loading
+    $('#connectionStatus').removeClass('success error testing').html('<i class="fa fa-spinner fa-spin"></i> Đang tải cấu hình...');
+    
+    $.ajax({
+        url: "<?php echo site_url('sales/get_einvoice_config'); ?>",
+        type: "GET",
+        dataType: "json",
+        success: function(response) {
+            if (response.success && response.data) {
+                $('#api_url').val(response.data.api_url || '');
+                $('#api_username').val(response.data.api_username || '');
+                $('#api_password').val(response.data.api_password || '');
+                $('#provider_code').val(response.data.provider_code || '');
+                $('#connectionStatus').removeClass('success error testing').html('');
+            } else {
+                $('#connectionStatus').removeClass('success error testing').html('');
+            }
+        },
+        error: function() {
+            $('#connectionStatus').removeClass('success error testing').addClass('error')
+                .html('<i class="fa fa-exclamation-triangle"></i> Không thể tải cấu hình!');
+        }
+    });
+}
+
+function testEInvoiceConnection() {
+    var apiUrl = $('#api_url').val().trim();
+    var apiUsername = $('#api_username').val().trim();
+    var apiPassword = $('#api_password').val().trim();
+    var providerCode = $('#provider_code').val().trim();
+    
+    // Validate required fields
+    if (!apiUrl || !apiUsername || !apiPassword || !providerCode) {
+        $('#connectionStatus').removeClass('success error testing').addClass('error')
+            .html('<i class="fa fa-exclamation-triangle"></i> Vui lòng điền đầy đủ thông tin!');
+        return;
+    }
+    
+    // Show testing status
+    $('#connectionStatus').removeClass('success error').addClass('testing')
+        .html('<i class="fa fa-spinner fa-spin"></i> Đang kiểm tra kết nối...');
+    
+    $('#testConnectionBtn').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Đang kiểm tra...');
+    
+    $.ajax({
+        url: "<?php echo site_url('sales/test_einvoice_connection'); ?>",
+        type: "POST",
+        data: {
+            api_url: apiUrl,
+            api_username: apiUsername,
+            api_password: apiPassword,
+            provider_code: providerCode
+        },
+        dataType: "json",
+        success: function(response) {
+            if (response.success) {
+                $('#connectionStatus').removeClass('testing error').addClass('success')
+                    .html('<i class="fa fa-check-circle"></i> Kết nối thành công! ' + (response.message || ''));
+            } else {
+                $('#connectionStatus').removeClass('testing success').addClass('error')
+                    .html('<i class="fa fa-exclamation-triangle"></i> Kết nối thất bại: ' + (response.message || 'Lỗi không xác định'));
+            }
+        },
+        error: function(xhr, status, error) {
+            $('#connectionStatus').removeClass('testing success').addClass('error')
+                .html('<i class="fa fa-exclamation-triangle"></i> Lỗi kết nối: ' + error);
+        },
+        complete: function() {
+            $('#testConnectionBtn').prop('disabled', false).html('<i class="fa fa-plug"></i> Kiểm tra kết nối API');
+        }
+    });
+}
+
+function saveEInvoiceConfig() {
+    var apiUrl = $('#api_url').val().trim();
+    var apiUsername = $('#api_username').val().trim();
+    var apiPassword = $('#api_password').val().trim();
+    var providerCode = $('#provider_code').val().trim();
+    
+    // Validate required fields
+    if (!apiUrl || !apiUsername || !apiPassword || !providerCode) {
+        alert('Vui lòng điền đầy đủ tất cả thông tin bắt buộc!');
+        return;
+    }
+    
+    // Show loading
+    $('#saveEInvoiceConfigBtn').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Đang lưu...');
+    
+    $.ajax({
+        url: "<?php echo site_url('sales/save_einvoice_config'); ?>",
+        type: "POST",
+        data: {
+            api_url: apiUrl,
+            api_username: apiUsername,
+            api_password: apiPassword,
+            provider_code: providerCode
+        },
+        dataType: "json",
+        success: function(response) {
+            if (response.success) {
+                alert('Lưu cấu hình thành công!');
+                $('#eInvoiceConfigModal').modal('hide');
+            } else {
+                alert('Có lỗi xảy ra: ' + (response.message || 'Lỗi không xác định'));
+            }
+        },
+        error: function(xhr, status, error) {
+            alert('Không thể lưu cấu hình: ' + error);
+        },
+        complete: function() {
+            $('#saveEInvoiceConfigBtn').prop('disabled', false).html('<i class="fa fa-save"></i> Lưu cấu hình');
+        }
+    });
+}
 
 // Function to build HTML from JSON data
 function buildOrderInfoHTML(orders) {

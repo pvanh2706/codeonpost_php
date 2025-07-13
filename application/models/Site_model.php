@@ -213,6 +213,62 @@ class Site_model extends CI_Model {
 		    return "failed";
 		}
 	}
+	
+	public function get_einvoice_config()
+	{
+		$query = $this->db->query("SELECT * FROM db_einvoice_config WHERE id = 1");
+		
+		if ($query->num_rows() > 0) {
+			return $query->row_array();
+		}
+		
+		return array();
+	}
+	
+	public function save_einvoice_config($api_url, $username, $password, $provider_code)
+	{
+		$data = array(
+			'api_url' => $api_url,
+			'username' => $username,
+			'password' => $password, // Trong thực tế nên mã hóa mật khẩu
+			'provider_code' => $provider_code,
+			'updated_at' => date('Y-m-d H:i:s')
+		);
+		
+		// Kiểm tra xem có bản ghi nào chưa
+		$query = $this->db->query("SELECT id FROM db_einvoice_config WHERE id = 1");
+		
+		if ($query->num_rows() > 0) {
+			// Cập nhật
+			$this->db->where('id', 1);
+			$result = $this->db->update('db_einvoice_config', $data);
+		} else {
+			// Tạo mới
+			$data['id'] = 1;
+			$data['created_at'] = date('Y-m-d H:i:s');
+			$result = $this->db->insert('db_einvoice_config', $data);
+		}
+		
+		return $result;
+	}
+	
+	public function create_einvoice_config_table()
+	{
+		// Tạo bảng cấu hình hóa đơn điện tử nếu chưa tồn tại
+		$sql = "CREATE TABLE IF NOT EXISTS `db_einvoice_config` (
+			`id` int(11) NOT NULL AUTO_INCREMENT,
+			`api_url` varchar(255) NOT NULL,
+			`username` varchar(100) NOT NULL,
+			`password` varchar(255) NOT NULL,
+			`provider_code` varchar(50) NOT NULL,
+			`status` tinyint(1) DEFAULT '1',
+			`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+			PRIMARY KEY (`id`)
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+		
+		return $this->db->simple_query($sql);
+	}
 }
 
 /* End of file Site_model.php */

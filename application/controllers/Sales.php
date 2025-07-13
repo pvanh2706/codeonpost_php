@@ -682,4 +682,101 @@ class Sales extends MY_Controller {
 		
 		echo json_encode($response);
 	}
+	
+	public function einvoice_config()
+	{
+		$this->permission_check('site_edit');
+		$data = $this->data;
+		$data['page_title'] = 'Cấu hình hóa đơn điện tử';
+		
+		// Lấy cấu hình hiện tại từ database (nếu có)
+		$this->load->model('site_model', 'site');
+		
+		// Tạo bảng cấu hình nếu chưa tồn tại
+		$this->site->create_einvoice_config_table();
+		
+		$config = $this->site->get_einvoice_config();
+		$data['einvoice_config'] = $config;
+		
+		$this->load->view('einvoice-config', $data);
+	}
+	
+	public function save_einvoice_config()
+	{
+		$this->permission_check('site_edit');
+		
+		$api_url = $this->input->post('api_url');
+		$username = $this->input->post('username');
+		$password = $this->input->post('password');
+		$provider_code = $this->input->post('provider_code');
+		
+		$this->load->model('site_model', 'site');
+		$result = $this->site->save_einvoice_config($api_url, $username, $password, $provider_code);
+		
+		if ($result) {
+			$response = array(
+				'success' => true,
+				'message' => 'Lưu cấu hình thành công'
+			);
+		} else {
+			$response = array(
+				'success' => false,
+				'message' => 'Có lỗi xảy ra khi lưu cấu hình'
+			);
+		}
+		
+		echo json_encode($response);
+	}
+	
+	public function test_einvoice_connection()
+	{
+		$this->permission_check('site_edit');
+		
+		$api_url = $this->input->post('api_url');
+		$username = $this->input->post('username');
+		$password = $this->input->post('password');
+		$provider_code = $this->input->post('provider_code');
+		
+		// Thực hiện test kết nối API
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $api_url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+		curl_setopt($ch, CURLOPT_POST, true);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(array(
+			'username' => $username,
+			'password' => $password,
+			'provider_code' => $provider_code,
+			'action' => 'test_connection'
+		)));
+		curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+			'Content-Type: application/json',
+			'Accept: application/json'
+		));
+		
+		$response = curl_exec($ch);
+		$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		$error = curl_error($ch);
+		curl_close($ch);
+		
+		if ($error) {
+			$result = array(
+				'success' => false,
+				'message' => 'Lỗi kết nối: ' . $error
+			);
+		} else if ($http_code == 200) {
+			$result = array(
+				'success' => true,
+				'message' => 'Kết nối thành công',
+				'data' => json_decode($response, true)
+			);
+		} else {
+			$result = array(
+				'success' => false,
+				'message' => 'Kết nối thất bại. HTTP Code: ' . $http_code
+			);
+		}
+		
+		echo json_encode($result);
+	}
 }
