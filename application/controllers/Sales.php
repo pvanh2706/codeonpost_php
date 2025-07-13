@@ -779,4 +779,76 @@ class Sales extends MY_Controller {
 		
 		echo json_encode($result);
 	}
+	
+	public function health_check_einvoice()
+	{
+		$this->permission_check('site_edit');
+		
+		$api_url = $this->input->post('api_url');
+		$username = $this->input->post('username');
+		$password = $this->input->post('password');
+		$provider_code = $this->input->post('provider_code');
+		
+		// Cấu trúc API theo yêu cầu
+		$data = array(
+			'SiteConfigInfo' => array(
+				'Site' => array(
+					'Partner' => 2,
+					'PartnerUrl' => $api_url,
+					'Username' => $username,
+					'Password' => $password
+				),
+				'ExtraDataMap' => array()
+			)
+		);
+		
+		// Thực hiện gọi API Health Check
+		$ch = curl_init();
+		
+		// URL Health Check endpoint
+		// $health_check_url = rtrim($api_url, '/') . '/api/ezInvoice/HealthCheck';
+		$health_check_url = rtrim('https://ms-api-test.ezinvoice.vn', '/') . '/api/ezInvoice/HealthCheck';
+		
+		curl_setopt($ch, CURLOPT_URL, $health_check_url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+		curl_setopt($ch, CURLOPT_POST, true);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+		curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+			'Content-Type: application/json',
+			'Authorization: Bearer 3DE164B5-0E9D-43DC-9FF1-976C823497FC'
+		));
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+		
+		$response = curl_exec($ch);
+		$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		$error = curl_error($ch);
+		curl_close($ch);
+		
+		if ($error) {
+			$result = array(
+				'success' => false,
+				'message' => 'Lỗi kết nối: ' . $error,
+				'error_details' => $error
+			);
+		} else if ($http_code == 200) {
+			$response_data = json_decode($response, true);
+			$result = array(
+				'success' => true,
+				'message' => 'Kiểm tra kết nối thành công',
+				'http_code' => $http_code,
+				'response' => $response_data
+			);
+		} else {
+			$result = array(
+				'success' => false,
+				'message' => 'Kiểm tra kết nối thất bại. HTTP Code: ' . $http_code,
+				'http_code' => $http_code,
+				'response' => $response
+			);
+		}
+		
+		echo json_encode($result);
+	}
 }

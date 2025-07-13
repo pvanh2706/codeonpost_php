@@ -165,6 +165,41 @@
         align-items: center;
         gap: 8px;
         margin-left: 10px;
+        border-radius: 4px;
+        border: 1px solid transparent;
+    }
+    
+    .btn-info {
+        color: #fff;
+        background-color: #17a2b8;
+        border-color: #17a2b8;
+    }
+    
+    .btn-info:hover {
+        background-color: #138496;
+        border-color: #117a8b;
+    }
+    
+    .btn-default {
+        color: #333;
+        background-color: #fff;
+        border-color: #ccc;
+    }
+    
+    .btn-default:hover {
+        background-color: #e6e6e6;
+        border-color: #adadad;
+    }
+    
+    .btn-primary {
+        color: #fff;
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+    
+    .btn-primary:hover {
+        background-color: #0056b3;
+        border-color: #004085;
     }
     
     .btn:disabled {
@@ -245,6 +280,11 @@
             </div>
             
             <div class="form-actions">
+                <button type="button" id="btn-health-check" class="btn btn-info">
+                    <i class="fa fa-heartbeat"></i>
+                    <span class="loading-spinner"></span>
+                    Kiểm tra kết nối
+                </button>
                 <button type="button" id="btn-test-connection" class="btn btn-default">
                     <i class="fa fa-plug"></i>
                     <span class="loading-spinner"></span>
@@ -275,6 +315,59 @@ $(document).ready(function() {
             passwordField.attr('type', 'password');
             icon.removeClass('fa-eye-slash').addClass('fa-eye');
         }
+    });
+    
+    // Kiểm tra kết nối Health Check
+    $('#btn-health-check').click(function() {
+        var btn = $(this);
+        var spinner = btn.find('.loading-spinner');
+        
+        // Validate form trước khi kiểm tra
+        if (!validateForm()) {
+            return;
+        }
+        
+        btn.prop('disabled', true);
+        spinner.show();
+        
+        var formData = {
+            api_url: $('#api_url').val().trim(),
+            username: $('#username').val().trim(),
+            password: $('#password').val().trim(),
+            provider_code: $('#provider_code').val().trim()
+        };
+        
+        $.ajax({
+            url: '<?php echo site_url("sales/health_check_einvoice"); ?>',
+            type: 'POST',
+            data: formData,
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    var message = '<i class="fa fa-check-circle"></i> ' + response.message;
+                    if (response.response && response.response.data) {
+                        message += '<br><small>Response Data: ' + JSON.stringify(response.response.data) + '</small>';
+                    }
+                    showAlert('success', message);
+                } else {
+                    var errorMessage = '<i class="fa fa-exclamation-circle"></i> ' + response.message;
+                    if (response.http_code) {
+                        errorMessage += '<br><small>HTTP Code: ' + response.http_code + '</small>';
+                    }
+                    if (response.error_details) {
+                        errorMessage += '<br><small>Chi tiết lỗi: ' + response.error_details + '</small>';
+                    }
+                    showAlert('danger', errorMessage);
+                }
+            },
+            error: function(xhr, status, error) {
+                showAlert('danger', '<i class="fa fa-exclamation-circle"></i> Có lỗi xảy ra khi kiểm tra kết nối: ' + error);
+            },
+            complete: function() {
+                btn.prop('disabled', false);
+                spinner.hide();
+            }
+        });
     });
     
     // Test kết nối API
@@ -415,10 +508,15 @@ $(document).ready(function() {
         
         $('#alert-container').html(alertHtml);
         
-        // Tự động ẩn alert sau 5 giây
+        // Scroll to top để thấy alert
+        $('html, body').animate({
+            scrollTop: $('#alert-container').offset().top - 100
+        }, 500);
+        
+        // Tự động ẩn alert sau 8 giây (tăng thời gian để đọc response data)
         setTimeout(function() {
             $('#alert-container .alert').fadeOut();
-        }, 5000);
+        }, 8000);
     }
     
     // Thêm style cho input lỗi
