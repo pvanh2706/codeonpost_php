@@ -131,7 +131,7 @@ class Purchase_return extends MY_Controller {
 			$row[] = ucfirst($purchase->created_by);
 					$str2 = '<div class="btn-group" title="View Account">
 										<a class="btn btn-primary btn-o dropdown-toggle" data-toggle="dropdown" href="#">
-											Action <span class="caret"></span>
+											Thao tác <span class="caret"></span>
 										</a>
 										<ul role="menu" class="dropdown-menu dropdown-light pull-right">';
 											if($this->permissions('purchase_return_view'))
@@ -165,7 +165,7 @@ class Purchase_return extends MY_Controller {
 											if($this->permissions('purchase_return_add') || $this->permissions('purchase_return_edit'))
 											$str2.='<li>
 												<a title="Update Record ?" target="_blank" href="'.base_url().'purchase_return/print_invoice/'.$purchase->id.'">
-													<i class="fa fa-fw fa-print text-blue"></i>Print
+													<i class="fa fa-fw fa-print text-blue"></i>In hóa đơn
 												</a>
 											</li>
 											<li>

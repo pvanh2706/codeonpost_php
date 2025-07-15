@@ -127,41 +127,41 @@ class Sales_return extends MY_Controller {
 
 					$str2 = '<div class="btn-group" title="View Account">
 										<a class="btn btn-primary btn-o dropdown-toggle" data-toggle="dropdown" href="#">
-											Action <span class="caret"></span>
+											Thao tác <span class="caret"></span>
 										</a>
 										<ul role="menu" class="dropdown-menu dropdown-light pull-right">';
 											if($this->permissions('sales_return_view'))
 											$str2.='<li>
 												<a title="View Invoice" href="sales_return/invoice/'.$sales->id.'" >
-													<i class="fa fa-fw fa-eye text-blue"></i>View sales
+													<i class="fa fa-fw fa-eye text-blue"></i>Xem chi tiết
 												</a>
 											</li>';
 
 											if($this->permissions('sales_return_edit'))
 											$str2.='<li>
 												<a title="Update Record ?" href="'.$str1.$sales->id.'">
-													<i class="fa fa-fw fa-edit text-blue"></i>Edit
+													<i class="fa fa-fw fa-edit text-blue"></i>Chỉnh sửa
 												</a>
 											</li>';
 
 											if($this->permissions('sales_return_payment_view'))
 											$str2.='<li>
 												<a title="Pay" class="pointer" onclick="view_payments('.$sales->id.')" >
-													<i class="fa fa-fw fa-money text-blue"></i>View Payments
+													<i class="fa fa-fw fa-money text-blue"></i>Xem thông tin thanh toán
 												</a>
 											</li>';
 
 											if($this->permissions('sales_return_payment_add'))
 											$str2.='<li>
 												<a title="Pay" class="pointer" onclick="pay_now('.$sales->id.')" >
-													<i class="fa fa-fw fa-hourglass-half text-blue"></i>Pay Now
+													<i class="fa fa-fw fa-hourglass-half text-blue"></i>Thanh toán ngay
 												</a>
 											</li>';
 
 											if($this->permissions('sales_return_add') || $this->permissions('sales_return_edit'))
 											$str2.='<li>
 												<a title="Update Record ?" target="_blank" href="sales_return/print_invoice/'.$sales->id.'">
-													<i class="fa fa-fw fa-print text-blue"></i>Print
+													<i class="fa fa-fw fa-print text-blue"></i>In hóa đơn
 												</a>
 											</li>
 
@@ -174,7 +174,7 @@ class Sales_return extends MY_Controller {
 											if($this->permissions('sales_return_delete'))
 											$str2.='<li>
 												<a style="cursor:pointer" title="Delete Record ?" onclick="delete_return(\''.$sales->id.'\')">
-													<i class="fa fa-fw fa-trash text-red"></i>Delete
+													<i class="fa fa-fw fa-trash text-red"></i>Xóa
 												</a>
 											</li>
 											
@@ -263,7 +263,7 @@ class Sales_return extends MY_Controller {
 		$data=$this->data;
 		$data=array_merge($data,array('return_id'=>$return_id));
 		$data['page_title']=$this->lang->line('sales_return_invoice');
-		$this->load->view('sal-invoice-pos',$data);
+		$this->load->view('return-invoice-pos',$data);
 	}
 	
 	

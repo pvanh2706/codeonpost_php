@@ -131,7 +131,7 @@
                         <th>ID</th>
                         <th>Date</th>
                         <th>Ref.ID</th>
-                        <th>Action</th>
+                        <th>Thao tác</th>
                       </tr>
                       </thead>
                       <tbody id="hold_invoice_list" >
@@ -291,8 +291,8 @@
                      
                     </div>
                     <div class="modal-footer">
-                      <button type="button" class="btn btn-warning" data-dismiss="modal">Close</button>
-                      <button type="button" class="btn btn-primary discount_update">Update</button>
+                      <button type="button" class="btn btn-warning" data-dismiss="modal">Đóng</button>
+                      <button type="button" class="btn btn-primary discount_update">Cập nhật</button>
                     </div>
                   </div>
                   <!-- /.modal-content -->

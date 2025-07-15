@@ -142,7 +142,7 @@
                   <th>Mã tham chiếu</th>
                   <th>Khách hàng</th>
                   <!-- <th>Warehouse</th> -->
-                  <th>Gia trị</th>
+                  <th>Giá trị</th>
                   <th>Đã thanh toán</th>
                   <th>Công nợ</th>
                   <th>Thanh toán</th>
@@ -155,7 +155,7 @@
                 </tbody>
                <tfoot>
                   <tr class="bg-gray">
-                      <th colspan="7" style="text-align:right">Total</th><!-- 6 -->
+                      <th colspan="7" style="text-align:right">Tổng cộng</th><!-- 6 -->
                       <th></th><!-- 7 -->
                       <th></th><!-- 7 -->
                       <th></th><!-- 7 -->

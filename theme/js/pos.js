@@ -1,4 +1,3 @@
-
 //On Enter Move the cursor to desigtation Id
 function shift_cursor(kevent,target){
 
@@ -23,9 +22,23 @@ $("#pay_all").on("click",function(){
 });
 
 
+// Hàm reset UI button
+function resetUIButton() {
+    $('.prevent-double-click').removeClass('processing').prop('disabled', false);
+}
+
+// Biến flag để ngăn chặn double-click
+var isProcessing = false;
+
 function save(print=false,pay_all=false){
 
 //$('.make_sale').on("click",function (e) {
+	
+	// Kiểm tra nếu đang xử lý thì không cho phép thực hiện lại
+	if(isProcessing) {
+		toastr["warning"]("Đang xử lý, vui lòng đợi...");
+		return;
+	}
 	
 	var base_url=$("#base_url").val().trim();
     
@@ -70,13 +83,18 @@ function save(print=false,pay_all=false){
 	//swal({ title: "Are you sure?",icon: "warning",buttons: true,dangerMode: true,}).then((sure) => {
 			//  if(sure) {//confirmation start
 
-		
+		// Đặt flag đang xử lý
+		isProcessing = true;
 		$("#"+this_btn).attr('disabled',true);  //Enable Save or Update button
 		//e.preventDefault();
 		var data = new Array(2);
 		data= new FormData($('#pos-form')[0]);//form name
 		/*Check XSS Code*/
-		if(!xss_validation(data)){ return false; }
+		if(!xss_validation(data)){ 
+			isProcessing = false; // Reset flag nếu có lỗi
+			$("#"+this_btn).attr('disabled',false);
+			return false; 
+		}
 		
 		$(".box").append('<div class="overlay"><i class="fa fa-refresh fa-spin"></i></div>');
 		$.ajax({
@@ -167,6 +185,19 @@ function save(print=false,pay_all=false){
 
 				$("."+this_btn).attr('disabled',false);  //Enable Save or Update button
 				$(".overlay").remove();
+				
+				// Reset flag đang xử lý sau khi hoàn thành
+				isProcessing = false;
+				resetUIButton(); // Reset UI button
+		   },
+		   error: function(xhr, status, error) {
+		   	    // Xử lý lỗi AJAX
+		   	    toastr['error']("Có lỗi xảy ra: " + error);
+		   	    $("."+this_btn).attr('disabled',false);
+		   	    $(".overlay").remove();
+		   	    // Reset flag đang xử lý khi có lỗi
+		   	    isProcessing = false;
+		   	    resetUIButton(); // Reset UI button
 		   }
 	   });
 	//} //confirmation sure
@@ -178,9 +209,21 @@ function save(print=false,pay_all=false){
 //});
 }//Save End
 
+// Biến flag để ngăn chặn double-click cho hàm savetam
+var isProcessingTam = false;
+
 function savetam(print=false,pay_all=false,in_tam){
 
 //$('.make_sale').on("click",function (e) {
+	
+	// Kiểm tra nếu đang xử lý thì không cho phép thực hiện lại
+	if(isProcessingTam) {
+		toastr["warning"]("Đang xử lý, vui lòng đợi...");
+		return;
+	}
+	
+	// Đặt flag đang xử lý
+	isProcessingTam = true;
 	
 	var base_url=$("#base_url").val().trim();
     
@@ -322,6 +365,17 @@ function savetam(print=false,pay_all=false,in_tam){
 
 				$("."+this_btn).attr('disabled',false);  //Enable Save or Update button
 				$(".overlay").remove();
+				
+				// Reset flag đang xử lý sau khi hoàn thành
+				isProcessingTam = false;
+		   },
+		   error: function(xhr, status, error) {
+		   	    // Xử lý lỗi AJAX
+		   	    toastr['error']("Có lỗi xảy ra: " + error);
+		   	    $("."+this_btn).attr('disabled',false);
+		   	    $(".overlay").remove();
+		   	    // Reset flag đang xử lý khi có lỗi
+		   	    isProcessingTam = false;
 		   }
 	   });
 	//} //confirmation sure
@@ -637,4 +691,3 @@ function remove_row(id){
 function calculate_payments(){
 	adjust_payments();
 }
-/* *********************** ORDER INVOICE END****************************/

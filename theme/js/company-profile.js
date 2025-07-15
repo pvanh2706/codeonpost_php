@@ -65,7 +65,7 @@ $('#save,#update').on("click",function (e) {
 	else if(this_id=="update")  //Update start
     {
 							
-					if(confirm("Do You Wants to Update Record ?")){
+					if(confirm("Bạn chắc chắn muốn cập nhật dữ liệu ??")){
 						e.preventDefault();
 						data = new FormData($('#company-form')[0]);//form name
 						/*Check XSS Code*/

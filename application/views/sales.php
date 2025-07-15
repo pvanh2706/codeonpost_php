@@ -25,6 +25,33 @@ padding-right: 2px;
 
 </head>
 
+<?php
+// Hàm format tiền tệ Việt Nam
+function formatCurrency($amount) {
+    return number_format($amount, 0, '.', '.') . '₫';
+}
+
+// Hàm format số (không có ký hiệu tiền tệ)
+function formatNumber($amount) {
+    return number_format($amount, 0, '.', '.');
+}
+
+// Hàm làm tròn theo cấu hình hệ thống
+function round_off($amount) {
+    // Lấy cấu hình làm tròn từ database
+    global $CI;
+    if (!isset($CI)) {
+        $CI = &get_instance();
+    }
+    
+    $round_off_to = $CI->db->select('round_off_to')->get('db_sitesettings')->row()->round_off_to;
+    
+    if ($round_off_to > 0) {
+        return round($amount / $round_off_to) * $round_off_to;
+    }
+    return $amount;
+}
+?>
 
 <body class="hold-transition skin-blue sidebar-mini">
 <div class="wrapper">
@@ -105,7 +132,10 @@ padding-right: 2px;
                            <input type="hidden" id="base_url" value="<?php echo $base_url;; ?>">
                            <input type="hidden" value='1' id="hidden_rowcount" name="hidden_rowcount">
                            <input type="hidden" value='0' id="hidden_update_rowid" name="hidden_update_rowid">
-                            <input type="hidden" name="order_price_level" id="order_price_level" value="<?= $order_price_level ?>">
+                           <input type="hidden" name="order_price_level" id="order_price_level" value="<?= $order_price_level ?>">
+                           <input type="hidden" id="hidden_total_amt" name="hidden_total_amt" value="0">
+                           <input type="hidden" id="hidden_discount_to_all_amt" name="hidden_discount_to_all_amt" value="0">
+                           <input type="hidden" id="hidden_round_off_amt" name="hidden_round_off_amt" value="0">
                           
                            <div class="box-body">
                                    <div class="col-md-6">
@@ -221,7 +251,7 @@ padding-right: 2px;
                                                                 break;
                                                             case '3':
                                                                 levelss = 'Đại lý Cấp 3';
-                                                                break;
+                                                               break;
                                                             default:
                                                                 levelss = 'Khách lẻ';
                                                                 
@@ -246,7 +276,7 @@ padding-right: 2px;
                                                                 break;
                                                             case '3':
                                                                 level = 'Đại lý Cấp 3';
-                                                                break;
+                                                               break;
                                                             default:
                                                                 level = 'Khách lẻ';
                                                                 
@@ -284,13 +314,11 @@ padding-right: 2px;
                                                             }).done(function(result){
                                                                 var prlvs = result[0].itemprice;
                                                                 console.log('Result: '+ datarow + ' | ' + result[0].itemprice);
-                                                                $("#td_data_"+datarow+"_10").val(prlvs);
-                                                                //$("#td_data_"+datarow+"_9").val(prlvs * $("#td_data_"+datarow+"_3").val());
+                                                                // Format giá khi hiển thị trong input
+                                                                $("#td_data_"+datarow+"_10").val(formatNumber(prlvs));
                                                                 calculate_tax(datarow);
                                                                 
                                                             })
-                                                            //adjust_payments();
-                                                            //calculate_payments();
                                                 }
                                                 
                                                 function get_price_level_name(level){
@@ -318,7 +346,7 @@ padding-right: 2px;
                                    <div class="col-md-6" style="display: none;">
                                        <div class="form-group">
                                            <label for="" class="col-md-4 control-label hidden-xs">Chính sách thuế <label class="text-danger">*</label></label>
-                                           <div class="col-md-8">
+                                           <div class="col-md-8>
                                              <select class="form-control " id="other_charges_tax_id" name="other_charges_tax_id" onchange="final_total();" style="width: 100%;">
                                                 <?php
                                                    $q1="select * from db_tax where status=1";
@@ -349,12 +377,12 @@ padding-right: 2px;
                                    <?php
                                         if(isset($sales_id)){
                                           $btn_id='update';
-                                          $btn_name="Update";
+                                          $btn_name="Cập nhật";
                                           echo '<input type="hidden" name="sales_id" id="sales_id" value="'.$sales_id.'"/>';
                                         }
                                         else{
                                           $btn_id='save';
-                                          $btn_name="SAVE";
+                                          $btn_name="Lưu";
                                           //echo '<input type="hidden" name="sales_id_price" id="sales_id_price" value="'.$sales_id.'"/>';
                                         }
         
@@ -393,7 +421,7 @@ padding-right: 2px;
                                                         <tr class="bg-primary" >
                                                            <th rowspan='2' style="width:25%">S.Phẩm</th>
                                                            <th rowspan='2' style="width:10%;min-width: 180px;">S.Lượng</th>
-                                                           <th rowspan='2' style="width:15%">Đ.Giá (<?= $CI->currency() ?>)</th> 
+                                                          <th rowspan='2' style="width:15%">Đ.Giá (<?= $CI->currency() ?>)</th>
                                                            <th rowspan='2' style="width:15%">C.Khấu (<?= $CI->currency() ?>)</th>
                                                            <!--th rowspan='2' style="width:10%" class="<?=tax_disable_class()?>"><?= $this->lang->line('tax_amount'); ?></th>
                                                            <th rowspan='2' style="width:5%" class="<?=tax_disable_class()?>"><?= $this->lang->line('tax'); ?></th-->
@@ -413,7 +441,7 @@ padding-right: 2px;
                                             <div class="form-group">
                                               <label for="other_charges_input" class="col-md-4 control-label">Phụ phí khác</label>    
                                               <div class="col-md-8">
-                                                 <input onclick="this.select();" type="text" class="form-control text-right only_currency" id="other_charges_input" name="other_charges_input" onkeyup="final_total();" value="<?php echo  $other_charges_input; ?>">
+                                                 <input onclick="this.select();" type="text" class="form-control text-right only_currency" id="other_charges_input" name="other_charges_input" onkeyup="final_total();" value="<?php echo formatNumber($other_charges_input); ?>">
                                               </div>
                                               
                                            </div>
@@ -421,7 +449,7 @@ padding-right: 2px;
                                            <div class="form-group">
                                           <label for="discount_to_all_input" class="col-md-4 control-label">Chiết khấu</label>    
                                           <div class="col-md-4">
-                                             <input type="text" class="form-control  text-right only_currency" id="discount_to_all_input" name="discount_to_all_input" onkeyup="enable_or_disable_item_discount();" value="<?php echo  $discount_input; ?>">
+                                             <input type="text" class="form-control  text-right only_currency" id="discount_to_all_input" name="discount_to_all_input" onkeyup="enable_or_disable_item_discount();" value="<?php echo formatNumber($discount_input); ?>">
                                           </div>
                                           <div class="col-md-4">
                                              <select class="form-control" onchange="final_total();" id='discount_to_all_type' name="discount_to_all_type">
@@ -441,7 +469,7 @@ padding-right: 2px;
                                        
                                         <div class="form-group">
                                           <label for="sales_note" class="col-md-4 control-label">Ghi chú đơn hàng (F8)</label>    
-                                          <div class="col-md-8">
+                                          <div class="col-md-8>
                                              <textarea rows="3" class="form-control text-left" id='sales_note' name="sales_note"><?= $sales_note; ?></textarea>
                                             <span id="sales_note_msg" style="display:none" class="text-danger"></span>
                                           </div>
@@ -450,9 +478,10 @@ padding-right: 2px;
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Số lượng | <span class="total_quantity text-danger" >0</span></span>
-                                                <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Tổng tạm tính | <span class="text-danger" id="subtotal_amt" name="subtotal_amt">0</span>₫</span>
+                                                <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Tổng tạm tính | <span class="text-danger" id="subtotal_amt" name="subtotal_amt">0</span></span>
                                                 <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Tổng chiết khấu | <span class="text-danger" id="discount_to_all_amt" name="discount_to_all_amt" >0</span>₫</span>
                                                 <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Phụ phí khác | <span class="text-danger" id="other_charges_amt" name="other_charges_amt">0</span>₫</span>
+                                                <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Làm tròn | <span class="text-danger" id="round_off_amt" name="round_off_amt">0</span></span>
                                                 <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Tổng thanh toán | <span style="font-size:1.3em;" class="text-danger" id="total_amt" name="total_amt" >0</span>₫</span>
                                             </div>
                                         </div>
@@ -539,13 +568,13 @@ padding-right: 2px;
                                                                                         echo "<td>".show_date($res3->payment_date)."</td>";
                                                                                         echo "<td>".$res3->payment_type."</td>";
                                                                                         echo "<td>".$res3->payment_note."</td>";
-                                                                                        echo "<td class='text-right' id='paid_amt_$i'>".$res3->payment."</td>";
+                                                                                        echo "<td class='text-right' id='paid_amt_$i'>".formatCurrency($res3->payment)."</td>";
                                                                                         echo '<td><i class="fa fa-trash text-red pointer" onclick="delete_payment('.$res3->id.')"> Xóa</i></td>';
                                                                                         echo "</tr>";
                                                                                         $total_paid +=$res3->payment;
                                                                                         $i++;
                                                                                       }
-                                                                                      echo "<tr class='text-right text-bold'><td colspan='4' >Total</td><td data-rowcount='$i' id='paid_amt_tot'>".number_format($total_paid)."</td><td></td></tr>";
+                                                                                      echo "<tr class='text-right text-bold'><td colspan='4' >Total</td><td data-rowcount='$i' id='paid_amt_tot'>".formatCurrency($total_paid)."</td><td></td></tr>";
                                                                                     }
                                                                                     else{
                                                                                       echo "<tr><td colspan='6' class='text-center text-bold'>No Previous Payments Found!!</td></tr>";
@@ -573,7 +602,7 @@ padding-right: 2px;
                                     <button type="button" id="" class="btn bg-olive btn-block btn-flat btn-lg" title="Lịch sử thanh toán" data-toggle="modal" data-target="#paymentHistoryModal">Lịch sử thanh toán</button>
                                  </div>
                                  <div class="col-md-6" style="float: right;"><a href="<?= base_url()?>dashboard">
-                                    <button type="button" class="btn bg-gray-active btn-block btn-flat btn-lg" title="Go Dashboard">Close</button>
+                                    <button type="button" class="btn bg-gray-active btn-block btn-flat btn-lg" title="Go Dashboard">Đóng</button>
                                   </a>
                                 </div>
                               </center>
@@ -620,6 +649,29 @@ padding-right: 2px;
             var customer_id = "<?= (!empty($customer_id)) ? $customer_id : '';  ?>";
 
             autoLoadFirstCustomer(customer_id);
+            
+            // Format các input có sẵn khi load trang
+            $('.only_currency').each(function() {
+                var rawValue = $(this).val().replace(/[^0-9]/g, '');
+                if (rawValue) {
+                    $(this).val(formatNumber(rawValue));
+                }
+            });
+            
+            // Event listener cho input currency
+            $(document).on('input', '.only_currency', function() {
+                var rawValue = $(this).val().replace(/[^0-9]/g, '');
+                if (rawValue) {
+                    $(this).val(formatNumber(rawValue));
+                }
+            });
+            
+            $(document).on('blur', '.only_currency', function() {
+                var rawValue = $(this).val().replace(/[^0-9]/g, '');
+                if (rawValue) {
+                    $(this).val(formatNumber(rawValue));
+                }
+            });
 
          });
          //Customer Selection Box Search - END
@@ -760,11 +812,11 @@ padding-right: 2px;
            //subtotal
            if((subtotal!=null || subtotal!='') && (subtotal!=0)){
              
-             //subtotal
-             $("#subtotal_amt").html(subtotal.toFixed(0));
+             //subtotal - format khi hiển thị
+             $("#subtotal_amt").html(formatCurrency(subtotal.toFixed(0)));
              
-             //other charges total amount
-             $("#other_charges_amt").html(parseFloat(other_charges_total_amt).toFixed(0));
+             //other charges total amount - format khi hiển thị
+             $("#other_charges_amt").html(formatCurrency(parseFloat(other_charges_total_amt).toFixed(0)));
              
              //other charges total amount
             
@@ -773,7 +825,7 @@ padding-right: 2px;
              
              //discount_to_all_amt
             // if($("#discount_to_all_input").val()!=null && $("#discount_to_all_input").val()!=''){
-                 var discount_input=parseFloat($("#discount_to_all_input").val());
+                 var discount_input=parseCurrency($("#discount_to_all_input").val());
                  discount_input = isNaN(discount_input) ? 0 : discount_input;
                  var discount=0;
                  if(discount_input>0){
@@ -792,34 +844,37 @@ padding-right: 2px;
                  else{
                     //discount += $("#")
                  }
-                   discount=parseFloat(discount).toFixed(0);
+                   // discount giữ nguyên dạng số để tính toán
                    
-                    $("#discount_to_all_amt").html(discount);  
-                    $("#hidden_discount_to_all_amt").val(discount);  
+                    $("#discount_to_all_amt").html(formatCurrency(discount.toFixed(0)));  
+                    $("#hidden_discount_to_all_amt").val(discount.toFixed(0));  
              //}
              //subtotal_round=Math.round(taxable);
              subtotal_round=round_off(taxable);//round_off() method custom defined
              subtotal_diff=subtotal_round-taxable;
          
-             $("#round_off_amt").html(parseFloat(subtotal_diff).toFixed(0)); 
-             $("#total_amt").html(parseFloat(subtotal_round).toFixed(0)); 
+             // Format khi hiển thị, giữ nguyên giá trị số cho hidden fields
+             $("#round_off_amt").html(formatCurrency(parseFloat(subtotal_diff).toFixed(0))); 
+             $("#total_amt").html(formatCurrency(parseFloat(subtotal_round).toFixed(0))); 
              if(save_operation()){
                //$("#amount").val(parseFloat(subtotal_round).toFixed(0));
                $("#amount").val('0');
              }
+             // Giá trị tính toán lưu dạng số
              $("#hidden_total_amt").val(parseFloat(subtotal_round).toFixed(0)); 
            }
            else{
-             $("#subtotal_amt").html('0'); 
-             $("#tax_amt").html('0'); 
-             $("#round_off_amt").html('0'); 
-             $("#total_amt").html('0'); 
+             // Format khi hiển thị 0
+             $("#subtotal_amt").html(formatCurrency(0)); 
+             $("#tax_amt").html(formatCurrency(0)); 
+             $("#round_off_amt").html(formatCurrency(0)); 
+             $("#total_amt").html(formatCurrency(0)); 
              $("#amount").val('0');
              $("#hidden_total_amt").html('0'); 
-             $("#discount_to_all_amt").html('0'); 
+             $("#discount_to_all_amt").html(formatCurrency(0)); 
              $("#hidden_discount_to_all_amt").html('0'); 
-             $("#subtotal_amt").html('0'); 
-             $("#other_charges_amt").html('0');  
+             $("#subtotal_amt").html(formatCurrency(0)); 
+             $("#other_charges_amt").html(formatCurrency(0));  
              $("#amount").val('0');  
            }
            
@@ -922,11 +977,12 @@ padding-right: 2px;
       //$("#popup_description").val(description);
       //$("#popup_row_id").val(row_id);
       
-      $("#sales_item2_finalprice0").html(item_pr0+'₫');
-      $("#sales_item2_finalprice1").html(item_pr1+'₫');
-      $("#sales_item2_finalprice2").html(item_pr2+'₫');
-      $("#sales_item2_finalprice3").html(item_pr3+'₫');
-      $("#sales_item2_finalprice").html(item_pr+'₫');
+      // Format khi hiển thị trong modal
+      $("#sales_item2_finalprice0").html(formatCurrency(item_pr0));
+      $("#sales_item2_finalprice1").html(formatCurrency(item_pr1));
+      $("#sales_item2_finalprice2").html(formatCurrency(item_pr2));
+      $("#sales_item2_finalprice3").html(formatCurrency(item_pr3));
+      $("#sales_item2_finalprice").html(formatCurrency(item_pr));
     }
 
     function set_info(){

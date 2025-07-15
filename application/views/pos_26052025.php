@@ -283,8 +283,8 @@
                      
                     </div>
                     <div class="modal-footer">
-                      <button type="button" class="btn btn-warning" data-dismiss="modal">Close</button>
-                      <button type="button" class="btn btn-primary discount_update">Update</button>
+                      <button type="button" class="btn btn-warning" data-dismiss="modal">Đóng</button>
+                      <button type="button" class="btn btn-primary discount_update">Cập nhật</button>
                     </div>
                   </div>
                   <!-- /.modal-content -->
@@ -490,7 +490,7 @@
                         </div>
                   </div>
                   <div class="modal-footer">
-                    <!--button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button-->
+                    <!--button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button-->
                     <button type="button" class="btn btn-primary"><i class="fa  fa-print "></i> In hóa đơn</button>
                   </div>
                 </div>

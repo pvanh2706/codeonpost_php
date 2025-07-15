@@ -191,7 +191,7 @@ $('#update').on("click",function (e) {
     }
 
     var this_id=this.id;
-			if(confirm("Do you wants to update ?")){
+			if(confirm("Bạn chắc chắn muốn cập nhật dữ liệu ??")){
 				e.preventDefault();
 				data = new FormData($('#site-form')[0]);//form name
 				/*Check XSS Code*/

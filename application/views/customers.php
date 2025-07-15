@@ -252,14 +252,14 @@
                                  <!-- <div class="col-sm-4"></div> -->
                                  <?php
                                     if($customer_name!=""){
-                                         $btn_name="Update";
+                                         $btn_name="Cập nhật";
                                          $btn_id="update";
                                          ?>
                                  <input type="hidden" name="q_id" id="q_id" value="<?php echo $q_id;?>"/>
                                  <?php
                                     }
                                               else{
-                                                  $btn_name="Save";
+                                                  $btn_name="Lưu";
                                                   $btn_id="save";
                                               }
                                     

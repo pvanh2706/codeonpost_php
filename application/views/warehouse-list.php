@@ -53,7 +53,7 @@
                   <th>Mobile</th>
                   <th>Email</th>
                   <th>status</th>
-                  <th>Action</th>
+                  <th>Thao tác</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -86,7 +86,7 @@
               <td>
                 <div class="btn-group" title="View Account">
                     <a class="btn btn-primary btn-o dropdown-toggle" data-toggle="dropdown" href="#">
-                      Action <span class="caret"></span>
+                      Thao tác <span class="caret"></span>
                     </a>
                     <ul role="menu" class="dropdown-menu dropdown-light pull-right">
                       <li>

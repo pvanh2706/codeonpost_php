@@ -150,6 +150,13 @@
             </div>
             <!-- /.box-header -->
             <div class="box-body">
+              <div class="row margin-bottom-10">
+                <div class="col-md-12">
+                  <button type="button" class="btn btn-info btn-sm pull-right" onclick="refreshSalesList()" title="Làm mới danh sách">
+                    <i class="fa fa-refresh"></i> Làm mới danh sách
+                  </button>
+                </div>
+              </div>
               <table id="example2" class="table table-bordered table-striped" width="100%">
                 <thead class="bg-primary ">
                 <tr>
@@ -366,6 +373,18 @@ $("#sales_from_date,#sales_to_date,#user_created_by,#search_customer_id").on("ch
 <script type="text/javascript">
   function print_invoice(id){
   window.open("<?= base_url();?>pos/print_invoice_pos/"+id, "_blank", "scrollbars=1,resizable=1,height=500,width=500");
+}
+
+// Hàm refresh danh sách đơn giản
+function refreshSalesList() {
+    // Hiện loading
+    toastr.info('Đang làm mới danh sách...', 'Đang xử lý');
+    
+    // Reload DataTable
+    $('#example2').DataTable().ajax.reload(function() {
+        // Hiện thông báo thành công
+        toastr.success('Danh sách đã được cập nhật', 'Thành công');
+    });
 }
 </script>
 <!-- Make sidebar menu hughlighter/selector -->

@@ -72,7 +72,7 @@ $('#save,#update,#create').on("click",function (e) {
 
     var this_id=this.id;
     
-			//if(confirm("Do You Wants to Save Record ?")){
+			//if(confirm("Bạn có chắc chắn muốn lưu không ??")){
 				e.preventDefault();
 				data = new FormData($('#purchase-form')[0]);//form name
         /*Check XSS Code*/

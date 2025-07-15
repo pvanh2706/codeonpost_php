@@ -196,7 +196,7 @@
                         <tr class='bg-blue'>
                           <td>#</td>
                           <td>Sản phẩm</td>
-                          <td>Giá bán</td>
+                          <td>Giá bán lẻ đề xuất</td>
                         </tr>
                         <tbody>
                 <?php

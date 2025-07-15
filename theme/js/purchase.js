@@ -21,30 +21,76 @@ $('#save,#update').on("click",function (e) {
       if(!$("#"+id).val().trim() ) //Also check Others????
         {
 
-            $('#'+id+'_msg').fadeIn(200).show().html('Required Field').addClass('required');
-           // $('#'+id).css({'background-color' : '#E8E2E9'});
+            $('#'+id+'_msg').fadeIn(200).show().html('Trường bắt buộc không được để trống!').addClass('required');
+            $('#'+id).addClass('required');
             flag=false;
         }
         else
         {
              $('#'+id+'_msg').fadeOut(200).hide();
-             //$('#'+id).css({'background-color' : '#FFFFFF'});    //White color
+             $('#'+id).removeClass('required');
+        }
+    }
+
+    function check_select_field(id)
+    {
+      var value = $("#"+id).val();
+      if(!value || value.trim() == '' || value == null) 
+        {
+            $('#'+id+'_msg').fadeIn(200).show().html('Vui lòng chọn một tùy chọn!').addClass('required');
+            $('#'+id).addClass('required');
+            flag=false;
+        }
+        else
+        {
+             $('#'+id+'_msg').fadeOut(200).hide();
+             $('#'+id).removeClass('required');
         }
     }
 
 
    //Validate Input box or selection box should not be blank or empty
-	  check_field("supplier_id");
+	  check_select_field("supplier_id");
     check_field("pur_date");
-    check_field("purchase_status");
+    check_select_field("purchase_status");
     //check_field("warehouse_id");
-	/*if(!isNaN($("#amount").val().trim()) && parseFloat($("#amount").val().trim())==0){
-        toastr["error"]("You have entered Payment Amount! <br>Please Select Payment Type!");
-        return;
-    }*/
+    
+    // Kiểm tra phải có ít nhất 1 sản phẩm trong bảng
+    var rowcount=document.getElementById("hidden_rowcount").value;
+	var flag1=false;
+	for(var n=1;n<=rowcount;n++){
+		if($("#td_data_"+n+"_3").val()!=null && $("#td_data_"+n+"_3").val()!=''){
+			flag1=true;
+		}	
+	}
+	
+    if(flag1==false){
+    	toastr["error"]("Vui lòng thêm ít nhất một sản phẩm vào danh sách!");
+        $("#item_search").focus();
+		return;
+    }
+    
+    // Kiểm tra validation input payment
+    if($("#amount").val().trim() != ''){
+       var amount = parseFloat($("#amount").val().replace(/[^\d]/g, ''));
+       if(isNaN(amount) || amount <= 0){
+         toastr["error"]("Vui lòng nhập số tiền thanh toán hợp lệ!");
+         $("#amount").focus();
+         return;
+       }
+       
+       if($("#payment_type").val().trim() == ''){
+         toastr["error"]("Vui lòng chọn hình thức thanh toán!");
+         $("#payment_type").focus();
+         return;
+       }
+    }
+    
 	if(flag==false)
 	{
-		toastr["error"]("You have missed Something to Fillup!");
+		toastr["error"]("Vui lòng điền đầy đủ các trường bắt buộc!");
+		// Focus vào trường đầu tiên có lỗi
+		$(".required").first().focus();
 		return;
 	}
 
@@ -72,7 +118,7 @@ $('#save,#update').on("click",function (e) {
 
     var this_id=this.id;
     
-			//if(confirm("Do You Wants to Save Record ?")){
+			//if(confirm("Bạn có chắc chắn muốn lưu không ??")){
 				e.preventDefault();
 				data = new FormData($('#purchase-form')[0]);//form name
         /*Check XSS Code*/

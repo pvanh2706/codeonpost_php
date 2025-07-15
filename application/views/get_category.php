@@ -27,7 +27,7 @@ $columns = array(
 
 			return '<div class="btn-group" >
 										<a class="btn btn-primary btn-o dropdown-toggle" data-toggle="dropdown" href="#">
-											Action <span class="caret"></span>
+											Thao tác <span class="caret"></span>
 										</a>
 										<ul role="menu" class="dropdown-menu dropdown-light pull-right">
 											

@@ -110,14 +110,14 @@
                                  <!-- <div class="col-sm-4"></div> -->
                                  <?php
                                     if($supplier_name!=""){
-                                         $btn_name="Update";
+                                         $btn_name="Cập nhật";
                                          $btn_id="update";
                                          ?>
                                  <input type="hidden" name="q_id" id="q_id" value="<?php echo $q_id;?>"/>
                                  <?php
                                     }
                                               else{
-                                                  $btn_name="Save";
+                                                  $btn_name="Lưu";
                                                   $btn_id="save";
                                               }
                                     
@@ -126,7 +126,7 @@
                                     <button type="button" id="<?php echo $btn_id;?>" class=" btn btn-block btn-success" title="Save Data"><?php echo $btn_name;?></button>
                                  </div>
                                  <div class="col-sm-3">
-                                    <button type="button" class="col-sm-3 btn btn-block btn-warning close_btn" title="Go Dashboard">Close</button>
+                                    <button type="button" class="col-sm-3 btn btn-block btn-warning close_btn" title="Go Dashboard">Đóng</button>
                                  </div>
                               </div>
                            </div>

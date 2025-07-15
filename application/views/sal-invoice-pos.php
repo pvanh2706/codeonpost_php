@@ -249,6 +249,7 @@
 				<table width="100%" cellpadding="0" cellspacing="0"  >
 					<thead>
     					<tr style="border-top-style: dashed;border-bottom-style: dashed;border-width: 0.1px; font-size: 1em; background: #e5dede; text-transform: uppercase;">
+                            <th style="font-weight: bold; text-align:left;">Sản phẩm</th>
     					    <th style="font-weight: bold; text-align:left;">Số lượng</th>
     					    <th style="font-weight: bold; text-align:center;">Đơn giá</th>
     					    <th style="font-weight: bold; text-align:right;">Thành tiền</th>
@@ -261,73 +262,63 @@
     			              $subtotal=0;
     			              $tax_amt=0;
     			              $q2=$this->db->query(" select b.sales_price, a.description, a.discount_type,a.discount_input,a.discount_amt, b.sku, b.id, b.item_name,a.sales_qty,a.unit_total_cost,a.price_per_unit,a.tax_amt,c.tax,a.total_cost from db_salesitems a,db_items b,db_tax c where c.id=a.tax_id and b.id=a.item_id and a.sales_id='$sales_id'");
-    			              foreach ($q2->result() as $res2) {
-    			                    
-    			                    if ($res2->description) {
-    			                        if ($res2->id == -1) {
-    			                            echo "<tr ><td colspan='3' style='text-align:left; font-size: 0.9em'>".$res2->item_name." - [".$res2->description."]</td></tr>"; 
-    			                        } else {
-    			                            echo "<tr ><td colspan='3' style='text-align:left; font-size: 0.9em'>".$res2->item_name."</td></tr>"; 
-    			                            echo "<tr style='font-style: italic; border-bottom-style: dashed;border-width: 0.1px;'><td colspan='3' style='text-align:left; font-size: 0.9em'>[".$res2->description."]</td></tr>";
-    			                        }
-    			                        
-    			                    } else {
-    			                       echo "<tr ><td colspan='3' style='text-align:left; font-size: 0.9em'>".$res2->item_name."</td></tr>"; 
-    			                    }
-    			                    echo "<tr style='border-bottom-style: dashed;border-width: 0.1px;'>";  
-    			                        //echo "<td colspan='2' style='padding-right: 2px; font-size: 0.8em;'>".$res2->sku."</td>";
-    			                        echo "<td style='text-align:left; padding-left: 2px; padding-right: 2px; font-size: 0.8em;'>SL: ".number_format($res2->sales_qty)."</td>";
-    			                        echo "<td style='text-align:center; padding-right: 2px; font-size: 0.8em;'>".number_format($res2->price_per_unit)."₫</td>";
-    			                        //echo "<td style='text-align:center; padding-left: 2px; padding-right: 2px; font-size: 0.8em;'>".number_format($res2->discount_amt)."₫</td>";
-    			                        echo "<td style='float: right;padding-left: 2px; padding-right: 2px; font-size: 0.8em;' >".number_format($res2->total_cost)."₫</td>";
-    			                    echo "</tr>";  
-    			                  //$tot_qty+=$res2->sales_qty;
-    			                  $subtotal+=($res2->total_cost);
-    			                  $tax_amt+=$res2->tax_amt;
-    			                  $total_discount+=$res2->discount_amt;
-    			              }
-    			              $before_tax = $subtotal-$tax_amt;
+foreach ($q2->result() as $res2) {
+    echo "<tr style='border-bottom-style: dashed;border-width: 0.1px;'>";  
+        if ($res2->description) {
+            if ($res2->id == -1) {
+                echo "<td style='text-align:left; font-size: 0.9em'>".$res2->item_name." - [".$res2->description."]</td>";
+            } else {
+                echo "<td style='text-align:left; font-size: 0.9em'>".$res2->item_name."<br><span style='font-style: italic; font-size: 0.8em'>[".$res2->description."]</span></td>";
+            }
+        } else {
+            echo "<td style='text-align:left; font-size: 0.9em'>".$res2->item_name."</td>";
+        }
+        echo "<td style='text-align:center; padding-left: 2px; padding-right: 2px; font-size: 0.8em;'>".number_format($res2->sales_qty)."</td>";
+        echo "<td style='text-align:center; padding-right: 2px; font-size: 0.8em;'>".number_format($res2->price_per_unit)."₫</td>";
+        echo "<td style='text-align:right;padding-left: 2px; padding-right: 2px; font-size: 0.8em;' >".number_format($res2->total_cost)."₫</td>";
+    echo "</tr>";  
+    $subtotal+=($res2->total_cost);
+    $tax_amt+=$res2->tax_amt;
+    $total_discount+=$res2->discount_amt;
+}
+$before_tax = $subtotal-$tax_amt;
 			              ?>
 					
 				    </tbody>
 					<tfoot>
-					<tr><td colspan="3"><hr></td></tr>
+					<tr><td colspan="4"><hr></td></tr>
 					<tr >
-						<td style=" padding-left: 2px; padding-right: 2px;" colspan="2" align="left">
-							<?= (is_tax_disabled()) ? "Tổng tạm tính" : "Tổng trước thuế"; ?>
-						</td>
-						<td style=" padding-left: 2px; padding-right: 2px;" align="right"><?= number_format($before_tax);?>₫</td>
-					</tr>
-					
-					<tr class="<?=tax_disable_class()?>">
-						<td style=" padding-left: 2px; padding-right: 2px;" colspan="2" align="left">Tổng thuế</td>
-						<td style=" padding-left: 2px; padding-right: 2px;" align="right"><?= number_format($tax_amt);?>₫</td>
-					</tr>
-					
-					<tr>
-						<td style=" padding-left: 2px; padding-right: 2px;" colspan="2" align="left">Tổng chiết khấu</td>
-						<td style=" padding-left: 2px; padding-right: 2px;" align="right"><?= number_format($total_discount); ?>₫</td>
-					</tr>
-					
-	                <tr>
-						<td style=" padding-left: 2px; padding-right: 2px;" colspan="2" align="left">Các phụ phí khác</td>
-						<td style=" padding-left: 2px; padding-right: 2px;" align="right"><?= number_format($other_charges_amt); ?>₫</td>
-					</tr>
-	                <?php if(!empty($tot_discount_to_all_amt) && $tot_discount_to_all_amt!=0) {?>
-					<tr>
-						<td style=" padding-left: 2px; padding-right: 2px;" colspan="2" align="left"><?= $this->lang->line('discount_on_all'); ?> <?= ($discount_to_all_type=='in_percentage') ? $discount_to_all_input .'%' : $discount_to_all_input.'[Fixed]' ;?></td>
-						<td style=" padding-left: 2px; padding-right: 2px;" align="right"><?= number_format($tot_discount_to_all_amt); ?>₫</td>
-					</tr>
-					<?php } ?>
-					
+    <td style=" padding-left: 2px; padding-right: 2px;" colspan="3" align="left">
+        <?= (is_tax_disabled()) ? "Tổng tạm tính" : "Tổng trước thuế"; ?>
+    </td>
+    <td style=" padding-left: 2px; padding-right: 2px;" align="right"><?= number_format($before_tax);?>₫</td>
+</tr>
 
-					
+<tr class="<?=tax_disable_class()?>">
+    <td style=" padding-left: 2px; padding-right: 2px;" colspan="3" align="left">Tổng thuế</td>
+    <td style=" padding-left: 2px; padding-right: 2px;" align="right"><?= number_format($tax_amt);?>₫</td>
+</tr>
 
-					
-					<tr style="border-bottom-style: solid;border-top-style: solid;border-width: 0.1px;">
-						<td style=" padding-left: 2px; padding-right: 2px;font-weight: bold;" colspan="2" align="left">Tổng cần thanh toán</td>
-						<td style=" padding-left: 2px; padding-right: 2px;font-weight: bold;" align="right"><?= number_format($grand_total); ?>₫</td>
-					</tr>
+<tr>
+    <td style=" padding-left: 2px; padding-right: 2px;" colspan="3" align="left">Tổng chiết khấu</td>
+    <td style=" padding-left: 2px; padding-right: 2px;" align="right"><?= number_format($total_discount); ?>₫</td>
+</tr>
+
+<tr>
+    <td style=" padding-left: 2px; padding-right: 2px;" colspan="3" align="left">Các phụ phí khác</td>
+    <td style=" padding-left: 2px; padding-right: 2px;" align="right"><?= number_format($other_charges_amt); ?>₫</td>
+</tr>
+<?php if(!empty($tot_discount_to_all_amt) && $tot_discount_to_all_amt!=0) {?>
+<tr>
+    <td style=" padding-left: 2px; padding-right: 2px;" colspan="3" align="left"><?= $this->lang->line('discount_on_all'); ?> <?= ($discount_to_all_type=='in_percentage') ? $discount_to_all_input .'%' : $discount_to_all_input.'[Fixed]' ;?></td>
+    <td style=" padding-left: 2px; padding-right: 2px;" align="right"><?= number_format($tot_discount_to_all_amt); ?>₫</td>
+</tr>
+<?php } ?>
+
+<tr style="border-bottom-style: solid;border-top-style: solid;border-width: 0.1px;">
+    <td style=" padding-left: 2px; padding-right: 2px;font-weight: bold;" colspan="3" align="left">Tổng cần thanh toán</td>
+    <td style=" padding-left: 2px; padding-right: 2px;font-weight: bold;" align="right"><?= number_format($grand_total); ?>₫</td>
+</tr>
 					
 					<!-- change_return_status -->
 					<?php if(change_return_status()) {
@@ -349,21 +340,20 @@
 					
 					<?php } ?>
 
-					
-					<?php if (get_site_settings_config('show_due') == 1) { ?>
-					<tr>
-						<td style=" padding-left: 2px; padding-right: 2px;" colspan="2" align="left">Công nợ trước</td>
-						<td style=" padding-left: 2px; padding-right: 2px;" align="right"><?= number_format($previous_due); ?>₫</td>
-					</tr>
 
-					<tr>
-						<td style=" padding-left: 2px; padding-right: 2px;" colspan="2" align="left">Tổng công nợ còn lại</td>
-						<td style=" padding-left: 2px; padding-right: 2px;font-weight:bold;" align="right"><?= number_format($customer_due); ?>₫</td>
-					</tr>
-					<?php } ?>
-			
-                    
-					</tfoot>
+<?php if (get_site_settings_config('show_due') == 1) { ?>
+<tr>
+    <td style=" padding-left: 2px; padding-right: 2px;" colspan="3" align="left">Công nợ trước</td>
+    <td style=" padding-left: 2px; padding-right: 2px;" align="right"><?= number_format($previous_due); ?>₫</td>
+</tr>
+
+<tr>
+    <td style=" padding-left: 2px; padding-right: 2px;" colspan="3" align="left">Tổng công nợ còn lại</td>
+    <td style=" padding-left: 2px; padding-right: 2px;font-weight:bold;" align="right"><?= number_format($customer_due); ?>₫</td>
+</tr>
+<?php } ?>
+
+</tfoot>
 				</table>
 			</td>
 		</tr>

@@ -83,19 +83,19 @@
 					<div class="col-sm-8">
 					  <?php
                        if($warehouse_name!=""){
-                            $btn_name="Update";
+                            $btn_name="Cập nhật";
                             $btn_id="update";
                            
               }
                         else{
-                            $btn_name="Save";
+                            $btn_name="Lưu";
                             $btn_id="save";
                         }
 
                         ?>
                         <input type="hidden" name="q_id" id="q_id" value="<?php echo $q_id;?>"/>
               <button type="button" id="<?php echo $btn_id;?>" class="btn  btn-success" title="Save Data"><?php echo $btn_name;?></button>
-						<a href='dashboard.php'><button type="button" class="btn btn-default" title="Go Dashboard">Close</button></a>
+						<a href='dashboard.php'><button type="button" class="btn btn-default" title="Go Dashboard">Đóng</button></a>
 					 </div>
 				   </div>
               </div>

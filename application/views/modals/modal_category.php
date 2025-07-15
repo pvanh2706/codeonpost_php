@@ -32,8 +32,8 @@
                        
                     </div>
                     <div class="modal-footer">
-                      <button type="button" class="btn btn-warning" data-dismiss="modal">Close</button>
-                      <button type="button" class="btn btn-primary add_category">Save</button>
+                      <button type="button" class="btn btn-warning" data-dismiss="modal">Đóng</button>
+                      <button type="button" class="btn btn-primary add_category">Lưu</button>
                     </div>
                   </div>
                   <!-- /.modal-content -->

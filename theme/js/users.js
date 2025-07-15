@@ -77,7 +77,7 @@ $("#save,#update").on("click",function(e){
       }
       
 
-      if(confirm("Do you wants to update ?")){
+      if(confirm("Bạn chắc chắn muốn cập nhật dữ liệu ?")){
         e.preventDefault();
         data = new FormData($('#users-form')[0]);//form name
         /*Check XSS Code*/

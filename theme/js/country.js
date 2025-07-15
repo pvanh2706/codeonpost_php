@@ -39,7 +39,7 @@ $('#save,#update').on("click",function (e) {
     {
 
 
-					if(confirm("Do You Wants to Save Record ?")){
+					if(confirm("Bạn có chắc chắn muốn lưu không ??")){
 						e.preventDefault();
 						data = new FormData($('#country-form')[0]);//form name
 						/*Check XSS Code*/
@@ -85,7 +85,7 @@ $('#save,#update').on("click",function (e) {
     }//Save end
 	else if(this_id=="update"){  //update start
 
-					if(confirm("Do You Wants to Update Record ?")){
+					if(confirm("Bạn chắc chắn muốn cập nhật dữ liệu ??")){
 						e.preventDefault();
 						data = new FormData($('#country-form')[0]);//form name
 						/*Check XSS Code*/

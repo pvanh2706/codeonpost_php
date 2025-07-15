@@ -283,8 +283,8 @@
                      
                     </div>
                     <div class="modal-footer">
-                      <button type="button" class="btn btn-warning" data-dismiss="modal">Close</button>
-                      <button type="button" class="btn btn-primary discount_update">Update</button>
+                      <button type="button" class="btn btn-warning" data-dismiss="modal">Đóng</button>
+                      <button type="button" class="btn btn-primary discount_update">Cập nhật</button>
                     </div>
                   </div>
                   <!-- /.modal-content -->
@@ -490,7 +490,7 @@
                         </div>
                   </div>
                   <div class="modal-footer">
-                    <!--button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button-->
+                    <!--button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button-->
                     <button type="button" class="btn btn-primary"><i class="fa  fa-print "></i> In hóa đơn</button>
                   </div>
                 </div>
@@ -2449,5 +2449,44 @@ function get_details_lv(lv='',reload=0,last_id='',show_only_searched=false,reloa
   window.open("https://pos.sieuthithuysinh.com/pos/print_invoice_temp/"+id, "_blank", "scrollbars=1,resizable=1,height=500,width=500");
 }
 </script> 
+
+<style>
+/* CSS để ngăn chặn double-click */
+.prevent-double-click:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+.prevent-double-click.processing {
+    opacity: 0.7;
+    pointer-events: none;
+}
+</style>
+
+<script>
+// JavaScript để ngăn chặn double-click trên UI
+$(document).ready(function() {
+    $('.prevent-double-click').on('click', function(e) {
+        var $this = $(this);
+        
+        // Nếu button đã được click trước đó thì không cho phép
+        if ($this.hasClass('processing')) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+        
+        // Đánh dấu button đang xử lý
+        $this.addClass('processing');
+        $this.prop('disabled', true);
+        
+        // Sau 3 giây sẽ reset lại (backup plan)
+        setTimeout(function() {
+            $this.removeClass('processing');
+            $this.prop('disabled', false);
+        }, 3000);
+    });
+});
+</script>
+
 </body>
 </html>

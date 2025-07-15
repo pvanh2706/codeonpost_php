@@ -55,6 +55,15 @@
                            b.`id`='$return_id' 
                            ");
                         
+    // Debug: Kiểm tra số lượng kết quả từ bảng db_salesreturn
+    echo "<div class='alert alert-info'>Debug: SQL Query executed for return_id = $return_id</div>";
+    echo "<div class='alert alert-info'>Debug: Number of rows found = " . $q3->num_rows() . "</div>";
+    
+    if($q3->num_rows() == 0) {
+        echo "<div class='alert alert-danger'>Lỗi: Không tìm thấy dữ liệu đơn trả hàng với ID: $return_id</div>";
+        echo "<div class='alert alert-warning'>Gợi ý: Kiểm tra xem ID $return_id có tồn tại trong bảng db_salesreturn không?</div>";
+        return;
+    }
     
     $res3=$q3->row();
     $sales_id=$res3->sales_id;
@@ -165,7 +174,7 @@
       <!-- info row -->
       <div class="row invoice-info">
         <div class="col-sm-4 invoice-col">
-          <i>CỬA HÀNg</i>
+          <i>CỬA HÀNG</i>
           <address>
             <strong><?php echo  $company_name; ?> | <?php echo  $company_mobile; ?></strong><br>
             <?php echo  str_replace('Aqua Home - ','',$company_address); ?>
@@ -174,7 +183,7 @@
         </div>
         <!-- /.col -->
         <div class="col-sm-4 invoice-col">
-          <i>KHÁCH HÀNg<br></i>
+          <i>KHÁCH HÀNG<br></i>
           <address>
             <strong><?php echo  $customer_name . " | " . $customer_mobile; ?> </strong><br>
             <?php 
@@ -254,6 +263,16 @@
                                   db_salesitemsreturn AS a,db_tax AS b,db_items AS c 
                                   WHERE 
                                   c.id=a.item_id AND b.id=a.tax_id AND a.return_id='$return_id'");
+              
+              // Debug: Kiểm tra số lượng kết quả
+              $num_rows = $q2->num_rows();
+              echo "<div class='alert alert-info'>Debug: Found $num_rows return items for return_id = $return_id</div>";
+              
+              if($num_rows == 0) {
+                  echo "<tr><td colspan='8' class='text-center text-danger'>Không có dữ liệu sản phẩm trả hàng. Return ID: $return_id</td></tr>";
+                  echo "<div class='alert alert-warning'>Gợi ý: Kiểm tra xem có dữ liệu trong bảng db_salesitemsreturn với return_id = $return_id không?</div>";
+              }
+              
               foreach ($q2->result() as $res2) {
                   $str = ($res2->tax_type=='Inclusive')? 'Inc.' : 'Exc.';
                   $discount = (empty($res2->discount_input)||$res2->discount_input==0)? '-':$res2->discount_input."%";
@@ -285,12 +304,13 @@
             </tbody>
             <tfoot class="text-right text-bold bg-gray">
               <tr>
-                <td colspan="3" class="text-center">Tổng tạm tính</td>
+                <td colspan="2" class="text-center"><?= $this->lang->line('total'); ?></td>
+                <td class="text-right"><?= $CI->currency(number_format($tot_sales_price)) ;?></td>
                 <td class="text-center"><?=number_format($tot_qty);?></td>
+                <td class="text-right"><?= $CI->currency(number_format($tot_discount_amt)) ;?></td>
+                <td class="text-right"><?= $CI->currency(number_format($tot_total_cost)) ;?></td>
                 <td class="<?=tax_disable_class()?>">-</td>
-                <td class="<?=tax_disable_class()?>"><?= $CI->currency(number_format($tot_tax_amt,2,'.',''));?></td>
-                <td><?= $CI->currency(number_format($tot_discount_amt)) ;?></td>
-                <td><?= $CI->currency(number_format($tot_total_cost)) ;?></td>
+                <td class="text-right <?=tax_disable_class()?>"><?= $CI->currency(number_format($tot_tax_amt,2,'.',''));?></td>
               </tr>
             </tfoot>
           </table>
@@ -377,21 +397,21 @@
                      
                     <table  class="col-md-11">
                        <tr>
-                          <th class="text-right" style="font-size: 17px;">Tổng số lượng</th>
+                          <th class="text-right" style="font-size: 17px;">Tổng tạm tính</th>
                           <th class="text-right" style="padding-left:10%;font-size: 17px;">
-                             <h4><b id="subtotal_amt" name="subtotal_amt"><?=$subtotal;?></b></h4>
+                             <h4><b id="subtotal_amt" name="subtotal_amt"><?=$CI->currency(number_format($subtotal));?></b></h4>
                           </th>
                        </tr>
                        <tr>
                           <th class="text-right" style="font-size: 17px;">Phụ phí khác</th>
                           <th class="text-right" style="padding-left:10%;font-size: 17px;">
-                             <h4><b id="other_charges_amt" name="other_charges_amt"><?=$other_charges_amt;?></b></h4>
+                             <h4><b id="other_charges_amt" name="other_charges_amt"><?=$CI->currency(number_format($other_charges_amt));?></b></h4>
                           </th>
                        </tr>
                        <tr>
                           <th class="text-right" style="font-size: 17px;">Chiết khấu</th>
                           <th class="text-right" style="padding-left:10%;font-size: 17px;">
-                             <h4><b id="discount_to_all_amt" name="discount_to_all_amt"><?=$tot_discount_to_all_amt;?></b></h4>
+                             <h4><b id="discount_to_all_amt" name="discount_to_all_amt"><?=$CI->currency(number_format($tot_discount_to_all_amt));?></b></h4>
                           </th>
                        </tr>
                        <!--tr>
@@ -403,7 +423,7 @@
                        <tr>
                           <th class="text-right" style="font-size: 17px;">Tổng thanh toán</th>
                           <th class="text-right" style="padding-left:10%;font-size: 17px;">
-                             <h4><b id="total_amt" name="total_amt"><?=$grand_total;?></b></h4>
+                             <h4><b id="total_amt" name="total_amt"><?=$CI->currency(number_format($grand_total));?></b></h4>
                           </th>
                        </tr>
                     </table>

@@ -20,6 +20,20 @@ body{
   word-wrap: break-word;
 }
 </style>
+
+<?php 
+// Hàm format tiền tệ Việt Nam
+function formatCurrency($amount) {
+    if ($amount == 0) return '0₫';
+    return number_format($amount, 0, ',', '.') . '₫';
+}
+
+function formatNumber($number) {
+    if ($number == 0) return '0';
+    return number_format($number, 0, ',', '.');
+}
+?>
+
 </head>
 <body onload="window.print();"><!--  -->
 <?php
@@ -129,31 +143,31 @@ body{
       <tr>
           <th colspan="5" rowspan="2" style="padding-left: 15px;">
             <b><?php echo $company_name; ?></b><br/>
-            <?php echo $this->lang->line('address')." : ".$company_address; ?><br/>
+            <?php echo "Địa chỉ : ".$company_address; ?><br/>
             <?php echo $company_country; ?><br/>
-            <?php echo $this->lang->line('mobile').":".$company_mobile; ?><br/>
-            <?php echo (!empty(trim($company_email))) ? $this->lang->line('email').": ".$company_email."<br>" : '';?>
-            <?php echo (!empty(trim($company_gst_no))) ? $this->lang->line('gst_number').": ".$company_gst_no."<br>" : '';?>
-            <?php echo (!empty(trim($company_vat_no))) ? $this->lang->line('vat_number').": ".$company_vat_no."<br>" : '';?>
+            <?php echo "Điện thoại:".$company_mobile; ?><br/>
+            <?php echo (!empty(trim($company_email))) ? "Email: ".$company_email."<br>" : '';?>
+            <?php echo (!empty(trim($company_gst_no))) ? "Mã số thuế: ".$company_gst_no."<br>" : '';?>
+            <?php echo (!empty(trim($company_vat_no))) ? "Mã VAT: ".$company_vat_no."<br>" : '';?>
           </th>
-          <th colspan="5" rowspan="1"><b style="text-transform: capitalize;"><?= $this->lang->line('sales_invoice'); ?> </b>(<?=$return_status;?>)</th>
+          <th colspan="5" rowspan="1"><b style="text-transform: capitalize;">HÓA ĐƠN TRẢ HÀNG</b> (<?=$return_status;?>)</th>
             
       </tr>
       <tr>
           <th colspan="3" rowspan="1">
-              <?= $this->lang->line('invoice_no'); ?> : <?php echo "$return_code"; ?><br>
-              <?= $this->lang->line('reference_no'); ?> : <?php echo "$reference_no"; ?>
+              Số hóa đơn : <?php echo "$return_code"; ?><br>
+              Số tham chiếu : <?php echo "$reference_no"; ?>
           </th>  
-          <th colspan="2" rowspan="1"><?= $this->lang->line('date'); ?> : <?php echo show_date($return_date)." ".$created_time; ?></th>
+          <th colspan="2" rowspan="1">Ngày lập : <?php echo show_date($return_date)." ".$created_time; ?></th>
       </tr>
     
 
 
       <tr>
     <td colspan="5" style="padding-left: 15px;">
-    <b><?= $this->lang->line('customer_address'); ?></b><br/>
-    <?php echo $this->lang->line('name').": ".$customer_name; ?><br/>
-      <?php echo $this->lang->line('mobile').": ".$customer_mobile; ?>
+    <b>Địa chỉ khách hàng</b><br/>
+    <?php echo "Tên: ".$customer_name; ?><br/>
+      <?php echo "Điện thoại: ".$customer_mobile; ?>
       <?php 
               if(!empty($customer_address)){
                 echo $customer_address;
@@ -172,15 +186,15 @@ body{
               }
             ?>
             <br>
-      <?php echo (!empty(trim($customer_email))) ? $this->lang->line('email').": ".$customer_email."<br>" : '';?>
-      <?php echo (!empty(trim($customer_gst_no))) ? $this->lang->line('gst_number').": ".$customer_gst_no."<br>" : '';?>
-      <?php echo (!empty(trim($customer_tax_number))) ? $this->lang->line('tax_number').": ".$customer_tax_number."<br>" : '';?>
+      <?php echo (!empty(trim($customer_email))) ? "Email: ".$customer_email."<br>" : '';?>
+      <?php echo (!empty(trim($customer_gst_no))) ? "Mã số thuế: ".$customer_gst_no."<br>" : '';?>
+      <?php echo (!empty(trim($customer_tax_number))) ? "Mã thuế: ".$customer_tax_number."<br>" : '';?>
   </td>
     
     <td colspan="5" style="padding-left: 15px;">
-    <b><?= $this->lang->line('shipping_address'); ?></b><br/>
-   <?php echo $this->lang->line('name').": ".$customer_name; ?><br/>
-      <?php echo $this->lang->line('mobile').": ".$customer_mobile; ?>
+    <b>Địa chỉ giao hàng</b><br/>
+   <?php echo "Tên: ".$customer_name; ?><br/>
+      <?php echo "Điện thoại: ".$customer_mobile; ?>
       <?php 
               if(!empty($customer_address)){
                 echo $customer_address;
@@ -199,9 +213,9 @@ body{
               }
             ?>
             <br>
-      <?php echo (!empty(trim($customer_email))) ? $this->lang->line('email').": ".$customer_email."<br>" : '';?>
-      <?php echo (!empty(trim($customer_gst_no))) ? $this->lang->line('gst_number').": ".$customer_gst_no."<br>" : '';?>
-      <?php echo (!empty(trim($customer_tax_number))) ? $this->lang->line('tax_number').": ".$customer_tax_number."<br>" : '';?>
+      <?php echo (!empty(trim($customer_email))) ? "Email: ".$customer_email."<br>" : '';?>
+      <?php echo (!empty(trim($customer_gst_no))) ? "Mã số thuế: ".$customer_gst_no."<br>" : '';?>
+      <?php echo (!empty(trim($customer_tax_number))) ? "Mã thuế: ".$customer_tax_number."<br>" : '';?>
   </td>
   </tr>
   
@@ -210,17 +224,17 @@ body{
     <?php $colspan_1 = (!is_tax_disabled()) ? 1 : 2; ?>
     <?php $colspan_2 = (!is_tax_disabled()) ? 0 : 1; ?>
     <th >#</th>
-    <th  colspan="<?=$colspan_1?>"><?= $this->lang->line('item_name'); ?></th>
-    <th ><?= $this->lang->line('sales_price'); ?></th>
-    <th ><?= $this->lang->line('quantity'); ?></th>
+    <th  colspan="<?=$colspan_1?>">Tên sản phẩm</th>
+    <th >Đơn giá</th>
+    <th >Số lượng</th>
     <?php if(!is_tax_disabled()) { ?>
-    <th ><?= $this->lang->line('tax'); ?></th>
-    <th ><?= $this->lang->line('tax_amount'); ?></th>
+    <th >Thuế</th>
+    <th >Tiền thuế</th>
     <?php } ?>
-    <th ><?= $this->lang->line('discount'); ?></th>
-    <th ><?= $this->lang->line('discount_amount'); ?></th>
-    <th ><?= $this->lang->line('unit_cost'); ?></th>
-    <th  colspan="<?=$colspan_1?>"><?= $this->lang->line('total_amount'); ?></th>
+    <th >Chiết khấu</th>
+    <th >Tiền chiết khấu</th>
+    <th >Đơn giá</th>
+    <th  colspan="<?=$colspan_1?>">Tổng tiền</th>
   </tr>
   </thead>
 <tbody>
@@ -243,20 +257,20 @@ body{
                                   c.id=a.item_id AND b.id=a.tax_id AND a.return_id='$return_id'");
               foreach ($q2->result() as $res2) {
                   $discount = (empty($res2->discount_input)||$res2->discount_input==0)? '-':$res2->discount_input."%";
-                  $discount_amt = (empty($res2->discount_amt)||$res2->discount_input==0)? '-':$res2->discount_amt."";
+                  $discount_amt = (empty($res2->discount_amt)||$res2->discount_input==0)? '-':formatCurrency($res2->discount_amt);
                   echo "<tr>";  
                   echo "<td>".++$i."</td>";
                   echo "<td colspan='".($colspan_2+1)."'>".$res2->item_name."</td>";
-                  echo "<td>".$res2->price_per_unit."</td>";
+                  echo "<td>".formatCurrency($res2->price_per_unit)."</td>";
                   echo "<td>".$res2->return_qty."</td>";
                   if(!is_tax_disabled()) {
                     echo "<td>".$res2->tax."%<br>".$res2->tax_name."</td>";
-                    echo "<td style='text-align: right;'>".$res2->tax_amt."</td>";
+                    echo "<td style='text-align: right;'>".formatCurrency($res2->tax_amt)."</td>";
                   }
                   echo "<td style='text-align: right;'>".$discount."</td>";
                   echo "<td style='text-align: right;'>".$discount_amt."</td>";
-                  echo "<td style='text-align: right;'>".$res2->unit_total_cost."</td>";
-                  echo "<td style='text-align: right;' colspan='".($colspan_2+1)."'>".$res2->total_cost."</td>";
+                  echo "<td style='text-align: right;'>".formatCurrency($res2->unit_total_cost)."</td>";
+                  echo "<td style='text-align: right;' colspan='".($colspan_2+1)."'>".formatCurrency($res2->total_cost)."</td>";
                   echo "</tr>";  
                   $tot_qty +=$res2->return_qty;
                   $tot_sales_price +=$res2->price_per_unit;
@@ -270,38 +284,38 @@ body{
   </tbody>
 <tfoot>
   <tr>
-    <td colspan="<?=$colspan_2+3?>" style="text-align: center;font-weight: bold;"><?= $this->lang->line('total'); ?></td>
+    <td colspan="<?=$colspan_2+3?>" style="text-align: center;font-weight: bold;">Tổng cộng</td>
     <td colspan="1" style="font-weight: bold;"><?=$tot_qty; ?></td>
     <?php if(!is_tax_disabled()) { ?>
     <td colspan="1" style="">-</td>
-    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(($tot_tax_amt),2,'.',''); ?></b></td>
+    <td colspan="1" style="text-align: right;" ><b><?php echo formatCurrency($tot_tax_amt); ?></b></td>
     <?php } ?>
     <td colspan="1" style="">-</td>
-    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(($tot_discount_amt),2,'.',''); ?></b></td>
-    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(($tot_unit_total_cost),2,'.',''); ?></b></td>
-    <td colspan="<?=$colspan_2+1?>" style="text-align: right;" ><b><?php echo number_format(($tot_total_cost),2,'.',''); ?></b></td>
+    <td colspan="1" style="text-align: right;" ><b><?php echo formatCurrency($tot_discount_amt); ?></b></td>
+    <td colspan="1" style="text-align: right;" ><b><?php echo formatCurrency($tot_unit_total_cost); ?></b></td>
+    <td colspan="<?=$colspan_2+1?>" style="text-align: right;" ><b><?php echo formatCurrency($tot_total_cost); ?></b></td>
   </tr>
   <tr>
-    <td colspan="<?=9-$colspan_2?>" style="text-align: right;"><b><?= $this->lang->line('subtotal'); ?></b></td>
-    <td colspan="<?=$colspan_2+1?>" style="text-align: right;" ><b><?php echo number_format(round($subtotal),2,'.',''); ?></b></td>
+    <td colspan="<?=9-$colspan_2?>" style="text-align: right;"><b>Tổng tạm tính</b></td>
+    <td colspan="<?=$colspan_2+1?>" style="text-align: right;" ><b><?php echo formatCurrency($subtotal); ?></b></td>
   </tr>
   <tr>
-    <td colspan="<?=9-$colspan_2?>" style="text-align: right;"><b><?= $this->lang->line('other_charges'); ?></b></td>
-    <td colspan="<?=$colspan_2+1?>" style="text-align: right;" ><b><?php echo number_format(round($other_charges_amt),2,'.',''); ?></b></td>
+    <td colspan="<?=9-$colspan_2?>" style="text-align: right;"><b>Phụ phí khác</b></td>
+    <td colspan="<?=$colspan_2+1?>" style="text-align: right;" ><b><?php echo formatCurrency($other_charges_amt); ?></b></td>
   </tr>
   <tr>
-    <td colspan="<?=9-$colspan_2?>" style="text-align: right;"><b><?= $this->lang->line('discount_on_all'); ?>(<?= $discount_to_all_input." ".$discount_to_all_type; ?>)</b></td>
-    <td colspan="<?=$colspan_2+1?>" style="text-align: right;" ><b><?php echo number_format(round($tot_discount_to_all_amt),2,'.',''); ?></b></td>
+    <td colspan="<?=9-$colspan_2?>" style="text-align: right;"><b>Chiết khấu tổng(<?= $discount_to_all_input." ".$discount_to_all_type; ?>)</b></td>
+    <td colspan="<?=$colspan_2+1?>" style="text-align: right;" ><b><?php echo formatCurrency($tot_discount_to_all_amt); ?></b></td>
   </tr>
   <tr>
-    <td colspan="<?=9-$colspan_2?>" style="text-align: right;"><b><?= $this->lang->line('grand_total'); ?></b></td>
-    <td colspan="<?=$colspan_2+1?>" style="text-align: right;" ><b><?php echo number_format(round($grand_total),2,'.',''); ?></b></td>
+    <td colspan="<?=9-$colspan_2?>" style="text-align: right;"><b>Tổng thanh toán</b></td>
+    <td colspan="<?=$colspan_2+1?>" style="text-align: right;" ><b><?php echo formatCurrency($grand_total); ?></b></td>
   </tr>
   <tr>
     <td colspan="10">
 <?php
      
-      echo "<span class='amt-in-word'>Amount in words: <i style='font-weight:bold;'>".NumberToWords(round($grand_total))." Only</i></span>";
+      echo "<span class='amt-in-word'>Số tiền bằng chữ: <i style='font-weight:bold;'>".NumberToWords(round($grand_total))." đồng</i></span>";
 
       ?>
   
@@ -310,10 +324,10 @@ body{
 
   <tr>
     <td colspan="5" style="height:100px;">
-      <b><?= $this->lang->line('customer_signature'); ?></b><br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>
+      <b>Chữ ký khách hàng</b><br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>
     </td>
     <td colspan="5">
-      <b><?= $this->lang->line('authorised_signature'); ?></b><br/><br/><br/><br/><br/>
+      <b>Chữ ký người bán</b><br/><br/><br/><br/><br/>
     </td>
   </tr>
   <?php if(!empty($sales_invoice_footer_text)) {?>

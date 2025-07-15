@@ -21,6 +21,23 @@
    padding-right: 2px;  
 
    }
+   
+   /* Style cho các trường bắt buộc có lỗi */
+   .required {
+     border: 1px solid #red !important;
+     background-color: #ffe6e6 !important;
+   }
+   
+   .text-danger {
+     color: #d73925 !important;
+     font-weight: bold;
+   }
+   
+   /* Style cho các trường bắt buộc */
+   .form-control:focus {
+     border-color: #3c8dbc;
+     box-shadow: 0 0 5px rgba(60, 141, 188, 0.5);
+   }
 </style>
 </head>
 
@@ -191,12 +208,12 @@
                                         <?php
                                             if(isset($purchase_id)){
                                               $btn_id='update';
-                                              $btn_name="Update";
+                                              $btn_name="Cập nhật";
                                               echo '<input type="hidden" name="purchase_id" id="purchase_id" value="'.$purchase_id.'"/>';
                                             }
                                             else{
                                               $btn_id='save';
-                                              $btn_name="Save";
+                                              $btn_name="Lưu";
                                             }
             
                                             ?>
@@ -495,7 +512,7 @@
                            <div class="box-footer col-sm-12">
                               <center>
                                  <div class="col-sm-3" style="float: right;"><a href="<?= base_url()?>dashboard">
-                                    <button type="button" class="btn bg-gray btn-block btn-flat btn-lg" title="Go Dashboard">Close</button>
+                                    <button type="button" class="btn bg-gray btn-block btn-flat btn-lg" title="Go Dashboard">Đóng</button>
                                   </a>
                                 </div>
                               </center>

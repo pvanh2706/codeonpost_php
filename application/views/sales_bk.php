@@ -369,12 +369,12 @@ padding-right: 2px;
                            <?php
                                         if(isset($sales_id)){
                                           $btn_id='update';
-                                          $btn_name="Update";
+                                          $btn_name="Cập nhật";
                                           echo '<input type="hidden" name="sales_id" id="sales_id" value="'.$sales_id.'"/>';
                                         }
                                         else{
                                           $btn_id='save';
-                                          $btn_name="SAVE";
+                                          $btn_name="Lưu";
                                         }
         
                                         ?>
@@ -790,12 +790,12 @@ padding-right: 2px;
                                 <?php
                                 /*if(isset($sales_id)){
                                   $btn_id='update';
-                                  $btn_name="Update";
+                                  $btn_name="Cập nhật";
                                   echo '<input type="hidden" name="sales_id" id="sales_id" value="'.$sales_id.'"/>';
                                 }
                                 else{
                                   $btn_id='save';
-                                  $btn_name="Save";
+                                  $btn_name="Lưu";
                                 }*/
 
                                 ?>
@@ -803,7 +803,7 @@ padding-right: 2px;
                                     <button type="button" id="" class="btn bg-maroon btn-block btn-flat btn-lg payments_modal" title="Lịch sử thanh toán" data-toggle="modal" data-target="#paymentHistoryModal">Lịch sử thanh toán</button>
                                  </div>
                                  <div class="col-sm-3" style="float: right;"><a href="<?= base_url()?>dashboard">
-                                    <button type="button" class="btn bg-gray btn-block btn-flat btn-lg" title="Go Dashboard">Close</button>
+                                    <button type="button" class="btn bg-gray btn-block btn-flat btn-lg" title="Go Dashboard">Đóng</button>
                                   </a>
                                 </div>
                               </center>

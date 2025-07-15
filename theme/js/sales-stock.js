@@ -134,7 +134,7 @@ $('#save,#update,#update-stock').on("click",function (e) {
 
     
     
-			//if(confirm("Do You Wants to Save Record ?")){
+			//if(confirm("Bạn có chắc chắn muốn lưu không ??")){
 				e.preventDefault();
 				data = new FormData($('#sales-form')[0]);//form name
         /*Check XSS Code*/

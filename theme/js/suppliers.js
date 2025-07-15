@@ -68,7 +68,7 @@ $('#save,#update').on("click",function (e) {
     if(this_id=="save")  //Save start
     {
 
-					if(confirm("Do You Wants to Save Record ?")){
+					if(confirm("Bạn có chắc chắn muốn lưu không ??")){
 						
 						e.preventDefault();
 						data = new FormData($('#suppliers-form')[0]);//form name
@@ -114,7 +114,7 @@ $('#save,#update').on("click",function (e) {
 	else if(this_id=="update")  //Update start
     {
 							
-					if(confirm("Do You Wants to Save Record ?")){
+					if(confirm("Bạn có chắc chắn muốn lưu không ??")){
 						e.preventDefault();
 						data = new FormData($('#suppliers-form')[0]);//form name
 						/*Check XSS Code*/
@@ -182,7 +182,7 @@ function update_status(id,status)
 				  success.play();
 				  if(status==0)
 				  {
-					  status="Nghỉ chơi";
+					  status="Ngừng hoạt động";
 					  var span_class="label label-danger";
 					  $("#span_"+id).attr('onclick','update_status('+id+',1)');
 				  }

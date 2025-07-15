@@ -154,8 +154,8 @@
          
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-warning" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary add_supplier">Save</button>
+        <button type="button" class="btn btn-warning" data-dismiss="modal">Đóng</button>
+        <button type="button" class="btn btn-primary add_supplier">Lưu</button>
       </div>
     </div>
     <!-- /.modal-content -->
