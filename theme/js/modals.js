@@ -52,7 +52,7 @@ $(".add_customer").on("click",function(e){
 
     
 
-			if(confirm("Are you Sure ?")){
+			if(confirm("Bạn có chắc chắn không??")){
 				e.preventDefault();
 				data = new FormData($('#customer-form')[0]);//form name
 				/*Check XSS Code*/
@@ -148,7 +148,7 @@ $(".add_supplier").on("click",function(e){
 
     
 
-			if(confirm("Are you Sure ?")){
+			if(confirm("Bạn có chắc chắn không??")){
 				
 				e.preventDefault();
 				data = new FormData($('#supplier-form')[0]);//form name
@@ -234,7 +234,7 @@ $(".add_brand").on("click",function(e){
    
     var this_id=this.id;
 
-      if(confirm("Are you Sure ?")){
+      if(confirm("Bạn có chắc chắn không??")){
         e.preventDefault();
         data = new FormData($('#brand_form')[0]);//form name
         /*Check XSS Code*/
@@ -318,7 +318,7 @@ $(".add_category").on("click",function(e){
    
     var this_id=this.id;
 
-      if(confirm("Are you Sure ?")){
+      if(confirm("Bạn có chắc chắn không??")){
         e.preventDefault();
         data = new FormData($('#category_form')[0]);//form name
         /*Check XSS Code*/
@@ -401,7 +401,7 @@ $(".add_unit").on("click",function(e){
    
     var this_id=this.id;
 
-      if(confirm("Are you Sure ?")){
+      if(confirm("Bạn có chắc chắn không??")){
         e.preventDefault();
         data = new FormData($('#unit_form')[0]);//form name
         /*Check XSS Code*/
@@ -486,7 +486,7 @@ $(".add_tax").on("click",function(e){
    
     var this_id=this.id;
 
-      if(confirm("Are you Sure ?")){
+      if(confirm("Bạn có chắc chắn không??")){
         e.preventDefault();
         data = new FormData($('#tax_form')[0]);//form name
         /*Check XSS Code*/

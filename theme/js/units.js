@@ -185,7 +185,7 @@ function update_status(id,status)
 function delete_unit(q_id)
 {
 	var base_url=$("#base_url").val().trim();
-   if(confirm("Do You Wants to Delete Record ?")){
+   if(confirm("Bạn có chắc chắn muốn xóa bản ghi này không?")){
    	$(".box").append('<div class="overlay"><i class="fa fa-refresh fa-spin"></i></div>');
    $.post(base_url+"units/delete_unit",{q_id:q_id},function(result){
    //alert(result);return;

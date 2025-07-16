@@ -206,7 +206,7 @@
             return;
           }
 
-          if(confirm("Are you sure ?")){
+            if(confirm("Bạn có chắc chắn không?")){
             e.preventDefault();
             data = new FormData($('#import-form')[0]);//form name
             /*Check XSS Code*/
@@ -225,24 +225,24 @@
               //alert(result);return;
               if(result=="success")
               {
-                //toastr["success"]("Record Updated Successfully!");
-                window.location=base_url+"customers";
+              //toastr["success"]("Cập nhật dữ liệu thành công!");
+              window.location=base_url+"customers";
               }
               else if(result=="failed")
               {
-                toastr["error"]("Sorry! Failed to save Record.Try again!");
-                 //alert("Sorry! Failed to save Record.Try again");
-                 // return;
+              toastr["error"]("Xin lỗi! Lưu dữ liệu thất bại. Vui lòng thử lại!");
+               //alert("Xin lỗi! Lưu dữ liệu thất bại. Vui lòng thử lại");
+               // return;
               }
               else
               {
-                toastr["error"](result);
+              toastr["error"](result);
               }
               $("#import").attr('disabled',false);  //Enable Save or Update button
               $(".overlay").remove();
              }
              });
-        }
+          }
         });
         
         

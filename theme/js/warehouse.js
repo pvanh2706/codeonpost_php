@@ -53,7 +53,7 @@ $("#save,#update").on("click",function(){
       }
       
 
-        if(confirm("Are you sure ?")){
+        if(confirm("Bạn có chắc chắn không??")){
           $(".box").append('<div class="overlay"><i class="fa fa-refresh fa-spin"></i></div>');
             $("#"+this_id).attr('disabled',true);  //Enable Save or Update button
           //Send data form to php

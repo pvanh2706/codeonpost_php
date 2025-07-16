@@ -568,7 +568,7 @@
 
 
          $(".close_btn").on("click",function(){
-           if(confirm('Are you sure you want to navigate away from this page?')){
+            if(confirm('Bạn có chắc chắn muốn rời khỏi trang này không?')){
                window.location='<?php echo $base_url; ?>dashboard';
              }
          });

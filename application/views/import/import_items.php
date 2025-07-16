@@ -115,7 +115,7 @@
             return;
           }
 
-          if(confirm("Are you sure ?")){
+          if(confirm("Bạn có chắc chắn không?")){
             e.preventDefault();
             data = new FormData($('#import-form')[0]);//form name
             /*Check XSS Code*/

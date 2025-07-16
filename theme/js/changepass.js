@@ -33,7 +33,7 @@ $("#save").on("click",function(){
       else
       {
 
-        if(confirm("Are you Sure ?")){
+        if(confirm("Bạn có chắc chắn không??")){
           /*Check XSS Code*/
           if(!xss_validation(currentpass)){ return false; }
           if(!xss_validation(newpass)){ return false; }

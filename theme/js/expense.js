@@ -187,7 +187,7 @@ function update_status(id,status)
 function delete_expense(q_id)
 {
 	
-   if(confirm("Do You Wants to Delete Record ?")){
+   if(confirm("Bạn có chắc chắn muốn xóa bản ghi này không?")){
    	$(".box").append('<div class="overlay"><i class="fa fa-refresh fa-spin"></i></div>');
    $.post("expense/delete_expense",{q_id:q_id},function(result){
    //alert(result);return;
@@ -219,7 +219,7 @@ function multi_delete(){
 	//var base_url=$("#base_url").val().trim();
     var this_id=this.id;
     
-		if(confirm("Are you sure ?")){
+		if(confirm("Bạn có chắc chắn không??")){
 			$(".box").append('<div class="overlay"><i class="fa fa-refresh fa-spin"></i></div>');
 			$("#"+this_id).attr('disabled',true);  //Enable Save or Update button
 			

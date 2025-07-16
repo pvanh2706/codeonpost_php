@@ -140,8 +140,8 @@
 <script type="text/javascript">
   function delete_warehouse(id)
   {
-     if(confirm("Do You Wants to Delete Record ?")){
-      $(".box").append('<div class="overlay"><i class="fa fa-refresh fa-spin"></i></div>');
+    if(confirm("Bạn có muốn xóa bản ghi này không?")){
+     $(".box").append('<div class="overlay"><i class="fa fa-refresh fa-spin"></i></div>');
      $.post("warehouse/delete_warehouse",{id:id},function(result){
      //alert(result);return;
        if(result=="success")

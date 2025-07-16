@@ -188,7 +188,7 @@ function update_status(id,status)
 function delete_state(q_id)
 {
 	
-   if(confirm("Do You Wants to Delete Record ?")){
+   if(confirm("Bạn có chắc chắn muốn xóa bản ghi này không?")){
    	$(".box").append('<div class="overlay"><i class="fa fa-refresh fa-spin"></i></div>');
    $.post("state/delete_state",{q_id:q_id},function(result){
    //alert(result);return;

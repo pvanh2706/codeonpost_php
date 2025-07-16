@@ -350,7 +350,7 @@ function update_paid_payment_total() {
   $("#paid_amt_tot").html(tot.toFixed(0));
 }
 function delete_payment(payment_id){
- if(confirm("Do You Wants to Delete Record ?")){
+ if(confirm("Bạn có chắc chắn muốn xóa bản ghi này không?")){
     var base_url=$("#base_url").val().trim();
     $(".box").append('<div class="overlay"><i class="fa fa-refresh fa-spin"></i></div>');
    $.post(base_url+"sales/delete_payment",{payment_id:payment_id},function(result){
@@ -383,7 +383,7 @@ function delete_payment(payment_id){
 function delete_sales(q_id)
 {
   
-   if(confirm("Do You Wants to Delete Record ?")){
+   if(confirm("Bạn có chắc chắn muốn xóa bản ghi này không?")){
     $(".box").append('<div class="overlay"><i class="fa fa-refresh fa-spin"></i></div>');
     $.post("sales/delete_sales",{q_id:q_id},function(result){
    //alert(result);return;
@@ -408,7 +408,7 @@ function multi_delete(){
   //var base_url=$("#base_url").val().trim();
     var this_id=this.id;
     
-    if(confirm("Are you sure ?")){
+    if(confirm("Bạn có chắc chắn không??")){
       data = new FormData($('#table_form')[0]);//form name
       /*Check XSS Code*/
       if(!xss_validation(data)){ return false; }
@@ -552,7 +552,7 @@ function save_payment(sales_id){
 }
 
 function delete_sales_payment(payment_id){
- if(confirm("Do You Wants to Delete Record ?")){
+ if(confirm("Bạn có chắc chắn muốn xóa bản ghi này không?")){
     var base_url=$("#base_url").val().trim();
     $(".box").append('<div class="overlay"><i class="fa fa-refresh fa-spin"></i></div>');
    $.post(base_url+"sales/delete_payment",{payment_id:payment_id},function(result){
