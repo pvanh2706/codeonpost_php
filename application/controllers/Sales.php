@@ -1227,33 +1227,61 @@ class Sales extends MY_Controller {
 
 	public function save_einvoice_template()
 	{
-		echo "<script>console.log('save_einvoice_template called');</script>";
-		// $this->permission_check('site_edit');
+		// Add debugging
+		error_log("save_einvoice_template method called");
+		
+		// Check if user is logged in
+		if($this->session->userdata('logged_in') != 1) {
+			echo json_encode(array(
+				'success' => false,
+				'message' => 'Bạn cần đăng nhập để thực hiện chức năng này'
+			));
+			return;
+		}
+		
+		// Check permission (uncomment when testing is done)
+		$this->permission_check('site_edit');
 		
 		$id = $this->input->post('id');
 		$template_number = $this->input->post('template_number');
 		$symbol = $this->input->post('symbol');
 		$description = $this->input->post('description');
 		
-		$this->load->model('site_model', 'site');
-		
-		if ($id) {
-			// Update existing template
-			$result = $this->site->update_einvoice_template($id, $template_number, $symbol, $description);
-		} else {
-			// Create new template
-			$result = $this->site->create_einvoice_template($template_number, $symbol, $description);
-		}
-		
-		if ($result) {
-			echo json_encode(array(
-				'success' => true,
-				'message' => 'Lưu mẫu số ký hiệu thành công'
-			));
-		} else {
+		// Validate required fields
+		if(empty($template_number) || empty($symbol)) {
 			echo json_encode(array(
 				'success' => false,
-				'message' => 'Có lỗi xảy ra khi lưu mẫu số ký hiệu'
+				'message' => 'Mẫu số và ký hiệu là bắt buộc'
+			));
+			return;
+		}
+		
+		$this->load->model('site_model', 'site');
+		
+		try {
+			if ($id) {
+				// Update existing template
+				$result = $this->site->update_einvoice_template($id, $template_number, $symbol, $description);
+			} else {
+				// Create new template
+				$result = $this->site->create_einvoice_template($template_number, $symbol, $description);
+			}
+			
+			if ($result) {
+				echo json_encode(array(
+					'success' => true,
+					'message' => 'Lưu mẫu số ký hiệu thành công'
+				));
+			} else {
+				echo json_encode(array(
+					'success' => false,
+					'message' => 'Có lỗi xảy ra khi lưu mẫu số ký hiệu'
+				));
+			}
+		} catch(Exception $e) {
+			echo json_encode(array(
+				'success' => false,
+				'message' => 'Lỗi: ' . $e->getMessage()
 			));
 		}
 	}
@@ -1357,4 +1385,6 @@ class Sales extends MY_Controller {
 			));
 		}
 	}
+
+	// Test method để debug
 }

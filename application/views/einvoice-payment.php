@@ -107,6 +107,7 @@
             <form id="paymentForm">
                 <div class="modal-body">
                     <input type="hidden" id="paymentId" name="id">
+                    <input type="hidden" name="<?php echo $this->security->get_csrf_token_name();?>" value="<?php echo $this->security->get_csrf_hash();?>">
                     
                     <div class="form-group">
                         <label for="paymentCode">Mã phương thức <span class="text-red">*</span></label>

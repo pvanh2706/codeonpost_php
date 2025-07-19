@@ -77,6 +77,7 @@
             <form id="templateForm">
                 <div class="modal-body">
                     <input type="hidden" id="templateId" name="id">
+                    <input type="hidden" name="<?php echo $this->security->get_csrf_token_name();?>" value="<?php echo $this->security->get_csrf_hash();?>">
                     
                     <div class="form-group">
                         <label for="templateNumber">Mẫu số <span class="text-red">*</span></label>
@@ -177,11 +178,6 @@ $(document).ready(function() {
         
         var formData = $(this).serialize();
         var url = '<?php echo $base_url; ?>sales/save_einvoice_template';
-        var url1 = '<?php echo site_url("sales/create_and_publish_einvoice"); ?>';
-        console.log('Form data:', formData);
-        console.log('URL:', url);   
-        console.log('URL1:', url1);
-        
         $('#saveBtn').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Đang lưu...');
         
         $.ajax({
@@ -190,6 +186,7 @@ $(document).ready(function() {
             data: formData,
             dataType: 'json',
             success: function(response) {
+                console.log('Success response:', response);
                 if (response.success) {
                     toastr.success(response.message);
                     $('#templateModal').modal('hide');
@@ -199,8 +196,19 @@ $(document).ready(function() {
                     toastr.error(response.message);
                 }
             },
-            error: function() {
-                toastr.error('Có lỗi xảy ra, vui lòng thử lại!');
+            error: function(xhr, status, error) {
+                console.log('Error status:', status);
+                console.log('Error:', error);
+                console.log('Response text:', xhr.responseText);
+                console.log('Status code:', xhr.status);
+                
+                if (xhr.status === 403) {
+                    toastr.error('Lỗi 403: Không có quyền truy cập. Vui lòng kiểm tra đăng nhập.');
+                } else if (xhr.status === 404) {
+                    toastr.error('Lỗi 404: Không tìm thấy URL. Vui lòng kiểm tra đường dẫn.');
+                } else {
+                    toastr.error('Có lỗi xảy ra: ' + error + ' (Status: ' + xhr.status + ')');
+                }
             },
             complete: function() {
                 $('#saveBtn').prop('disabled', false).html('<i class="fa fa-save"></i> Lưu');
