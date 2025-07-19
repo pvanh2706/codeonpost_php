@@ -269,6 +269,116 @@ class Site_model extends CI_Model {
 		
 		return $this->db->simple_query($sql);
 	}
+
+	// E-invoice Template Methods
+	public function create_einvoice_template_table()
+	{
+		$sql = "CREATE TABLE IF NOT EXISTS `db_einvoice_templates` (
+			`id` int(11) NOT NULL AUTO_INCREMENT,
+			`template_number` varchar(50) NOT NULL,
+			`symbol` varchar(50) NOT NULL,
+			`description` text,
+			`status` tinyint(1) DEFAULT '1',
+			`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+			PRIMARY KEY (`id`),
+			UNIQUE KEY `template_symbol` (`template_number`, `symbol`)
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+		
+		return $this->db->simple_query($sql);
+	}
+
+	public function get_einvoice_templates()
+	{
+		$query = $this->db->query("SELECT * FROM db_einvoice_templates WHERE status = 1 ORDER BY id DESC");
+		return $query->result_array();
+	}
+
+	public function create_einvoice_template($template_number, $symbol, $description = '')
+	{
+		$data = array(
+			'template_number' => $template_number,
+			'symbol' => $symbol,
+			'description' => $description,
+			'status' => 1
+		);
+		
+		return $this->db->insert('db_einvoice_templates', $data);
+	}
+
+	public function update_einvoice_template($id, $template_number, $symbol, $description = '')
+	{
+		$data = array(
+			'template_number' => $template_number,
+			'symbol' => $symbol,
+			'description' => $description
+		);
+		
+		$this->db->where('id', $id);
+		return $this->db->update('db_einvoice_templates', $data);
+	}
+
+	public function delete_einvoice_template($id)
+	{
+		$data = array('status' => 0);
+		$this->db->where('id', $id);
+		return $this->db->update('db_einvoice_templates', $data);
+	}
+
+	// E-invoice Payment Methods
+	public function create_einvoice_payment_table()
+	{
+		$sql = "CREATE TABLE IF NOT EXISTS `db_einvoice_payments` (
+			`id` int(11) NOT NULL AUTO_INCREMENT,
+			`payment_code` varchar(50) NOT NULL,
+			`payment_name` varchar(100) NOT NULL,
+			`description` text,
+			`status` tinyint(1) DEFAULT '1',
+			`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+			PRIMARY KEY (`id`),
+			UNIQUE KEY `payment_code` (`payment_code`)
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+		
+		return $this->db->simple_query($sql);
+	}
+
+	public function get_einvoice_payments()
+	{
+		$query = $this->db->query("SELECT * FROM db_einvoice_payments WHERE status = 1 ORDER BY id DESC");
+		return $query->result_array();
+	}
+
+	public function create_einvoice_payment($payment_code, $payment_name, $description = '')
+	{
+		$data = array(
+			'payment_code' => $payment_code,
+			'payment_name' => $payment_name,
+			'description' => $description,
+			'status' => 1
+		);
+		
+		return $this->db->insert('db_einvoice_payments', $data);
+	}
+
+	public function update_einvoice_payment($id, $payment_code, $payment_name, $description = '')
+	{
+		$data = array(
+			'payment_code' => $payment_code,
+			'payment_name' => $payment_name,
+			'description' => $description
+		);
+		
+		$this->db->where('id', $id);
+		return $this->db->update('db_einvoice_payments', $data);
+	}
+
+	public function delete_einvoice_payment($id)
+	{
+		$data = array('status' => 0);
+		$this->db->where('id', $id);
+		return $this->db->update('db_einvoice_payments', $data);
+	}
 }
 
 /* End of file Site_model.php */

@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test E-Invoice JSON Viewer</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+        .section { margin-bottom: 30px; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
+        .section h2 { color: #333; border-bottom: 2px solid #28a745; padding-bottom: 10px; }
+        .feature { margin-bottom: 15px; }
+        .status-new { color: #28a745; font-weight: bold; }
+        .status-enhanced { color: #17a2b8; font-weight: bold; }
+        .code { background: #f4f4f4; padding: 10px; border-radius: 3px; font-family: monospace; }
+        .table { border-collapse: collapse; width: 100%; }
+        .table th, .table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        .table th { background-color: #f8f9fa; }
+        .step { background: #e9ecef; padding: 15px; border-left: 4px solid #28a745; margin: 10px 0; }
+        .warning { background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; padding: 10px; border-radius: 4px; }
+        .success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 10px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h1>📊 Test E-Invoice JSON Viewer Feature</h1>
+    
+    <div class="section">
+        <h2>🎯 Tính năng mới đã thêm</h2>
+        <p>Đã thêm thành công chức năng xem thông tin hóa đơn điện tử dưới dạng JSON:</p>
+        <ul>
+            <li class="status-new">✅ Nút "Xem JSON" trong modal header</li>
+            <li class="status-new">✅ Modal popup hiển thị JSON với 3 tabs</li>
+            <li class="status-new">✅ Controller method get_einvoice_json</li>
+            <li class="status-new">✅ Các tính năng Copy, Download, Format JSON</li>
+            <li class="status-enhanced">✅ Import modal từ file riêng biệt</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>📁 Cấu trúc files đã tạo</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>File</th>
+                    <th>Mô tả</th>
+                    <th>Trạng thái</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>einvoice-json-modal.php</code></td>
+                    <td>Modal popup hiển thị JSON</td>
+                    <td class="status-new">✅ Mới tạo</td>
+                </tr>
+                <tr>
+                    <td><code>sales-order-info-modal.php</code></td>
+                    <td>Modal chính (đã cập nhật)</td>
+                    <td class="status-enhanced">🔄 Đã cập nhật</td>
+                </tr>
+                <tr>
+                    <td><code>Sales.php</code> (Controller)</td>
+                    <td>Controller xử lý JSON</td>
+                    <td class="status-enhanced">🔄 Đã cập nhật</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>🖥️ Giao diện Modal JSON</h2>
+        <p>Modal mới có 3 tabs chính:</p>
+        
+        <h3>1. Tab "JSON Data" 📝</h3>
+        <ul>
+            <li>Hiển thị dữ liệu JSON raw trong textarea</li>
+            <li>Font Courier New, readonly, có scroll</li>
+            <li>Background màu xám nhạt</li>
+        </ul>
+        
+        <h3>2. Tab "Preview" 👁️</h3>
+        <ul>
+            <li><strong>Bên trái:</strong> Thông tin header (khách hàng, ngày, mẫu số, v.v.)</li>
+            <li><strong>Bên phải:</strong> Chi tiết sản phẩm dạng bảng</li>
+            <li>Hiển thị dữ liệu được format đẹp</li>
+        </ul>
+        
+        <h3>3. Tab "Thông tin" ℹ️</h3>
+        <ul>
+            <li>Kích thước file JSON</li>
+            <li>Số lượng sản phẩm</li>
+            <li>Thời gian tạo</li>
+            <li>Trạng thái hóa đơn</li>
+            <li>Tổng tiền</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>🔧 Các chức năng tiện ích</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Nút</th>
+                    <th>Màu sắc</th>
+                    <th>Chức năng</th>
+                    <th>Icon</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Copy JSON</td>
+                    <td>Xanh lá (success)</td>
+                    <td>Copy JSON vào clipboard</td>
+                    <td>fa-copy</td>
+                </tr>
+                <tr>
+                    <td>Tải xuống</td>
+                    <td>Xanh dương (info)</td>
+                    <td>Download file JSON</td>
+                    <td>fa-download</td>
+                </tr>
+                <tr>
+                    <td>Format JSON</td>
+                    <td>Vàng (warning)</td>
+                    <td>Toggle compact/formatted</td>
+                    <td>fa-magic</td>
+                </tr>
+                <tr>
+                    <td>Làm mới</td>
+                    <td>Xanh dương (primary)</td>
+                    <td>Tải lại dữ liệu</td>
+                    <td>fa-refresh</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>📋 Cách sử dụng từng bước</h2>
+        
+        <div class="step">
+            <strong>Bước 1:</strong> Mở danh sách đơn hàng trong hệ thống POS
+        </div>
+        
+        <div class="step">
+            <strong>Bước 2:</strong> Chọn một đơn hàng đã có hóa đơn điện tử và click "Thông tin chi tiết"
+        </div>
+        
+        <div class="step">
+            <strong>Bước 3:</strong> Trong modal sẽ có nút <strong>"Xem JSON"</strong> màu xanh lá
+        </div>
+        
+        <div class="step">
+            <strong>Bước 4:</strong> Click nút "Xem JSON" để mở popup hiển thị dữ liệu
+        </div>
+        
+        <div class="step">
+            <strong>Bước 5:</strong> Sử dụng các tab và nút tiện ích để xem/xuất dữ liệu
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🗄️ Cấu trúc JSON trả về</h2>
+        <div class="code">
+{
+  "header": {
+    "id": 1,
+    "order_id": 123,
+    "sales_code": "SO001",
+    "invoice_date": "2025-01-19",
+    "template_number": "1",
+    "symbol": "C24",
+    "customer_name": "Nguyễn Văn A",
+    "customer_phone": "0123456789",
+    "customer_address": "123 Đường ABC",
+    "customer_tax_code": "0123456789",
+    "payment_method": "TM",
+    "sales_note": "Ghi chú",
+    "subtotal_amount": 1000000,
+    "bill_discount_amount": 50000,
+    "grand_total": 950000,
+    "status": "draft",
+    "created_at": "2025-01-19 10:30:00",
+    "created_by": 1
+  },
+  "items": [
+    {
+      "item_id": 1,
+      "item_name": "Sản phẩm A",
+      "quantity": 2,
+      "unit_price": 500000,
+      "discount_percent": 0,
+      "discount_amount": 0,
+      "tax_percent": 10,
+      "tax_amount": 100000,
+      "total_amount": 1100000
+    }
+  ],
+  "summary": {
+    "total_items": 1,
+    "total_quantity": 2,
+    "subtotal": 1000000,
+    "total_discount": 50000,
+    "grand_total": 950000,
+    "currency": "VND"
+  },
+  "metadata": {
+    "generated_at": "2025-01-19 15:30:00",
+    "generated_by": 1,
+    "version": "1.0",
+    "format": "einvoice_json"
+  }
+}
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>⚠️ Lưu ý quan trọng</h2>
+        <div class="warning">
+            <strong>Điều kiện tiên quyết:</strong>
+            <ul>
+                <li>Đơn hàng phải đã được lưu thông tin hóa đơn điện tử trước</li>
+                <li>Bảng <code>db_einvoice_header</code> và <code>db_einvoice_items</code> phải tồn tại</li>
+                <li>User cần có quyền <code>sales_view</code></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🔍 Troubleshooting</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Vấn đề</th>
+                    <th>Nguyên nhân</th>
+                    <th>Giải pháp</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Nút "Xem JSON" không hiện</td>
+                    <td>Chưa load modal hoặc lỗi JS</td>
+                    <td>F12 kiểm tra console, reload trang</td>
+                </tr>
+                <tr>
+                    <td>"Không tìm thấy hóa đơn điện tử"</td>
+                    <td>Chưa lưu HD điện tử cho đơn hàng</td>
+                    <td>Click "Lưu HĐ điện tử" trước</td>
+                </tr>
+                <tr>
+                    <td>Modal không mở</td>
+                    <td>Conflict JS hoặc Bootstrap</td>
+                    <td>Kiểm tra jQuery và Bootstrap</td>
+                </tr>
+                <tr>
+                    <td>JSON không hiển thị</td>
+                    <td>Lỗi AJAX hoặc controller</td>
+                    <td>Kiểm tra Network tab trong F12</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>🚀 Tính năng nâng cao có thể mở rộng</h2>
+        <ul>
+            <li>📤 <strong>Gửi API:</strong> Gửi JSON đến nhà cung cấp hóa đơn điện tử</li>
+            <li>🔍 <strong>Validate:</strong> Kiểm tra tính hợp lệ của JSON</li>
+            <li>📊 <strong>Export:</strong> Xuất ra Excel, PDF</li>
+            <li>🔄 <strong>Sync:</strong> Đồng bộ với hệ thống thuế</li>
+            <li>📱 <strong>QR Code:</strong> Tạo mã QR cho hóa đơn</li>
+            <li>🔐 <strong>Encryption:</strong> Mã hóa dữ liệu nhạy cảm</li>
+        </ul>
+    </div>
+
+    <div class="success">
+        <h3>✅ Kết luận</h3>
+        <p><strong>Tính năng đã hoàn thành và sẵn sàng sử dụng!</strong></p>
+        <ul>
+            <li>Modal JSON với giao diện đẹp và đầy đủ chức năng</li>
+            <li>Dữ liệu được format chuẩn và có thể sử dụng cho API</li>
+            <li>Tích hợp liền mạch với modal chính</li>
+            <li>Hỗ trợ đầy đủ các thao tác: xem, copy, download, format</li>
+        </ul>
+    </div>
+
+    <p style="text-align: center; margin-top: 40px; color: #666;">
+        <strong>🎊 Chúc mừng! Tính năng JSON Viewer đã được thêm thành công!</strong><br>
+        Bạn có thể test ngay bây giờ.
+    </p>
+</body>
+</html>

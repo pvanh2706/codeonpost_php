@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test E-Invoice Save Feature</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+        .section { margin-bottom: 30px; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
+        .section h2 { color: #333; border-bottom: 2px solid #3c8dbc; padding-bottom: 10px; }
+        .feature { margin-bottom: 15px; }
+        .status-new { color: #28a745; font-weight: bold; }
+        .status-modified { color: #ffc107; font-weight: bold; }
+        .code { background: #f4f4f4; padding: 10px; border-radius: 3px; font-family: monospace; }
+        .table { border-collapse: collapse; width: 100%; }
+        .table th, .table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        .table th { background-color: #f8f9fa; }
+    </style>
+</head>
+<body>
+    <h1>🧾 Test E-Invoice Save Feature</h1>
+    
+    <div class="section">
+        <h2>📋 Tổng quan tính năng</h2>
+        <p>Đã thêm thành công chức năng lưu thông tin hóa đơn điện tử với các thành phần sau:</p>
+        <ul>
+            <li class="status-new">✅ Nút "Lưu HĐ điện tử" trong modal header</li>
+            <li class="status-new">✅ JavaScript function xử lý dữ liệu từ form</li>
+            <li class="status-new">✅ Controller method save_einvoice_data</li>
+            <li class="status-new">✅ Tự động tạo 2 bảng database nếu chưa tồn tại</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>🗄️ Cấu trúc Database</h2>
+        <p>Hệ thống sẽ tự động tạo 2 bảng khi lưu hóa đơn điện tử lần đầu:</p>
+        
+        <h3>1. Bảng db_einvoice_header (Thông tin chung hóa đơn)</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Trường</th>
+                    <th>Kiểu dữ liệu</th>
+                    <th>Mô tả</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>id</td><td>int(11) AUTO_INCREMENT</td><td>Khóa chính</td></tr>
+                <tr><td>order_id</td><td>int(11) UNIQUE</td><td>ID đơn hàng gốc</td></tr>
+                <tr><td>sales_code</td><td>varchar(50)</td><td>Mã đơn hàng</td></tr>
+                <tr><td>invoice_date</td><td>date</td><td>Ngày hóa đơn</td></tr>
+                <tr><td>template_number</td><td>varchar(10)</td><td>Mẫu số (1,2)</td></tr>
+                <tr><td>symbol</td><td>varchar(10)</td><td>Ký hiệu (C24,C25)</td></tr>
+                <tr><td>customer_name</td><td>varchar(255)</td><td>Tên khách hàng</td></tr>
+                <tr><td>customer_phone</td><td>varchar(20)</td><td>Điện thoại</td></tr>
+                <tr><td>customer_address</td><td>text</td><td>Địa chỉ</td></tr>
+                <tr><td>customer_tax_code</td><td>varchar(50)</td><td>Mã số thuế</td></tr>
+                <tr><td>payment_method</td><td>varchar(10)</td><td>Phương thức thanh toán</td></tr>
+                <tr><td>sales_note</td><td>text</td><td>Ghi chú</td></tr>
+                <tr><td>subtotal_amount</td><td>decimal(10,2)</td><td>Tổng tiền hàng</td></tr>
+                <tr><td>bill_discount_amount</td><td>decimal(10,2)</td><td>Giảm giá hóa đơn</td></tr>
+                <tr><td>grand_total</td><td>decimal(10,2)</td><td>Tổng tiền</td></tr>
+                <tr><td>status</td><td>varchar(20)</td><td>Trạng thái (draft, sent, etc.)</td></tr>
+                <tr><td>created_at</td><td>datetime</td><td>Thời gian tạo</td></tr>
+                <tr><td>created_by</td><td>int(11)</td><td>Người tạo</td></tr>
+                <tr><td>updated_at</td><td>datetime</td><td>Thời gian cập nhật</td></tr>
+                <tr><td>updated_by</td><td>int(11)</td><td>Người cập nhật</td></tr>
+            </tbody>
+        </table>
+
+        <h3>2. Bảng db_einvoice_items (Chi tiết sản phẩm)</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Trường</th>
+                    <th>Kiểu dữ liệu</th>
+                    <th>Mô tả</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>id</td><td>int(11) AUTO_INCREMENT</td><td>Khóa chính</td></tr>
+                <tr><td>einvoice_header_id</td><td>int(11) FK</td><td>Liên kết với header</td></tr>
+                <tr><td>item_id</td><td>int(11)</td><td>ID sản phẩm</td></tr>
+                <tr><td>item_name</td><td>varchar(255)</td><td>Tên sản phẩm</td></tr>
+                <tr><td>quantity</td><td>decimal(10,3)</td><td>Số lượng</td></tr>
+                <tr><td>unit_price</td><td>decimal(10,2)</td><td>Đơn giá</td></tr>
+                <tr><td>discount_percent</td><td>decimal(5,2)</td><td>% Giảm giá sản phẩm</td></tr>
+                <tr><td>discount_amount</td><td>decimal(10,2)</td><td>Tiền giảm giá sản phẩm</td></tr>
+                <tr><td>tax_percent</td><td>decimal(5,2)</td><td>% Thuế</td></tr>
+                <tr><td>tax_amount</td><td>decimal(10,2)</td><td>Tiền thuế</td></tr>
+                <tr><td>total_amount</td><td>decimal(10,2)</td><td>Thành tiền</td></tr>
+                <tr><td>created_at</td><td>datetime</td><td>Thời gian tạo</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>🔧 Cách sử dụng</h2>
+        <ol>
+            <li>Mở danh sách đơn hàng trong hệ thống POS</li>
+            <li>Chọn một đơn hàng và click "Thông tin chi tiết"</li>
+            <li>Trong modal sẽ có nút <strong>"Lưu HĐ điện tử"</strong> màu vàng</li>
+            <li>Điền đầy đủ thông tin hóa đơn (ngày, mẫu số, ký hiệu, v.v.)</li>
+            <li>Click nút "Lưu HĐ điện tử"</li>
+            <li>Hệ thống sẽ:
+                <ul>
+                    <li>Kiểm tra và tạo bảng database nếu chưa có</li>
+                    <li>Lưu thông tin header vào bảng db_einvoice_header</li>
+                    <li>Lưu chi tiết sản phẩm vào bảng db_einvoice_items</li>
+                    <li>Hiển thị thông báo kết quả</li>
+                </ul>
+            </li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <h2>🎯 Tính năng nổi bật</h2>
+        <ul>
+            <li><strong>Tự động tạo bảng:</strong> Không cần tạo bảng thủ công, hệ thống tự động tạo</li>
+            <li><strong>Cập nhật thông minh:</strong> Nếu đã có hóa đơn cho order, sẽ cập nhật thay vì tạo mới</li>
+            <li><strong>Ràng buộc dữ liệu:</strong> Foreign key đảm bảo tính toàn vẹn dữ liệu</li>
+            <li><strong>Audit trail:</strong> Lưu thông tin người tạo/sửa và thời gian</li>
+            <li><strong>Validation:</strong> Kiểm tra quyền truy cập và dữ liệu đầu vào</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>📊 Dữ liệu được thu thập</h2>
+        <h3>Thông tin header:</h3>
+        <ul>
+            <li>Thông tin đơn hàng: ID, mã đơn, ngày hóa đơn</li>
+            <li>Thông tin khách hàng: Tên, điện thoại, địa chỉ, mã số thuế</li>
+            <li>Thông tin hóa đơn: Mẫu số, ký hiệu, phương thức thanh toán</li>
+            <li>Thông tin tài chính: Tổng tiền hàng, giảm giá, tổng cộng</li>
+        </ul>
+        
+        <h3>Thông tin chi tiết sản phẩm:</h3>
+        <ul>
+            <li>Thông tin sản phẩm: ID, tên, số lượng, đơn giá</li>
+            <li>Thông tin giảm giá: % và số tiền giảm giá sản phẩm</li>
+            <li>Thông tin thuế: % và số tiền thuế</li>
+            <li>Thành tiền sau tính toán</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>⚠️ Lưu ý quan trọng</h2>
+        <ul>
+            <li>Cần có quyền <code>sales_edit</code> để sử dụng tính năng này</li>
+            <li>Mỗi đơn hàng chỉ có thể có một hóa đơn điện tử (UNIQUE constraint)</li>
+            <li>Khi cập nhật, tất cả chi tiết sản phẩm cũ sẽ bị xóa và thay thế</li>
+            <li>Cần kiểm tra kết nối database trước khi sử dụng</li>
+            <li>Backup database trước khi chạy lần đầu tiên</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>🔍 Debug và Troubleshooting</h2>
+        <p>Nếu gặp lỗi, kiểm tra:</p>
+        <ul>
+            <li>Quyền truy cập database của user MySQL</li>
+            <li>Quyền CREATE TABLE trong database</li>
+            <li>Log file của web server (Apache/Nginx)</li>
+            <li>Developer Tools của browser (F12) để xem AJAX errors</li>
+            <li>File log của CodeIgniter trong <code>application/logs/</code></li>
+        </ul>
+    </div>
+
+    <p style="text-align: center; margin-top: 40px; color: #666;">
+        <strong>✅ Tính năng đã được thêm thành công!</strong><br>
+        Sẵn sàng để test và sử dụng.
+    </p>
+</body>
+</html>

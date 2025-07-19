@@ -923,4 +923,438 @@ class Sales extends MY_Controller {
 		
 		echo json_encode($result);
 	}
+
+	public function save_einvoice_data() {
+		$this->permission_check('sales_edit');
+		
+		$invoice_data = $this->input->post('invoice_data');
+		
+		if (!$invoice_data) {
+			echo json_encode(array(
+				'success' => false,
+				'message' => 'Không có dữ liệu hóa đơn'
+			));
+			return;
+		}
+		
+		try {
+			// Check and create tables if not exist
+			$tables_created = $this->create_einvoice_tables_if_not_exist();
+			
+			// Save invoice header
+			$invoice_header_data = array(
+				'order_id' => $invoice_data['order_id'],
+				'sales_code' => $invoice_data['sales_code'],
+				'invoice_date' => $invoice_data['invoice_date'],
+				'template_number' => $invoice_data['template_number'],
+				'symbol' => $invoice_data['symbol'],
+				'customer_name' => $invoice_data['customer_name'],
+				'customer_phone' => $invoice_data['customer_phone'],
+				'customer_address' => $invoice_data['customer_address'],
+				'customer_tax_code' => $invoice_data['customer_tax_code'],
+				'payment_method' => $invoice_data['payment_method'],
+				'sales_note' => $invoice_data['sales_note'],
+				'subtotal_amount' => $invoice_data['subtotal_amount'],
+				'bill_discount_amount' => $invoice_data['bill_discount_amount'],
+				'grand_total' => $invoice_data['grand_total'],
+				'created_at' => date('Y-m-d H:i:s'),
+				'created_by' => $this->session->userdata('user_id')
+			);
+			
+			// Check if invoice already exists for this order
+			$existing_invoice = $this->db->where('order_id', $invoice_data['order_id'])
+									   ->get('db_einvoice_header')
+									   ->row();
+			
+			if ($existing_invoice) {
+				// Update existing invoice
+				$invoice_header_data['updated_at'] = date('Y-m-d H:i:s');
+				$invoice_header_data['updated_by'] = $this->session->userdata('user_id');
+				
+				$this->db->where('id', $existing_invoice->id);
+				$this->db->update('db_einvoice_header', $invoice_header_data);
+				$invoice_header_id = $existing_invoice->id;
+				
+				// Delete existing items
+				$this->db->where('einvoice_header_id', $invoice_header_id);
+				$this->db->delete('db_einvoice_items');
+			} else {
+				// Insert new invoice
+				$this->db->insert('db_einvoice_header', $invoice_header_data);
+				$invoice_header_id = $this->db->insert_id();
+			}
+			
+			// Save invoice items
+			if (!empty($invoice_data['items'])) {
+				foreach ($invoice_data['items'] as $item) {
+					$item_data = array(
+						'einvoice_header_id' => $invoice_header_id,
+						'item_id' => $item['item_id'],
+						'item_name' => $item['item_name'],
+						'quantity' => $item['quantity'],
+						'unit_price' => $item['unit_price'],
+						'discount_percent' => $item['discount_percent'],
+						'discount_amount' => $item['discount_amount'],
+						'tax_percent' => $item['tax_percent'],
+						'tax_amount' => $item['tax_amount'],
+						'total_amount' => $item['total_amount'],
+						'created_at' => date('Y-m-d H:i:s')
+					);
+					
+					$this->db->insert('db_einvoice_items', $item_data);
+				}
+			}
+			
+			echo json_encode(array(
+				'success' => true,
+				'message' => 'Lưu thông tin hóa đơn điện tử thành công',
+				'tables_created' => $tables_created,
+				'invoice_id' => $invoice_header_id
+			));
+			
+		} catch (Exception $e) {
+			echo json_encode(array(
+				'success' => false,
+				'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
+			));
+		}
+	}
+	
+	private function create_einvoice_tables_if_not_exist() {
+		$tables_created = false;
+		
+		// Check if einvoice_header table exists
+		$header_table_exists = $this->db->query("SHOW TABLES LIKE 'db_einvoice_header'")->num_rows() > 0;
+		
+		if (!$header_table_exists) {
+			// Create einvoice_header table
+			$sql_header = "
+				CREATE TABLE `db_einvoice_header` (
+					`id` int(11) NOT NULL AUTO_INCREMENT,
+					`order_id` int(11) NOT NULL,
+					`sales_code` varchar(50) NOT NULL,
+					`invoice_date` date NOT NULL,
+					`template_number` varchar(10) DEFAULT '1',
+					`symbol` varchar(10) DEFAULT 'C24',
+					`customer_name` varchar(255) NOT NULL,
+					`customer_phone` varchar(20) DEFAULT NULL,
+					`customer_address` text DEFAULT NULL,
+					`customer_tax_code` varchar(50) DEFAULT NULL,
+					`payment_method` varchar(10) DEFAULT 'TM',
+					`sales_note` text DEFAULT NULL,
+					`subtotal_amount` decimal(10,2) DEFAULT 0.00,
+					`bill_discount_amount` decimal(10,2) DEFAULT 0.00,
+					`grand_total` decimal(10,2) DEFAULT 0.00,
+					`status` varchar(20) DEFAULT 'draft',
+					`created_at` datetime NOT NULL,
+					`created_by` int(11) DEFAULT NULL,
+					`updated_at` datetime DEFAULT NULL,
+					`updated_by` int(11) DEFAULT NULL,
+					PRIMARY KEY (`id`),
+					UNIQUE KEY `order_id` (`order_id`),
+					KEY `sales_code` (`sales_code`),
+					KEY `invoice_date` (`invoice_date`)
+				) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+			";
+			
+			$this->db->query($sql_header);
+			$tables_created = true;
+		}
+		
+		// Check if einvoice_items table exists
+		$items_table_exists = $this->db->query("SHOW TABLES LIKE 'db_einvoice_items'")->num_rows() > 0;
+		
+		if (!$items_table_exists) {
+			// Create einvoice_items table
+			$sql_items = "
+				CREATE TABLE `db_einvoice_items` (
+					`id` int(11) NOT NULL AUTO_INCREMENT,
+					`einvoice_header_id` int(11) NOT NULL,
+					`item_id` int(11) NOT NULL,
+					`item_name` varchar(255) NOT NULL,
+					`quantity` decimal(10,3) NOT NULL DEFAULT 1.000,
+					`unit_price` decimal(10,2) NOT NULL DEFAULT 0.00,
+					`discount_percent` decimal(5,2) DEFAULT 0.00,
+					`discount_amount` decimal(10,2) DEFAULT 0.00,
+					`tax_percent` decimal(5,2) DEFAULT 0.00,
+					`tax_amount` decimal(10,2) DEFAULT 0.00,
+					`total_amount` decimal(10,2) NOT NULL DEFAULT 0.00,
+					`created_at` datetime NOT NULL,
+					PRIMARY KEY (`id`),
+					KEY `einvoice_header_id` (`einvoice_header_id`),
+					KEY `item_id` (`item_id`),
+					CONSTRAINT `fk_einvoice_items_header` FOREIGN KEY (`einvoice_header_id`) REFERENCES `db_einvoice_header` (`id`) ON DELETE CASCADE
+				) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+			";
+			
+			$this->db->query($sql_items);
+			$tables_created = true;
+		}
+		
+		return $tables_created;
+	}
+	
+	public function get_einvoice_json() {
+		$this->permission_check('sales_view');
+		
+		$order_id = $this->input->post('order_id');
+		
+		if (!$order_id) {
+			echo json_encode(array(
+				'success' => false,
+				'message' => 'Không có ID đơn hàng'
+			));
+			return;
+		}
+		
+		try {
+			// Get invoice header
+			$header = $this->db->where('order_id', $order_id)
+							   ->get('db_einvoice_header')
+							   ->row_array();
+			
+			if (!$header) {
+				echo json_encode(array(
+					'success' => false,
+					'message' => 'Không tìm thấy hóa đơn điện tử cho đơn hàng này'
+				));
+				return;
+			}
+			
+			// Get invoice items
+			$items = $this->db->where('einvoice_header_id', $header['id'])
+							  ->get('db_einvoice_items')
+							  ->result_array();
+			
+			// Format the response data as JSON structure
+			$json_data = array(
+				'header' => array(
+					'id' => $header['id'],
+					'order_id' => $header['order_id'],
+					'sales_code' => $header['sales_code'],
+					'invoice_date' => $header['invoice_date'],
+					'template_number' => $header['template_number'],
+					'symbol' => $header['symbol'],
+					'customer_name' => $header['customer_name'],
+					'customer_phone' => $header['customer_phone'],
+					'customer_address' => $header['customer_address'],
+					'customer_tax_code' => $header['customer_tax_code'],
+					'payment_method' => $header['payment_method'],
+					'sales_note' => $header['sales_note'],
+					'subtotal_amount' => floatval($header['subtotal_amount']),
+					'bill_discount_amount' => floatval($header['bill_discount_amount']),
+					'grand_total' => floatval($header['grand_total']),
+					'status' => $header['status'],
+					'created_at' => $header['created_at'],
+					'created_by' => $header['created_by'],
+					'updated_at' => $header['updated_at'],
+					'updated_by' => $header['updated_by']
+				),
+				'items' => array()
+			);
+			
+			// Format items data
+			foreach ($items as $item) {
+				$json_data['items'][] = array(
+					'item_id' => $item['item_id'],
+					'item_name' => $item['item_name'],
+					'quantity' => floatval($item['quantity']),
+					'unit_price' => floatval($item['unit_price']),
+					'discount_percent' => floatval($item['discount_percent']),
+					'discount_amount' => floatval($item['discount_amount']),
+					'tax_percent' => floatval($item['tax_percent']),
+					'tax_amount' => floatval($item['tax_amount']),
+					'total_amount' => floatval($item['total_amount']),
+					'created_at' => $item['created_at']
+				);
+			}
+			
+			// Calculate summary
+			$json_data['summary'] = array(
+				'total_items' => count($items),
+				'total_quantity' => array_sum(array_column($items, 'quantity')),
+				'subtotal' => $json_data['header']['subtotal_amount'],
+				'total_discount' => $json_data['header']['bill_discount_amount'],
+				'grand_total' => $json_data['header']['grand_total'],
+				'currency' => 'VND'
+			);
+			
+			// Add metadata
+			$json_data['metadata'] = array(
+				'generated_at' => date('Y-m-d H:i:s'),
+				'generated_by' => $this->session->userdata('user_id'),
+				'version' => '1.0',
+				'format' => 'einvoice_json'
+			);
+			
+			echo json_encode(array(
+				'success' => true,
+				'message' => 'Lấy dữ liệu JSON thành công',
+				'data' => $json_data
+			));
+			
+		} catch (Exception $e) {
+			echo json_encode(array(
+				'success' => false,
+				'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
+			));
+		}
+	}
+
+	// Methods for E-invoice Template Configuration
+	public function einvoice_template()
+	{
+		$this->permission_check('site_edit');
+		$data = $this->data;
+		$data['page_title'] = 'Cấu hình Mẫu số, Ký hiệu HDDT';
+		
+		$this->load->model('site_model', 'site');
+		
+		// Tạo bảng mẫu số ký hiệu nếu chưa tồn tại
+		$this->site->create_einvoice_template_table();
+		
+		$this->load->view('einvoice-template', $data);
+	}
+
+	public function get_einvoice_templates()
+	{
+		$this->permission_check('site_edit');
+		$this->load->model('site_model', 'site');
+		
+		$templates = $this->site->get_einvoice_templates();
+		echo json_encode(array('data' => $templates));
+	}
+
+	public function save_einvoice_template()
+	{
+		echo "<script>console.log('save_einvoice_template called');</script>";
+		// $this->permission_check('site_edit');
+		
+		$id = $this->input->post('id');
+		$template_number = $this->input->post('template_number');
+		$symbol = $this->input->post('symbol');
+		$description = $this->input->post('description');
+		
+		$this->load->model('site_model', 'site');
+		
+		if ($id) {
+			// Update existing template
+			$result = $this->site->update_einvoice_template($id, $template_number, $symbol, $description);
+		} else {
+			// Create new template
+			$result = $this->site->create_einvoice_template($template_number, $symbol, $description);
+		}
+		
+		if ($result) {
+			echo json_encode(array(
+				'success' => true,
+				'message' => 'Lưu mẫu số ký hiệu thành công'
+			));
+		} else {
+			echo json_encode(array(
+				'success' => false,
+				'message' => 'Có lỗi xảy ra khi lưu mẫu số ký hiệu'
+			));
+		}
+	}
+
+	public function delete_einvoice_template()
+	{
+		$this->permission_check('site_edit');
+		
+		$id = $this->input->post('id');
+		$this->load->model('site_model', 'site');
+		
+		$result = $this->site->delete_einvoice_template($id);
+		
+		if ($result) {
+			echo json_encode(array(
+				'success' => true,
+				'message' => 'Xóa mẫu số ký hiệu thành công'
+			));
+		} else {
+			echo json_encode(array(
+				'success' => false,
+				'message' => 'Có lỗi xảy ra khi xóa mẫu số ký hiệu'
+			));
+		}
+	}
+
+	// Methods for E-invoice Payment Configuration
+	public function einvoice_payment()
+	{
+		$this->permission_check('site_edit');
+		$data = $this->data;
+		$data['page_title'] = 'Cấu hình phương thức thanh toán HDDT';
+		
+		$this->load->model('site_model', 'site');
+		
+		// Tạo bảng phương thức thanh toán nếu chưa tồn tại
+		$this->site->create_einvoice_payment_table();
+		
+		$this->load->view('einvoice-payment', $data);
+	}
+
+	public function get_einvoice_payments()
+	{
+		$this->permission_check('site_edit');
+		$this->load->model('site_model', 'site');
+		
+		$payments = $this->site->get_einvoice_payments();
+		echo json_encode(array('data' => $payments));
+	}
+
+	public function save_einvoice_payment()
+	{
+		$this->permission_check('site_edit');
+		
+		$id = $this->input->post('id');
+		$payment_code = $this->input->post('payment_code');
+		$payment_name = $this->input->post('payment_name');
+		$description = $this->input->post('description');
+		
+		$this->load->model('site_model', 'site');
+		
+		if ($id) {
+			// Update existing payment method
+			$result = $this->site->update_einvoice_payment($id, $payment_code, $payment_name, $description);
+		} else {
+			// Create new payment method
+			$result = $this->site->create_einvoice_payment($payment_code, $payment_name, $description);
+		}
+		
+		if ($result) {
+			echo json_encode(array(
+				'success' => true,
+				'message' => 'Lưu phương thức thanh toán thành công'
+			));
+		} else {
+			echo json_encode(array(
+				'success' => false,
+				'message' => 'Có lỗi xảy ra khi lưu phương thức thanh toán'
+			));
+		}
+	}
+
+	public function delete_einvoice_payment()
+	{
+		$this->permission_check('site_edit');
+		
+		$id = $this->input->post('id');
+		$this->load->model('site_model', 'site');
+		
+		$result = $this->site->delete_einvoice_payment($id);
+		
+		if ($result) {
+			echo json_encode(array(
+				'success' => true,
+				'message' => 'Xóa phương thức thanh toán thành công'
+			));
+		} else {
+			echo json_encode(array(
+				'success' => false,
+				'message' => 'Có lỗi xảy ra khi xóa phương thức thanh toán'
+			));
+		}
+	}
 }

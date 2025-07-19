@@ -14,6 +14,12 @@
           <button type="button" class="btn btn-sm btn-info" id="configEInvoiceBtn">
             <i class="fa fa-cog"></i> Cấu hình HĐ điện tử
           </button>
+          <button type="button" class="btn btn-sm btn-warning" id="saveEInvoiceBtn">
+            <i class="fa fa-file-invoice"></i> Lưu HĐ điện tử
+          </button>
+          <button type="button" class="btn btn-sm btn-success" id="viewEInvoiceJsonBtn">
+            <i class="fa fa-file-code-o"></i> Xem JSON
+          </button>
           <button type="button" class="btn btn-sm btn-primary" id="editOrderBtn" style="display: none;">
             <i class="fa fa-edit"></i> Sửa
           </button>
@@ -305,6 +311,7 @@
 
 <script>
 // Global variables
+console.log('Order Info Modal Script Loaded');
 var originalOrderData = null;
 var isEditMode = false;
 
@@ -546,6 +553,8 @@ function show_order_info() {
         success: function(response) {
             if (response.success) {
                 originalOrderData = response.data[0]; // Store original data
+                console.log('Original Order Data1:', originalOrderData);
+                console.log('Response Data1:', response.data);
                 var html = buildOrderInfoHTML(response.data);
                 $('#orderInfoContent').html(html);
                 $('#editOrderBtn').show();
@@ -858,8 +867,9 @@ function calculateItemTotal(row) {
 // Main modal initialization
 $(document).ready(function() {
     // Global variables
-    var originalOrderData = null;
-    var isEditMode = false;
+    console.log('Order Info Modal Script Loaded originalOrderData');
+    originalOrderData = null;
+    isEditMode = false;
     
     // Function to show order information
     window.show_order_info = function() {
@@ -896,6 +906,8 @@ $(document).ready(function() {
             success: function(response) {
                 if (response.success) {
                     originalOrderData = response.data[0]; // Store original data
+                    console.log('Original Order Data:', originalOrderData);
+                    console.log('Response Data:', response.data);
                     var html = buildOrderInfoHTML(response.data);
                     $('#orderInfoContent').html(html);
                     $('#editOrderBtn').show();
@@ -998,6 +1010,7 @@ $(document).ready(function() {
     }
     
     function saveOrderChanges() {
+        console.log('org ==> ', originalOrderData)
         if (!originalOrderData) {
             alert("Không có dữ liệu gốc để lưu!");
             return;
@@ -1216,6 +1229,14 @@ $(document).ready(function() {
     
     $(document).on('click', '#saveEInvoiceConfigBtn', function() {
         saveEInvoiceConfig();
+    });
+    
+    $(document).on('click', '#saveEInvoiceBtn', function() {
+        saveEInvoiceData();
+    });
+    
+    $(document).on('click', '#viewEInvoiceJsonBtn', function() {
+        viewEInvoiceJson();
     });
 });
 
@@ -1642,4 +1663,108 @@ function buildOrderInfoHTML(orders) {
         });
     });
 
+// Function to save E-Invoice data
+function saveEInvoiceData() {
+    console.log('Saving E-Invoice data...', originalOrderData);
+    if (!originalOrderData) {
+        alert("Không có dữ liệu đơn hàng để lưu!");
+        return;
+    }
+    
+    // Collect invoice data from form
+    var invoiceData = {
+        order_id: originalOrderData.id,
+        sales_code: originalOrderData.sales_code,
+        invoice_date: $('#edit_sales_date').val(),
+        template_number: $('#edit_template_number').val(),
+        symbol: $('#edit_symbol').val(),
+        customer_name: $('#edit_customer_name').val(),
+        customer_phone: $('#edit_mobile').val(),
+        customer_address: $('#edit_address').val(),
+        customer_tax_code: $('#edit_tax_info').val(),
+        payment_method: $('#edit_payment_method').val(),
+        sales_note: $('#edit_sales_note').val(),
+        subtotal_amount: parseFloat($('#subtotal_amount').text().replace(/[^\d.,]/g, '').replace(/,/g, '')) || 0,
+        bill_discount_amount: parseFloat($('#bill_discount_amount').val().replace(/,/g, '')) || 0,
+        grand_total: parseFloat($('#final_total').text().replace(/[^\d.,]/g, '').replace(/,/g, '')) || 0,
+        items: []
+    };
+    
+    // Collect items data
+    $('.item-row').each(function() {
+        var itemId = $(this).data('item-id');
+        var itemName = $(this).find('.item-name-input').val();
+        var qty = parseFloat($(this).find('.item-qty-input').val()) || 0;
+        var unitPrice = parseFloat($(this).find('.item-price-input').val().replace(/,/g, '')) || 0;
+        var discountPercent = parseFloat($(this).find('.item-discount-percent-input').val()) || 0;
+        var taxPercent = parseFloat($(this).find('.item-tax-percent-input').val()) || 0;
+        
+        // Calculate amounts
+        var subtotal = qty * unitPrice;
+        var discountAmount = (subtotal * discountPercent) / 100;
+        var afterDiscount = subtotal - discountAmount;
+        var taxAmount = (afterDiscount * taxPercent) / 100;
+        var totalAmount = afterDiscount + taxAmount;
+        
+        invoiceData.items.push({
+            item_id: itemId,
+            item_name: itemName,
+            quantity: qty,
+            unit_price: unitPrice,
+            discount_percent: discountPercent,
+            discount_amount: discountAmount,
+            tax_percent: taxPercent,
+            tax_amount: taxAmount,
+            total_amount: totalAmount
+        });
+    });
+    
+    // Show loading
+    $('#saveEInvoiceBtn').html('<i class="fa fa-spinner fa-spin"></i> Đang lưu...').prop('disabled', true);
+    
+    // AJAX call to save e-invoice data
+    $.ajax({
+        url: "<?php echo site_url('sales/save_einvoice_data'); ?>",
+        type: "POST",
+        data: {
+            invoice_data: invoiceData
+        },
+        dataType: "json",
+        success: function(response) {
+            if (response.success) {
+                alert("Lưu thông tin hóa đơn điện tử thành công!");
+                if (response.tables_created) {
+                    alert("Đã tạo bảng dữ liệu hóa đơn điện tử thành công!");
+                }
+            } else {
+                alert("Có lỗi xảy ra: " + response.message);
+            }
+        },
+        error: function(xhr, status, error) {
+            alert("Không thể lưu thông tin hóa đơn điện tử: " + error);
+        },
+        complete: function() {
+            $('#saveEInvoiceBtn').html('<i class="fa fa-file-invoice"></i> Lưu HĐ điện tử').prop('disabled', false);
+        }
+    });
+}
+
+// Function to view E-Invoice JSON data
+function viewEInvoiceJson() {
+    if (!originalOrderData) {
+        alert("Không có dữ liệu đơn hàng!");
+        return;
+    }
+    
+    // Use the showEInvoiceJson function from the imported modal
+    if (typeof showEInvoiceJson === 'function') {
+        showEInvoiceJson(originalOrderData.id);
+    } else {
+        alert("Chức năng xem JSON chưa được tải. Vui lòng tải lại trang!");
+    }
+}
+
 </script>
+
+<!-- Import E-Invoice JSON Modal -->
+<?php $this->load->view('einvoice-json-modal'); ?>
