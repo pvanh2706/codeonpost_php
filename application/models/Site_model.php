@@ -225,9 +225,10 @@ class Site_model extends CI_Model {
 		return array();
 	}
 	
-	public function save_einvoice_config($api_url, $username, $password, $provider_code)
+	public function save_einvoice_config($api_url_einvoice, $api_url, $username, $password, $provider_code)
 	{
 		$data = array(
+			'api_url_einvoice' => $api_url_einvoice,
 			'api_url' => $api_url,
 			'username' => $username,
 			'password' => $password, // Trong thực tế nên mã hóa mật khẩu
@@ -257,6 +258,7 @@ class Site_model extends CI_Model {
 		// Tạo bảng cấu hình hóa đơn điện tử nếu chưa tồn tại
 		$sql = "CREATE TABLE IF NOT EXISTS `db_einvoice_config` (
 			`id` int(11) NOT NULL AUTO_INCREMENT,
+			`api_url_einvoice` varchar(255) NOT NULL,
 			`api_url` varchar(255) NOT NULL,
 			`username` varchar(100) NOT NULL,
 			`password` varchar(255) NOT NULL,

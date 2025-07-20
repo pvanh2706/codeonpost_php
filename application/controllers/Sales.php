@@ -705,13 +705,14 @@ class Sales extends MY_Controller {
 	{
 		$this->permission_check('site_edit');
 		
+		$api_url_einvoice = $this->input->post('api_url_einvoice');
 		$api_url = $this->input->post('api_url');
 		$username = $this->input->post('username');
 		$password = $this->input->post('password');
 		$provider_code = $this->input->post('provider_code');
 		
 		$this->load->model('site_model', 'site');
-		$result = $this->site->save_einvoice_config($api_url, $username, $password, $provider_code);
+		$result = $this->site->save_einvoice_config($api_url_einvoice, $api_url, $username, $password, $provider_code);
 		
 		if ($result) {
 			$response = array(
@@ -784,6 +785,7 @@ class Sales extends MY_Controller {
 	{
 		$this->permission_check('site_edit');
 		
+		$api_url_einvoice = $this->input->post('api_url_einvoice');
 		$api_url = $this->input->post('api_url');
 		$username = $this->input->post('username');
 		$password = $this->input->post('password');
@@ -793,7 +795,7 @@ class Sales extends MY_Controller {
 		$data = array(
 			'SiteConfigInfo' => array(
 				'Site' => array(
-					'Partner' => 2,
+					'Partner' => $provider_code,
 					'PartnerUrl' => $api_url,
 					'Username' => $username,
 					'Password' => $password
@@ -806,8 +808,8 @@ class Sales extends MY_Controller {
 		$ch = curl_init();
 		
 		// URL Health Check endpoint
-		// $health_check_url = rtrim($api_url, '/') . '/api/ezInvoice/HealthCheck';
-		$health_check_url = rtrim('https://ms-api-test.ezinvoice.vn', '/') . '/api/ezInvoice/HealthCheck';
+		$health_check_url = rtrim($api_url_einvoice, '/') . '/api/ezInvoice/HealthCheck';
+		// $health_check_url = rtrim('https://ms-api-test.ezinvoice.vn', '/') . '/api/ezInvoice/HealthCheck';
 		
 		curl_setopt($ch, CURLOPT_URL, $health_check_url);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -816,7 +818,7 @@ class Sales extends MY_Controller {
 		curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
 		curl_setopt($ch, CURLOPT_HTTPHEADER, array(
 			'Content-Type: application/json',
-			'Authorization: Bearer 3DE164B5-0E9D-43DC-9FF1-976C823497FC'
+			// 'Authorization: Bearer 3DE164B5-0E9D-43DC-9FF1-976C823497FC'
 		));
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);

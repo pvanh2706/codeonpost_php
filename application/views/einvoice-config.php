@@ -136,19 +136,19 @@
         border: 1px solid transparent;
     }
     
-    .alert-success {
+    .alert-einvoice-success {
         color: #155724;
         background-color: #d4edda;
         border-color: #c3e6cb;
     }
     
-    .alert-danger {
+    .alert-einvoice-danger {
         color: #721c24;
         background-color: #f8d7da;
         border-color: #f5c6cb;
     }
     
-    .alert-info {
+    .alert-einvoice-info {
         color: #0c5460;
         background-color: #d1ecf1;
         border-color: #bee5eb;
@@ -230,7 +230,8 @@
                 <h4><i class="fa fa-info-circle"></i> Thông tin cấu hình</h4>
                 <p>Vui lòng nhập thông tin kết nối để tích hợp với hệ thống hóa đơn điện tử:</p>
                 <ul>
-                    <li><strong>Link kết nối API:</strong> URL endpoint của nhà cung cấp hóa đơn điện tử</li>
+                    <li><strong>Link kết nối API:</strong> URL endpoint kết nối Hóa đơn điện tử của phần mềm</li>
+                    <li><strong>Link API nhà cung cấp:</strong> URL endpoint của nhà cung cấp hóa đơn điện tử</li>
                     <li><strong>Tài khoản:</strong> Username được cấp bởi nhà cung cấp</li>
                     <li><strong>Mật khẩu:</strong> Password tương ứng với tài khoản</li>
                     <li><strong>Mã nhà cung cấp:</strong> Mã định danh doanh nghiệp trong hệ thống</li>
@@ -241,14 +242,21 @@
         
         <form id="einvoice-config-form">
             <div class="form-group">
-                <label for="api_url">
+                <label for="api_url_einvoice">
                     <i class="fa fa-link"></i> Link kết nối API *
+                </label>
+                <input type="url" id="api_url_einvoice" name="api_url_einvoice" required 
+                       placeholder="https://api.einvoice.example.com/v1"
+                       value="<?php echo isset($einvoice_config['api_url_einvoice']) ? $einvoice_config['api_url_einvoice'] : ''; ?>">
+            </div>
+            <div class="form-group">
+                <label for="api_url">
+                    <i class="fa fa-link"></i> Link API nhà cung cấp *
                 </label>
                 <input type="url" id="api_url" name="api_url" required 
                        placeholder="https://api.einvoice.example.com/v1"
                        value="<?php echo isset($einvoice_config['api_url']) ? $einvoice_config['api_url'] : ''; ?>">
             </div>
-            
             <div class="form-group">
                 <label for="username">
                     <i class="fa fa-user"></i> Tài khoản *
@@ -274,9 +282,11 @@
                 <label for="provider_code">
                     <i class="fa fa-building"></i> Mã nhà cung cấp *
                 </label>
-                <input type="text" id="provider_code" name="provider_code" required 
-                       placeholder="Nhập mã nhà cung cấp"
-                       value="<?php echo isset($einvoice_config['provider_code']) ? $einvoice_config['provider_code'] : ''; ?>">
+                <select id="provider_code" name="provider_code" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; transition: border-color 0.3s ease;">
+                    <option value="">-- Chọn nhà cung cấp --</option>
+                    <option value="2" <?php echo (isset($einvoice_config['provider_code']) && $einvoice_config['provider_code'] == '2') ? 'selected' : ''; ?>>MInvoice</option>
+                    <option value="3" <?php echo (isset($einvoice_config['provider_code']) && $einvoice_config['provider_code'] == '3') ? 'selected' : ''; ?>>Viettel</option>
+                </select>
             </div>
             
             <div class="form-actions">
@@ -331,6 +341,7 @@ $(document).ready(function() {
         spinner.show();
         
         var formData = {
+            api_url_einvoice: $('#api_url_einvoice').val().trim(),
             api_url: $('#api_url').val().trim(),
             username: $('#username').val().trim(),
             password: $('#password').val().trim(),
@@ -350,6 +361,7 @@ $(document).ready(function() {
                     }
                     showAlert('success', message);
                 } else {
+                    alert('danger', '<i class="fa fa-exclamation-circle"></i> ' + response.message);
                     var errorMessage = '<i class="fa fa-exclamation-circle"></i> ' + response.message;
                     if (response.http_code) {
                         errorMessage += '<br><small>HTTP Code: ' + response.http_code + '</small>';
@@ -426,6 +438,7 @@ $(document).ready(function() {
         spinner.show();
         
         var formData = {
+            api_url_einvoice: $('#api_url_einvoice').val().trim(),
             api_url: $('#api_url').val().trim(),
             username: $('#username').val().trim(),
             password: $('#password').val().trim(),
@@ -499,21 +512,31 @@ $(document).ready(function() {
     
     // Hiển thị alert
     function showAlert(type, message) {
-        var alertHtml = '<div class="alert alert-' + type + ' alert-dismissible fade show" role="alert">' +
+        // Đảm bảo alert container tồn tại
+        if ($('#alert-container').length === 0) {
+            console.log('Alert container not found, creating one');
+            $('.box-body').prepend('<div id="alert-container"></div>');
+        }
+        
+        var alertHtml = '<div class="alert alert-einvoice-' + type + ' alert-dismissible" role="alert" style="display: none;">' +
                         message +
-                        '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
+                        '<button type="button" class="close" onclick="$(this).parent().fadeOut();" aria-label="Close">' +
                         '<span aria-hidden="true">&times;</span>' +
                         '</button>' +
                         '</div>';
         
+        // Xóa alert cũ và thêm alert mới
         $('#alert-container').html(alertHtml);
+        $('#alert-container .alert').fadeIn();
         
         // Scroll to top để thấy alert
-        $('html, body').animate({
-            scrollTop: $('#alert-container').offset().top - 100
-        }, 500);
+        if ($('#alert-container').offset()) {
+            $('html, body').animate({
+                scrollTop: $('#alert-container').offset().top - 100
+            }, 500);
+        }
         
-        // Tự động ẩn alert sau 8 giây (tăng thời gian để đọc response data)
+        // Tự động ẩn alert sau 8 giây
         setTimeout(function() {
             $('#alert-container .alert').fadeOut();
         }, 8000);
