@@ -1624,10 +1624,14 @@ function buildOrderInfoHTML(orders) {
         spinner.show();
         
         var formData = {
-            api_url: $('#api_url').val().trim(),
-            username: $('#username').val().trim(),
-            password: $('#password').val().trim(),
-            provider_code: $('#provider_code').val().trim()
+            // api_url: $('#api_url').val().trim(),
+            // username: $('#username').val().trim(),
+            // password: $('#password').val().trim(),
+            // provider_code: $('#provider_code').val().trim()
+            api_url: '',
+            username: '',
+            password: '',
+            provider_code: ''
         };
         
         $.ajax({
@@ -1662,6 +1666,56 @@ function buildOrderInfoHTML(orders) {
             }
         });
     });
+function createAndPublishInvoice() {
+    var btn = $(this);
+        var spinner = btn.find('.loading-spinner');
+        
+        btn.prop('disabled', true);
+        spinner.show();
+        
+        var formData = {
+            // api_url: $('#api_url').val().trim(),
+            // username: $('#username').val().trim(),
+            // password: $('#password').val().trim(),
+            // provider_code: $('#provider_code').val().trim()
+            api_url: '',
+            username: '',
+            password: '',
+            provider_code: ''
+        };
+        
+        $.ajax({
+            url: '<?php echo site_url("sales/create_and_publish_einvoice"); ?>',
+            type: 'POST',
+            data: formData,
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    var message = '<i class="fa fa-check-circle"></i> ' + response.message;
+                    if (response.response && response.response.data) {
+                        message += '<br><small>Response Data: ' + JSON.stringify(response.response.data) + '</small>';
+                    }
+                    showAlert('success', message);
+                } else {
+                    var errorMessage = '<i class="fa fa-exclamation-circle"></i> ' + response.message;
+                    if (response.http_code) {
+                        errorMessage += '<br><small>HTTP Code: ' + response.http_code + '</small>';
+                    }
+                    if (response.error_details) {
+                        errorMessage += '<br><small>Chi tiết lỗi: ' + response.error_details + '</small>';
+                    }
+                    showAlert('danger', errorMessage);
+                }
+            },
+            error: function(xhr, status, error) {
+                showAlert('danger', '<i class="fa fa-exclamation-circle"></i> Có lỗi xảy ra khi kiểm tra kết nối: ' + error);
+            },
+            complete: function() {
+                btn.prop('disabled', false);
+                spinner.hide();
+            }
+        });
+}
 
 // Function to save E-Invoice data
 function saveEInvoiceData() {
@@ -1745,6 +1799,7 @@ function saveEInvoiceData() {
         },
         complete: function() {
             $('#saveEInvoiceBtn').html('<i class="fa fa-file-invoice"></i> Lưu HĐ điện tử').prop('disabled', false);
+            createAndPublishInvoice();
         }
     });
 }

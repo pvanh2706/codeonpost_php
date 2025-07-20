@@ -865,12 +865,91 @@ class Sales extends MY_Controller {
 		
 		// Cấu trúc API theo yêu cầu
 		$data = array(
+			'Invoice' => array(
+				'ezInvoiceId' => null, // Mã định danh cho hóa đơn
+				'FormNo' => '1', // Mẫu số - Nhà cung cấp sẽ gửi thông tin này
+				'Serial' => '1C25MOC', // Ký hiệu - Nhà cung cấp sẽ gửi thông tin này
+				'InvoiceNo' => null, // Số hóa đơn - Giá trị trả ra khi phát hành hóa đơn thành công (trường ThirdPartyInvoiceNumber) - Dùng khi điểu chỉnh hóa đơn đã phát hành
+				'InvoiceDate' => '20/07/2025', // Ngày hóa đơn
+				'CustomerName' => ' 22', // Tên người mua hàng
+				'CustomerPhone' => '', // Số điện thoại người mua hàng
+				'CustomerTax' => '', // Mã số thuế người mua hàng
+				'CustomerAddress' => '', // Địa chỉ người mua hàng 
+				'CustomerEmail' => '', // Email người mua hàng
+				'CompanyName' => '', // Tên công ty người mua hàng
+				'BankAccount' => '', // Số tài khoản người mua hàng
+				'BankName' => '', // Tên tài khoàn người mua hàng
+				'CurrencyCode' => 'VND', // Fix 
+				'ExchangeRate' => 1.0, // Fix
+				'PaymentMethod' => 'TM', // Tên phương thưc thanh toán - Thường dùng tên viết tắt của phương thức. VD: Tiền mặt ~ TM, Chuyển khoản - CK,....
+				'PaymentBankAccount' => '',  // Số tài khoản thanh toán
+				'PaymentBankName' => '', // Tên tài khoản thanh toán
+				'Notice' => '', // Ghi chú cho hóa đơn
+				'SubAmount' => 11.0, // Tổng tiền trước thuế phí
+				'ServiceRate' => 5.0, // Phần trăm phí 
+				'ServiceCharge' => 0.0, // Tổng tiền phí 
+				'BeforeTaxAmount' => 11.0, // Tổng tiền trước thuế 
+				'TaxRate' => 10.0, // Phần trăm thuế - Nếu trong danh sách sản phẩm có nhiều mức thuế thì không cần truyền - Lúc này dùng đến TaxSummarys
+				'TaxAmount' => 1.0, // Tổng tiền thuế
+				'AfterTaxAmount' => 12.0, // Tổng tiền sau thuế phí
+				// Những trường dưới đây cứ khai báo nhưng tạm thời chưa dùng
+				'HotelExtra' => null, 
+				'sid' => null,
+				'RefID' => '',
+				'InvoiceType' => 0,
+				'SearchCode' => null,
+				'XmlContent' => null,
+				'BuyerNotGetInvoice' => null,
+				'PricePrecision' => 2,
+				'QuantityPrecision' => 0,
+				'IsMultiVATRate' => true,
+				'Validation' => null,
+				'IsTaxReduction43' => null,
+				'TaxReductionType' => null
+			),
+			// Thông tin sản phẩm
+			'Details' => array(
+				array(
+					// 'transdate' => date('d/m/Y'), // Cột ngày trên bảng sản phẩm
+					'transdate' => '19/04/2025', // Cột ngày trên bảng sản phẩm
+					'ItemName' => 'Sản phẩm 1', // Tên sản phẩm
+					'UnitName' => 'cái', // Tên đơn vị
+					'Quantity' => 1.0, // Số lượng
+					'Price' => 10.0, // Giá sản phẩm 
+					'DiscountAmount' => 0.0, // Số tiền giảm giá sản phẩm
+					'DiscountPercent' => 0.0, // % Giảm giá
+					'SubAmount' => 10.0, // Tiền sau giảm giá 
+					'ServiceRate' => 5.0, // % phí
+					'ServiceCharge' => 0.0, // Tiền phí
+					'BeforeTaxAmount' => 10.0, // Tiền trước thuế
+					'TaxRate' => 10.0, // % Thuế 
+					'TaxAmount' => 1.0, // Tiền thuế
+					'AfterTaxAmount' => 11.0, // Tiền sau thuế phí
+					'Note' => null, // Ghi chú cho sản phẩm
+					// Những trường dưới tạm thời không dùng
+					'ExciseTaxRate' => null,
+					'ExciseTaxCharge' => null,
+					'TaxReduction43Amount' => null,
+					'TaxReduction43AmountOC' => null
+				)
+			),
+			// Tổng hợp tiền thuế
+			'TaxSummarys' => array(
+				array(
+					'BeforeTaxAmount' => 11.0,
+					'TaxRate' => 10.0,
+					'TaxAmount' => 1.0
+				)
+			),
 			'SiteConfigInfo' => array(
 				'Site' => array(
-					'Partner' => 2,
-					'PartnerUrl' => $api_url,
-					'Username' => $username,
-					'Password' => $password
+					"TaxNumber" => "0101243150-339", // Mã số thuế khách hàng
+					"Partner" => 6,
+					"PartnerUrl" => "https://testapi.meinvoice.vn/api/v3/", // API nhà cung cấp
+					"Username" => "testmisa@yahoo.com", // Tài khoản api
+					"Password" => "123456Aa", // Mật khẩu api
+					"Username2" => "string", // Tài khoản thử 2, nhà cung cấp VNPT sẽ cấp thông tin này
+					"Password2" => "string" // Mật khẩu api thứ 2, nhà cung cấp VNPT sẽ cấp thông tin này
 				),
 				'ExtraDataMap' => array()
 			)
@@ -881,7 +960,7 @@ class Sales extends MY_Controller {
 		
 		// URL Health Check endpoint
 		// $health_check_url = rtrim($api_url, '/') . '/api/ezInvoice/HealthCheck';
-		$health_check_url = rtrim('https://ms-api-test.ezinvoice.vn', '/') . '/api/ezInvoice/HealthCheck';
+		$health_check_url = rtrim('https://ms-api-test.ezinvoice.vn', '/') . '/api/ezInvoice/CreateAndPublishInvoice';
 		
 		curl_setopt($ch, CURLOPT_URL, $health_check_url);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -890,7 +969,7 @@ class Sales extends MY_Controller {
 		curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
 		curl_setopt($ch, CURLOPT_HTTPHEADER, array(
 			'Content-Type: application/json',
-			'Authorization: Bearer 3DE164B5-0E9D-43DC-9FF1-976C823497FC'
+			// 'Authorization: Bearer 3DE164B5-0E9D-43DC-9FF1-976C823497FC'
 		));
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
