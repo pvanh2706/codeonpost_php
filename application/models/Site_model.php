@@ -381,6 +381,87 @@ class Site_model extends CI_Model {
 		$this->db->where('id', $id);
 		return $this->db->update('db_einvoice_payments', $data);
 	}
+
+	// Migration for E-invoice fields in db_sales table
+	public function add_einvoice_fields_to_sales_table()
+	{
+		// Check if columns exist, if not add them
+		$query = $this->db->query("SHOW COLUMNS FROM db_sales LIKE 'template_number'");
+		if ($query->num_rows() == 0) {
+			$this->db->query("ALTER TABLE db_sales ADD COLUMN template_number VARCHAR(50) DEFAULT '1' AFTER sales_note");
+		}
+
+		$query = $this->db->query("SHOW COLUMNS FROM db_sales LIKE 'symbol'");
+		if ($query->num_rows() == 0) {
+			$this->db->query("ALTER TABLE db_sales ADD COLUMN symbol VARCHAR(50) DEFAULT 'C24' AFTER template_number");
+		}
+
+		$query = $this->db->query("SHOW COLUMNS FROM db_sales LIKE 'payment_method'");
+		if ($query->num_rows() == 0) {
+			$this->db->query("ALTER TABLE db_sales ADD COLUMN payment_method VARCHAR(50) DEFAULT 'TM' AFTER symbol");
+		}
+
+		$query = $this->db->query("SHOW COLUMNS FROM db_sales LIKE 'tax_code'");
+		if ($query->num_rows() == 0) {
+			$this->db->query("ALTER TABLE db_sales ADD COLUMN tax_code VARCHAR(100) DEFAULT '' AFTER payment_method");
+		}
+
+		return true;
+	}
+
+	// Initialize default E-invoice templates
+	public function init_default_einvoice_templates()
+	{
+		// Create table first
+		$this->create_einvoice_template_table();
+		
+		// Check if templates exist
+		$query = $this->db->query("SELECT COUNT(*) as count FROM db_einvoice_templates WHERE status = 1");
+		$count = $query->row()->count;
+		
+		if ($count == 0) {
+			// Insert default templates
+			$default_templates = array(
+				array('template_number' => '1', 'symbol' => 'C24', 'description' => 'Mẫu số 1 - Ký hiệu C24'),
+				array('template_number' => '1', 'symbol' => 'C25', 'description' => 'Mẫu số 1 - Ký hiệu C25'),
+				array('template_number' => '2', 'symbol' => 'C24', 'description' => 'Mẫu số 2 - Ký hiệu C24'),
+				array('template_number' => '2', 'symbol' => 'C25', 'description' => 'Mẫu số 2 - Ký hiệu C25')
+			);
+			
+			foreach ($default_templates as $template) {
+				$this->create_einvoice_template($template['template_number'], $template['symbol'], $template['description']);
+			}
+		}
+		
+		return true;
+	}
+
+	// Initialize default E-invoice payment methods
+	public function init_default_einvoice_payments()
+	{
+		// Create table first
+		$this->create_einvoice_payment_table();
+		
+		// Check if payment methods exist
+		$query = $this->db->query("SELECT COUNT(*) as count FROM db_einvoice_payments WHERE status = 1");
+		$count = $query->row()->count;
+		
+		if ($count == 0) {
+			// Insert default payment methods
+			$default_payments = array(
+				array('payment_code' => 'TM', 'payment_name' => 'Tiền mặt', 'description' => 'Thanh toán bằng tiền mặt'),
+				array('payment_code' => 'CK', 'payment_name' => 'Chuyển khoản', 'description' => 'Thanh toán bằng chuyển khoản ngân hàng'),
+				array('payment_code' => 'THE', 'payment_name' => 'Thẻ tín dụng', 'description' => 'Thanh toán bằng thẻ tín dụng'),
+				array('payment_code' => 'COMBO', 'payment_name' => 'Kết hợp', 'description' => 'Thanh toán kết hợp nhiều phương thức')
+			);
+			
+			foreach ($default_payments as $payment) {
+				$this->create_einvoice_payment($payment['payment_code'], $payment['payment_name'], $payment['description']);
+			}
+		}
+		
+		return true;
+	}
 }
 
 /* End of file Site_model.php */

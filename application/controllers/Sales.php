@@ -437,6 +437,23 @@ class Sales extends MY_Controller {
 		}
 		
 		try {
+			// Load site model để lấy cấu hình hóa đơn điện tử
+			$this->load->model('site_model', 'site');
+			
+			// Thêm các cột E-invoice vào bảng db_sales nếu chưa có
+			$this->site->add_einvoice_fields_to_sales_table();
+			
+			// Lấy cấu hình hóa đơn điện tử
+			$einvoice_config = $this->site->get_einvoice_config();
+			
+			// Khởi tạo và lấy danh sách mẫu số và ký hiệu
+			$this->site->init_default_einvoice_templates();
+			$einvoice_templates = $this->site->get_einvoice_templates();
+			
+			// Khởi tạo và lấy danh sách phương thức thanh toán
+			$this->site->init_default_einvoice_payments();
+			$einvoice_payments = $this->site->get_einvoice_payments();
+			
 			$orders = array();
 			
 			foreach ($order_ids as $order_id) {
@@ -478,7 +495,7 @@ class Sales extends MY_Controller {
 						}
 					}
 					
-					// Tạo array cho đơn hàng
+					// Tạo array cho đơn hàng với thông tin bổ sung về hóa đơn điện tử
 					$order_data = array(
 						'id' => $order->id,
 						'sales_code' => $order->sales_code,
@@ -495,7 +512,16 @@ class Sales extends MY_Controller {
 						'subtotal_amount' => isset($order->subtotal_amount) ? $order->subtotal_amount : 0,
 						'bill_discount_percent' => isset($order->bill_discount_percent) ? $order->bill_discount_percent : 0,
 						'bill_discount_amount' => isset($order->bill_discount_amount) ? $order->bill_discount_amount : 0,
-						'items' => $items
+						// Thông tin hóa đơn điện tử
+						'template_number' => isset($order->template_number) ? $order->template_number : '1',
+						'symbol' => isset($order->symbol) ? $order->symbol : 'C24',
+						'payment_method' => isset($order->payment_method) ? $order->payment_method : 'TM',
+						'tax_code' => isset($order->tax_code) ? $order->tax_code : '',
+						'items' => $items,
+						// Cấu hình hóa đơn điện tử
+						'einvoice_config' => $einvoice_config,
+						'einvoice_templates' => $einvoice_templates,
+						'einvoice_payments' => $einvoice_payments
 					);
 					
 					$orders[] = $order_data;
@@ -507,6 +533,27 @@ class Sales extends MY_Controller {
 				'data' => $orders
 			);
 			
+		} catch (Exception $e) {
+			$response = array(
+				'success' => false,
+				'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
+			);
+		}
+		
+		echo json_encode($response);
+	}
+	
+	public function get_einvoice_config() {
+		$this->permission_check('sales_view');
+		
+		try {
+			$this->load->model('site_model', 'site');
+			$config = $this->site->get_einvoice_config();
+			
+			$response = array(
+				'success' => true,
+				'data' => $config
+			);
 		} catch (Exception $e) {
 			$response = array(
 				'success' => false,
@@ -541,6 +588,20 @@ class Sales extends MY_Controller {
 				'sales_status' => $order_data['sales_status'],
 				'sales_note' => $order_data['sales_note']
 			);
+			
+			// Thêm các trường E-invoice nếu có
+			if (isset($order_data['template_number'])) {
+				$sales_update['template_number'] = $order_data['template_number'];
+			}
+			if (isset($order_data['symbol'])) {
+				$sales_update['symbol'] = $order_data['symbol'];
+			}
+			if (isset($order_data['payment_method'])) {
+				$sales_update['payment_method'] = $order_data['payment_method'];
+			}
+			if (isset($order_data['tax_code'])) {
+				$sales_update['tax_code'] = $order_data['tax_code'];
+			}
 			
 			$this->db->where('id', $order_id);
 			$this->db->update('db_sales', $sales_update);
@@ -663,6 +724,11 @@ class Sales extends MY_Controller {
 				'subtotal_amount' => isset($updated_order->subtotal_amount) ? $updated_order->subtotal_amount : 0,
 				'bill_discount_percent' => isset($updated_order->bill_discount_percent) ? $updated_order->bill_discount_percent : 0,
 				'bill_discount_amount' => isset($updated_order->bill_discount_amount) ? $updated_order->bill_discount_amount : 0,
+				// Thêm các trường E-invoice
+				'template_number' => isset($updated_order->template_number) ? $updated_order->template_number : '1',
+				'symbol' => isset($updated_order->symbol) ? $updated_order->symbol : 'C24',
+				'payment_method' => isset($updated_order->payment_method) ? $updated_order->payment_method : 'TM',
+				'tax_code' => isset($updated_order->tax_code) ? $updated_order->tax_code : '',
 				'items' => $items
 			);
 			
