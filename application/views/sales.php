@@ -21,6 +21,22 @@ padding-left: 2px;
 padding-right: 2px;  
 
 }
+
+/* Ensure tax columns have consistent borders with discount column */
+#sales_table td[id*="_tax_rate"],
+#sales_table td[id*="_tax_amount"],
+#sales_table td[id*="_before_tax"],
+#sales_table td[id*="_after_tax"] {
+    border: 1px solid #ddd !important;
+    padding: 8px !important;
+    vertical-align: middle !important;
+    text-align: center !important;
+}
+
+/* Ensure all table cells have consistent borders */
+#sales_table.table-bordered td {
+    border: 1px solid #ddd;
+}
 </style>
 
 </head>
@@ -419,14 +435,15 @@ function round_off($amount) {
                                                 <table class="table table-hover table-bordered" style="width:100%; display: block; max-height: 450px; overflow: auto;" id="sales_table">
                                                     <thead class="custom_thead">
                                                         <tr class="bg-primary" >
-                                                           <th rowspan='2' style="width:25%">S.Phẩm</th>
-                                                           <th rowspan='2' style="width:10%;min-width: 180px;">S.Lượng</th>
-                                                          <th rowspan='2' style="width:15%">Đ.Giá (<?= $CI->currency() ?>)</th>
-                                                           <th rowspan='2' style="width:15%">C.Khấu (<?= $CI->currency() ?>)</th>
-                                                           <!--th rowspan='2' style="width:10%" class="<?=tax_disable_class()?>"><?= $this->lang->line('tax_amount'); ?></th>
-                                                           <th rowspan='2' style="width:5%" class="<?=tax_disable_class()?>"><?= $this->lang->line('tax'); ?></th-->
-                                                           <th rowspan='2' style="width:15%">T.Tính (<?= $CI->currency() ?>)</th>
-                                                           <th rowspan='2' style="width:10%">T.Tác</th>
+                                                           <th rowspan='2' style="width:20%">S.Phẩm</th>
+                                                           <th rowspan='2' style="width:8%;min-width: 120px;">S.Lượng</th>
+                                                           <th rowspan='2' style="width:10%">Đ.Giá (<?= $CI->currency() ?>)</th>
+                                                           <th rowspan='2' style="width:10%">C.Khấu (<?= $CI->currency() ?>)</th>
+                                                           <th rowspan='2' style="width:8%">Thuế (%)</th>
+                                                           <th rowspan='2' style="width:10%">T.Tiền thuế (<?= $CI->currency() ?>)</th>
+                                                           <th rowspan='2' style="width:10%">T.Trước thuế (<?= $CI->currency() ?>)</th>
+                                                           <th rowspan='2' style="width:12%">T.Sau thuế (<?= $CI->currency() ?>)</th>
+                                                           <th rowspan='2' style="width:8%">T.Tác</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody style=""></tbody>
@@ -479,10 +496,13 @@ function round_off($amount) {
                                             <div class="form-group">
                                                 <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Số lượng | <span class="total_quantity text-danger" >0</span></span>
                                                 <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Tổng tạm tính | <span class="text-danger" id="subtotal_amt" name="subtotal_amt">0</span></span>
-                                                <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Tổng chiết khấu | <span class="text-danger" id="discount_to_all_amt" name="discount_to_all_amt" >0</span>₫</span>
-                                                <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Phụ phí khác | <span class="text-danger" id="other_charges_amt" name="other_charges_amt">0</span>₫</span>
-                                                <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Làm tròn | <span class="text-danger" id="round_off_amt" name="round_off_amt">0</span></span>
-                                                <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Tổng thanh toán | <span style="font-size:1.3em;" class="text-danger" id="total_amt" name="total_amt" >0</span>₫</span>
+                                                <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Tổng chiết khấu | <span class="text-danger" id="discount_to_all_amt" name="discount_to_all_amt">0</span></span>
+                                                <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Tổng trước thuế | <span class="text-danger" id="total_before_tax_amt" name="total_before_tax_amt">0</span></span>
+                                                <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Tổng tiền thuế | <span class="text-danger" id="total_tax_amt" name="total_tax_amt">0</span></span>
+                                                <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Tổng sau thuế | <span class="text-danger" id="total_after_tax_amt" name="total_after_tax_amt">0</span></span>
+                                                <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Phụ phí khác | <span class="text-danger" id="other_charges_amt" name="other_charges_amt">0</span></span>
+                                                <!-- <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Làm tròn | <span class="text-danger" id="round_off_amt" name="round_off_amt">0</span></span> -->
+                                                <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" ><strong>Tổng thanh toán</strong> | <span style="font-size:1.3em; font-weight: bold;" class="text-danger" id="total_amt" name="total_amt" ><b>0</b></span></span>
                                             </div>
                                         </div>
                                     </div>
@@ -672,384 +692,360 @@ function round_off($amount) {
                     $(this).val(formatNumber(rawValue));
                 }
             });
+            
+            // Thêm event listener cho việc tạo dòng mới
+            $(document).on('DOMNodeInserted', '#sales_table tbody tr', function() {
+                updateRowTaxColumns(this);
+            });
+            
+            // Sửa chữa các cột thuế cho dòng hiện có sau khi trang load
+            setTimeout(function() {
+                fixAllTaxColumns();
+                final_total();
+            }, 500);
 
          });
-         //Customer Selection Box Search - END
-
+         
+         // Hàm chuyển đổi format tiền tệ về số
+         function parseCurrency(value) {
+             if (!value) return 0;
+             return parseFloat(value.toString().replace(/[^0-9]/g, '')) || 0;
+         }
+         
+         // Hàm format số thành tiền tệ VN
+         function formatCurrency(amount) {
+             return formatNumber(amount) + '₫';
+         }
+         
+         // Hàm format số
+         function formatNumber(amount) {
+             return parseFloat(amount || 0).toLocaleString('vi-VN');
+         }
+         
+         // Hàm cập nhật các cột thuế cho dòng mới
+         function updateRowTaxColumns(row) {
+             var $row = $(row);
+             var rowId = $row.attr('id');
+             if (!rowId || !rowId.startsWith('row_')) return;
+             
+             var rowNum = rowId.replace('row_', '');
+             
+             // Kiểm tra xem dòng đã có đủ cột thuế chưa
+             if ($row.find('#td_' + rowNum + '_tax_rate').length === 0) {
+                 // Tìm vị trí cột chiết khấu để thêm các cột thuế sau đó
+                 var existingCells = $row.find('td');
+                 
+                 // Nếu có ít nhất 4 cột (sản phẩm, số lượng, đơn giá, chiết khấu)
+                 if (existingCells.length >= 4) {
+                     var discountCell = existingCells.eq(3); // Cột chiết khấu (index 3)
+                     
+                     // Thêm cột thuế % sau cột chiết khấu với border styling giống discount column
+                     discountCell.after('<td id="td_' + rowNum + '_tax_rate" class="text-center" style="vertical-align: middle; border: 1px solid #ddd; padding: 8px;">0%</td>');
+                     
+                     // Thêm cột tiền thuế với border styling
+                     $('#td_' + rowNum + '_tax_rate').after('<td id="td_' + rowNum + '_tax_amount" class="text-center" style="vertical-align: middle; border: 1px solid #ddd; padding: 8px;">0₫</td>');
+                     
+                     // Thêm cột tổng trước thuế với border styling
+                     $('#td_' + rowNum + '_tax_amount').after('<td id="td_' + rowNum + '_before_tax" class="text-center" style="vertical-align: middle; border: 1px solid #ddd; padding: 8px;">0₫</td>');
+                     
+                     // Thêm cột tổng sau thuế với border styling
+                     $('#td_' + rowNum + '_before_tax').after('<td id="td_' + rowNum + '_after_tax" class="text-center" style="vertical-align: middle; border: 1px solid #ddd; padding: 8px;">0₫</td>');
+                     
+                     console.log('Tax columns added for row ' + rowNum);
+                 }
+             }
+             
+             // Tính toán ngay sau khi thêm cột
+             setTimeout(function() {
+                 calculate_tax(rowNum);
+             }, 100);
+         }
+         
+         // Hàm kiểm tra và sửa chữa các cột thuế cho tất cả dòng
+         function fixAllTaxColumns() {
+             var rowcount = $('#hidden_rowcount').val();
+             console.log('Fixing tax columns for ' + rowcount + ' rows');
+             
+             for (var i = 1; i <= rowcount; i++) {
+                 if (document.getElementById('row_' + i)) {
+                     var $row = $('#row_' + i);
+                     
+                     // Kiểm tra xem dòng đã có đủ cột thuế chưa
+                     if ($row.find('#td_' + i + '_tax_rate').length === 0) {
+                         console.log('Adding tax columns to row ' + i);
+                         updateRowTaxColumns($row[0]);
+                     } else {
+                         console.log('Row ' + i + ' already has tax columns');
+                         // Tính lại thuế cho dòng này
+                         calculate_tax(i);
+                     }
+                 }
+             }
+         }
+         
+         // Hàm tính lại thuế cho tất cả dòng
+         function recalculateAllTax() {
+             var rowcount = $('#hidden_rowcount').val();
+             console.log('Recalculating tax for ' + rowcount + ' rows');
+             
+             for (var i = 1; i <= rowcount; i++) {
+                 if (document.getElementById('td_data_' + i + '_3')) {
+                     calculate_tax(i);
+                 }
+             }
+         }
+         
+         // Hàm tính thuế chi tiết cho từng dòng
+         function calculateDetailedTax(rowId) {
+             var qty = parseFloat($('#td_data_' + rowId + '_3').val()) || 0;
+             var unitPrice = parseCurrency($('#td_data_' + rowId + '_10').val());
+             var discount = parseCurrency($('#td_data_' + rowId + '_8').val());
+             var taxRate = parseFloat($('#tr_tax_value_' + rowId).val()) || 0;
+             
+             var lineTotal = qty * unitPrice;
+             var afterDiscount = lineTotal - discount;
+             var taxAmount = (afterDiscount * taxRate) / 100;
+             var totalWithTax = afterDiscount + taxAmount;
+             
+             // Cập nhật các cột thuế (chỉ format khi hiển thị)
+             $('#td_' + rowId + '_tax_rate').html(taxRate + '%');
+             $('#td_' + rowId + '_tax_amount').html(formatCurrency(taxAmount));
+             $('#td_' + rowId + '_before_tax').html(formatCurrency(afterDiscount));
+             $('#td_' + rowId + '_after_tax').html(formatCurrency(totalWithTax));
+             
+             // Debug log
+             console.log('Row ' + rowId + ' - Qty: ' + qty + ', Unit Price: ' + unitPrice + ', Discount: ' + discount + ', Tax Rate: ' + taxRate + '%');
+             console.log('Row ' + rowId + ' - Line Total: ' + lineTotal + ', After Discount: ' + afterDiscount + ', Tax Amount: ' + taxAmount + ', Total With Tax: ' + totalWithTax);
+             
+             // Trả về giá trị số nguyên để tính toán
+             return {
+                 lineTotal: lineTotal,
+                 afterDiscount: afterDiscount,
+                 taxAmount: taxAmount,
+                 totalWithTax: totalWithTax
+             };
+         }
+         
+         // Override calculate_tax function để sử dụng tính toán chi tiết
+         function calculate_tax(i) {
+             set_tax_value(i);
+             var result = calculateDetailedTax(i);
+             
+             // Cập nhật tổng cuối cùng (lưu dạng số)
+             $('#td_data_' + i + '_9').val(result.totalWithTax);
+             
+             final_total();
+         }
+         
+         // Hàm tính tổng chi tiết
+         function calculateDetailedTotals() {
+             var rowcount = $('#hidden_rowcount').val();
+             var totals = {
+                 quantity: 0,
+                 subtotal: 0,
+                 totalBeforeTax: 0,
+                 totalTax: 0,
+                 totalAfterTax: 0
+             };
+             
+             for (var i = 1; i <= rowcount; i++) {
+                 if (document.getElementById('td_data_' + i + '_3')) {
+                     var qty = parseFloat($('#td_data_' + i + '_3').val()) || 0;
+                     if (qty > 0) {
+                         var unitPrice = parseCurrency($('#td_data_' + i + '_10').val());
+                         var discount = parseCurrency($('#td_data_' + i + '_8').val());
+                         var taxRate = parseFloat($('#tr_tax_value_' + i).val()) || 0;
+                         
+                         var lineTotal = qty * unitPrice;
+                         var afterDiscount = lineTotal - discount;
+                         var taxAmount = (afterDiscount * taxRate) / 100;
+                         var totalWithTax = afterDiscount + taxAmount;
+                         
+                         totals.quantity += qty;
+                         totals.subtotal += lineTotal;
+                         totals.totalBeforeTax += afterDiscount;
+                         totals.totalTax += taxAmount;
+                         totals.totalAfterTax += totalWithTax;
+                     }
+                 }
+             }
+             
+             console.log('Totals:', totals);
+             return totals;
+         }
+         
+         // Override final_total function
+         function final_total() {
+             var totals = calculateDetailedTotals();
+             
+             // Hiển thị tổng (chỉ format khi hiển thị)
+             $('.total_quantity').html(totals.quantity);
+             $('#subtotal_amt').html(formatCurrency(totals.subtotal));
+             $('#total_before_tax_amt').html(formatCurrency(totals.totalBeforeTax));
+             $('#total_tax_amt').html(formatCurrency(totals.totalTax));
+             $('#total_after_tax_amt').html(formatCurrency(totals.totalAfterTax));
+             
+             // Tính phụ phí
+             var otherCharges = parseCurrency($('#other_charges_input').val());
+             $('#other_charges_amt').html(formatCurrency(otherCharges));
+             
+             // Tính chiết khấu
+             var discountInput = parseCurrency($('#discount_to_all_input').val());
+             var discountType = $('#discount_to_all_type').val();
+             var discount = 0;
+             
+             if (discountInput > 0) {
+                 if (discountType === 'in_fixed') {
+                     discount = discountInput;
+                 } else if (discountType === 'in_percentage') {
+                     discount = (totals.totalAfterTax * discountInput) / 100;
+                 }
+             }
+             
+             $('#discount_to_all_amt').html(formatCurrency(discount));
+             $('#hidden_discount_to_all_amt').val(discount);
+             
+             // Tính tổng cuối cùng
+             var grandTotal = totals.totalAfterTax + otherCharges - discount;
+             var roundedTotal = round_off(grandTotal);
+             var roundDiff = roundedTotal - grandTotal;
+             
+             // Hiển thị (chỉ format khi hiển thị)
+             $('#round_off_amt').html(formatCurrency(roundDiff));
+             $('#total_amt').html(formatCurrency(roundedTotal));
+             
+             // Lưu giá trị số cho tính toán
+             $('#hidden_total_amt').val(roundedTotal);
+             $('#hidden_round_off_amt').val(roundDiff);
+             
+             if (save_operation()) {
+                 $('#amount').val('0');
+             }
+         }
+         
+         // Hàm round_off sử dụng logic tương tự như PHP
+         function round_off(amount) {
+             // Tạm thời sử dụng Math.round, có thể tùy chỉnh logic làm tròn sau
+             return Math.round(amount);
+         }
+         
+         // Hàm enable_or_disable_item_discount
+         function enable_or_disable_item_discount() {
+             var discountInput = parseCurrency($('#discount_to_all_input').val());
+             var rowcount = $('#hidden_rowcount').val();
+             
+             if (discountInput > 0) {
+                 // Nếu có chiết khấu tổng, có thể disable item discount
+                 $('.item_discount').attr({
+                     'style': 'border-color:red;cursor:no-drop',
+                 });
+             } else {
+                 // Nếu không có chiết khấu tổng, cho phép item discount
+                 $('.item_discount').attr({
+                     'style': '',
+                 });
+             }
+             
+             // Sửa chữa cột thuế trước khi tính lại
+             fixAllTaxColumns();
+             
+             // Tính lại thuế cho tất cả các dòng
+             recalculateAllTax();
+         }
+         
+         // Hàm set_tax_value (nếu chưa có)
+         function set_tax_value(rowId) {
+             // Hàm này có thể được sử dụng để set giá trị thuế
+             // Tạm thời để trống, có thể implement sau
+         }
+         
+         // Hàm save_operation
          function save_operation() {
-            <?php if($save_operation){ ?>
-               return true;
-            <?php }else{ ?>
-               return false;
-            <?php } ?>
+             <?php if($save_operation){ ?>
+                return true;
+             <?php } else { ?>
+                return false;
+             <?php } ?>
          }
-
-         //Initialize Select2 Elements
-             $(".select2").select2();
-         //Date picker
-             $('.datepicker').datepicker({
-               autoclose: true,
-            format: 'dd-mm-yyyy',
-              todayHighlight: true
+         
+         // Hàm removerow (xóa dòng)
+         function removerow(id) {
+             $('#row_' + id).remove();
+             $('#doublerow_' + id).remove();
+             final_total();
+             
+             // Play sound effect nếu có
+             if (typeof failed !== 'undefined') {
+                 failed.currentTime = 0;
+                 failed.play();
+             }
+         }
+         
+         // Hàm increment_qty (tăng số lượng)
+         function increment_qty(rowcount) {
+             var item_qty = parseFloat($('#td_data_' + rowcount + '_3').val()) || 0;
+             var new_item_qty = item_qty + 1;
+             $('#td_data_' + rowcount + '_3').val(new_item_qty);
+             calculate_tax(rowcount);
+         }
+         
+         // Hàm decrement_qty (giảm số lượng)
+         function decrement_qty(rowcount) {
+             var item_qty = parseFloat($('#td_data_' + rowcount + '_3').val()) || 0;
+             
+             if (item_qty <= 1) {
+                 $('#td_data_' + rowcount + '_3').val(1);
+                 if (typeof toastr !== 'undefined') {
+                     toastr["warning"]("Giá trị nhỏ nhất là 1!");
+                 }
+                 return;
+             }
+             
+             $('#td_data_' + rowcount + '_3').val(item_qty - 1);
+             calculate_tax(rowcount);
+         }
+         
+         // Hàm item_qty_input (xử lý input số lượng)
+         function item_qty_input(i) {
+             calculate_tax(i);
+         }
+         
+         // Hàm shift_cursor (di chuyển con trỏ khi nhấn Enter)
+         function shift_cursor(kevent, target) {
+             if (kevent.keyCode == 13) {
+                 $('#' + target).focus();
+             }
+         }
+         
+         // Hàm return_row_with_data (thêm dòng sản phẩm mới)
+         function return_row_with_data(item_id) {
+             $('#item_search').addClass('ui-autocomplete-loader-center');
+             var base_url = $('#base_url').val().trim();
+             var rowcount = $('#hidden_rowcount').val();
+             var cusLvs = $('#cusLV')[0].getAttribute('data-lv');
+             
+             $.post(base_url + "sales/return_row_with_data2/" + cusLvs + "/" + rowcount + "/" + item_id, {}, function(result) {
+                 $('#sales_table tbody').prepend(result);
+                 $('#hidden_rowcount').val(parseFloat(rowcount) + 1);
+                 
+                 // Play success sound
+                 if (typeof success !== 'undefined') {
+                     success.currentTime = 0;
+                     success.play();
+                 }
+                 
+                 enable_or_disable_item_discount();
+                 
+                 // Format tiền tệ cho các input trong dòng mới
+                 if (typeof formatNewRowInputs !== 'undefined') {
+                     formatNewRowInputs(rowcount);
+                 }
+                 
+                 $('#item_search').removeClass('ui-autocomplete-loader-center');
+                 $('#td_data_' + rowcount + '_3').focus();
+                 $('#td_data_' + rowcount + '_3').select();
              });
-          
-      
-         
-
-        /* function update_price(row_id,item_cost){
-        
-          var sales_price=$("#sales_price_"+row_id).val().trim();
-          if(sales_price!='' || sales_price==0) {sales_price = parseFloat(sales_price); }
-
-        
-          var item_price=parseFloat($("#tr_sales_price_temp_"+row_id).val().trim());
-
-          if(sales_price<item_cost){
-        
-            $("#sales_price_"+row_id).parent().addClass('has-error');
-          }else{
-            $("#sales_price_"+row_id).parent().removeClass('has-error');
-          }
-
-          make_subtotal($("#tr_item_id_"+row_id).val(),row_id);
-        }*/
-
-        /*function set_to_original(i,purchase_price) {
-                    var sales_price=parseFloat($("#td_data_"+i+"_10").val().trim());
-          if(sales_price!='' || sales_price==0) {sales_price = parseFloat(sales_price); }
-
-                    var item_price=parseFloat($("#tr_purchase_price_"+i).val().trim());
-
-          if(sales_price<purchase_price){
-            toastr["success"]("Default Price Set "+item_price);
-            $("#td_data_"+i+"_10").parent().removeClass('has-error');
-            $("#td_data_"+i+"_10").val(item_price);
-          }
-          calculate_tax(i);
-        }*/
-
-         /* ---------- CALCULATE TAX -------------*/
-         function calculate_tax(i){ //i=Row
-            set_tax_value(i);
-
-           //Find the Tax type and Tax amount
-           var tax_type = $("#tr_tax_type_"+i).val();
-           var tax_amount = $("#td_data_"+i+"_11").val();
-
-           var qty=$("#td_data_"+i+"_3").val().trim();
-           var sales_price=parseFloat($("#td_data_"+i+"_10").val().trim());
-           $("#td_data_"+i+"_4").val(sales_price);
-           /*Discounr*/
-           var discount_amt=$("#td_data_"+i+"_8").val().trim();
-               discount_amt   =(isNaN(parseFloat(discount_amt)))    ? 0 : parseFloat(discount_amt);
-
-           var amt=parseFloat(qty) * sales_price;//Taxable
-
-           var total_amt=amt-discount_amt;
-           total_amt = (tax_type=='Inclusive') ? total_amt : parseFloat(total_amt) + parseFloat(tax_amount);
-           
-           //Set Unit cost
-           $("#td_data_"+i+"_9").val('').val(total_amt.toFixed(0));
-        
-           final_total();
          }
-        
-         /* ---------- CALCULATE GST END -------------*/
-
-        
-         /* ---------- Final Description of amount ------------*/
-         function final_total(){
-           
-
-           var rowcount=$("#hidden_rowcount").val();
-           var subtotal=parseFloat(0);
-           
-           var other_charges_per_amt=parseFloat(0);
-           var other_charges_total_amt=0;
-           var taxable=0;
-          if($("#other_charges_input").val()!=null && $("#other_charges_input").val()!=''){
-             
-              other_charges_tax_id =$('option:selected', '#other_charges_tax_id').attr('data-tax');
-             other_charges_input=$("#other_charges_input").val();
-             if(other_charges_tax_id>0){
-
-               other_charges_per_amt=(other_charges_tax_id * other_charges_input)/100;
-             }
-             
-             taxable=parseFloat(other_charges_per_amt)+parseFloat(other_charges_input);//Other charges input
-             other_charges_total_amt=parseFloat(other_charges_per_amt)+parseFloat(other_charges_input);
-           }
-           else{
-             //$("#other_charges_amt").html('0.00');
-           }
-           
-         
-           var tax_amt=0;
-           var actual_taxable=0;
-           var total_quantity=0;
-         
-           for(i=1;i<=rowcount;i++){
-         
-             if(document.getElementById("td_data_"+i+"_3")){
-               //customer_id must exist
-               if($("#td_data_"+i+"_3").val()!=null && $("#td_data_"+i+"_3").val()!=''){
-                    actual_taxable=actual_taxable+ + +(parseFloat($("#td_data_"+i+"_13").val()).toFixed(0) * parseFloat($("#td_data_"+i+"_3").val()));
-                    subtotal=subtotal+ + +parseFloat($("#td_data_"+i+"_9").val()).toFixed(0);
-                    if($("#td_data_"+i+"_7").val()>=0){
-                      tax_amt=tax_amt+ + +$("#td_data_"+i+"_7").val();
-                    }   
-                    total_quantity +=parseFloat($("#td_data_"+i+"_3").val().trim());
-                }
-                   
-             }//if end
-           }//for end
-           
-          
-          //Show total Sales Quantitys
-           $(".total_quantity").html(total_quantity);
-
-           //Apply Output on screen
-           //subtotal
-           if((subtotal!=null || subtotal!='') && (subtotal!=0)){
-             
-             //subtotal - format khi hiển thị
-             $("#subtotal_amt").html(formatCurrency(subtotal.toFixed(0)));
-             
-             //other charges total amount - format khi hiển thị
-             $("#other_charges_amt").html(formatCurrency(parseFloat(other_charges_total_amt).toFixed(0)));
-             
-             //other charges total amount
-            
-
-             taxable=taxable+subtotal;
-             
-             //discount_to_all_amt
-            // if($("#discount_to_all_input").val()!=null && $("#discount_to_all_input").val()!=''){
-                 var discount_input=parseCurrency($("#discount_to_all_input").val());
-                 discount_input = isNaN(discount_input) ? 0 : discount_input;
-                 var discount=0;
-                 if(discount_input>0){
-                     var discount_type=$("#discount_to_all_type").val();
-                     if(discount_type=='in_fixed'){
-                       taxable-=discount_input;
-                       discount=discount_input;
-                       //Minus
-                     }
-                     else if(discount_type=='in_percentage'){
-                         discount=(taxable*discount_input)/100;
-                        taxable-=discount;
-             
-                     }
-                 }
-                 else{
-                    //discount += $("#")
-                 }
-                   // discount giữ nguyên dạng số để tính toán
-                   
-                    $("#discount_to_all_amt").html(formatCurrency(discount.toFixed(0)));  
-                    $("#hidden_discount_to_all_amt").val(discount.toFixed(0));  
-             //}
-             //subtotal_round=Math.round(taxable);
-             subtotal_round=round_off(taxable);//round_off() method custom defined
-             subtotal_diff=subtotal_round-taxable;
-         
-             // Format khi hiển thị, giữ nguyên giá trị số cho hidden fields
-             $("#round_off_amt").html(formatCurrency(parseFloat(subtotal_diff).toFixed(0))); 
-             $("#total_amt").html(formatCurrency(parseFloat(subtotal_round).toFixed(0))); 
-             if(save_operation()){
-               //$("#amount").val(parseFloat(subtotal_round).toFixed(0));
-               $("#amount").val('0');
-             }
-             // Giá trị tính toán lưu dạng số
-             $("#hidden_total_amt").val(parseFloat(subtotal_round).toFixed(0)); 
-           }
-           else{
-             // Format khi hiển thị 0
-             $("#subtotal_amt").html(formatCurrency(0)); 
-             $("#tax_amt").html(formatCurrency(0)); 
-             $("#round_off_amt").html(formatCurrency(0)); 
-             $("#total_amt").html(formatCurrency(0)); 
-             $("#amount").val('0');
-             $("#hidden_total_amt").html('0'); 
-             $("#discount_to_all_amt").html(formatCurrency(0)); 
-             $("#hidden_discount_to_all_amt").html('0'); 
-             $("#subtotal_amt").html(formatCurrency(0)); 
-             $("#other_charges_amt").html(formatCurrency(0));  
-             $("#amount").val('0');  
-           }
-           
-          // adjust_payments();
-          //alert("final_total() end");
-         }
-         /* ---------- Final Description of amount end ------------*/
-          
-         function removerow(id){//id=Rowid
-           
-         $("#row_"+id).remove();
-         $("#doublerow_"+id).remove();
-         final_total();
-         failed.currentTime = 0;
-        failed.play();
-         }
-               
-     
-
-    function enable_or_disable_item_discount(){
-      /*var discount_input=parseFloat($("#discount_to_all_input").val());
-      discount_input = isNaN(discount_input) ? 0 : discount_input;
-      if(discount_input>0){
-        $(".item_discount").attr({
-          'readonly': true,
-          'style': 'border-color:red;cursor:no-drop',
-        });
-      }
-      else{
-        $(".item_discount").attr({
-          'readonly': false,
-          'style': '',
-        });
-      }*/
-
-      var rowcount=$("#hidden_rowcount").val();
-      for(k=1;k<=rowcount;k++){
-       if(document.getElementById("tr_item_id_"+k)){
-         calculate_tax(k);
-       }//if end
-     }//for end
-
-      //final_total();
-    }
-
-    //Sale Items Modal Operations Start
-    function show_sales_item_modal(row_id){
-      $('#sales_item').modal('toggle');
-      $("#popup_tax_id").select2();
-
-      //Find the item details
-      var item_name = $("#td_data_"+row_id+"_1").html();
-      var tax_type = $("#tr_tax_type_"+row_id).val();
-      var tax_id = $("#tr_tax_id_"+row_id).val();
-      var description = $("#description_"+row_id).val();
-
-      /*Discount*/
-      var item_discount_input = $("#item_discount_input_"+row_id).val();
-      var item_discount_type = $("#item_discount_type_"+row_id).val();
-
-      //Set to Popup
-      $("#item_discount_input").val(item_discount_input);
-      $("#item_discount_type").val(item_discount_type).select2();
-
-      $("#popup_item_name").html(item_name);
-      $("#popup_tax_type").val(tax_type).select2();
-      $("#popup_tax_id").val(tax_id).select2();
-      $("#popup_description").val(description);
-      $("#popup_row_id").val(row_id);
-    }
-    
-    function show_sales_item_modal_price(row_id){
-      $('#sales_item2').modal('toggle');
-      //$("#popup_tax_id").select2();
-
-      //Find the item details
-      var item_name = $("#td_data_"+row_id+"_1").html();
-      //var tax_type = $("#tr_tax_type_"+row_id).val();
-      //var tax_id = $("#tr_tax_id_"+row_id).val();
-      //var description = $("#description_"+row_id).val();
-      
-      var item_pr0 = $("#row_"+row_id).attr("data-p0");
-      var item_pr1 = $("#row_"+row_id).attr("data-p1");
-      var item_pr2 = $("#row_"+row_id).attr("data-p2");
-      var item_pr3 = $("#row_"+row_id).attr("data-p3");
-      var item_pr = $("#row_"+row_id).attr("data-p");
-      
-
-      /*Discount*/
-      //var item_discount_input = $("#item_discount_input_"+row_id).val();
-      //var item_discount_type = $("#item_discount_type_"+row_id).val();
-
-      //Set to Popup
-      //$("#item_discount_input").val(item_discount_input);
-      //$("#item_discount_type").val(item_discount_type).select2();
-
-      $("#popup_item_name").html(item_name);
-      //$("#popup_tax_type").val(tax_type).select2();
-      //$("#popup_tax_id").val(tax_id).select2();
-      //$("#popup_description").val(description);
-      //$("#popup_row_id").val(row_id);
-      
-      // Format khi hiển thị trong modal
-      $("#sales_item2_finalprice0").html(formatCurrency(item_pr0));
-      $("#sales_item2_finalprice1").html(formatCurrency(item_pr1));
-      $("#sales_item2_finalprice2").html(formatCurrency(item_pr2));
-      $("#sales_item2_finalprice3").html(formatCurrency(item_pr3));
-      $("#sales_item2_finalprice").html(formatCurrency(item_pr));
-    }
-
-    function set_info(){
-      var row_id = $("#popup_row_id").val();
-      var tax_type = $("#popup_tax_type").val();
-      var tax_id = $("#popup_tax_id").val();
-      var description = $("#popup_description").val();
-      var tax_name = ($('option:selected', "#popup_tax_id").attr('data-tax-value'));
-      var tax = parseFloat($('option:selected', "#popup_tax_id").attr('data-tax'));
-
-      /*Discounr*/
-      var item_discount_input = $("#item_discount_input").val();
-      var item_discount_type = $("#item_discount_type").val();
-
-      //Set it into row 
-      $("#item_discount_input_"+row_id).val(item_discount_input);
-      $("#item_discount_type_"+row_id).val(item_discount_type);
-
-      $("#tr_tax_type_"+row_id).val(tax_type);
-      $("#tr_tax_id_"+row_id).val(tax_id);
-      $("#tr_tax_value_"+row_id).val(tax);//%
-      $("#description_"+row_id).val(description);
-      $("#td_data_"+row_id+"_12").html(tax_name);
-      
-      calculate_tax(row_id);
-      $('#sales_item').modal('toggle');
-    }
-    function set_tax_value(row_id){
-      //get the sales price of the item
-      var tax_type = $("#tr_tax_type_"+row_id).val();
-      var tax = $("#tr_tax_value_"+row_id).val(); //%
-      var qty=$("#td_data_"+row_id+"_3").val().trim();
-          qty = (isNaN(qty)) ? 0 :qty;
-      var sales_price = parseFloat($("#td_data_"+row_id+"_10").val());
-          sales_price = (isNaN(sales_price)) ? 0 :sales_price;
-          sales_price = sales_price * qty;
-
-      /*Discount*/
-      var item_discount_type = $("#item_discount_type_"+row_id).val();
-      var item_discount_input = parseFloat($("#item_discount_input_"+row_id).val());
-          item_discount_input = (isNaN(item_discount_input)) ? 0 :item_discount_input;
-
-      //Calculate discount      
-      var discount_amt=(item_discount_type=='Percentage') ? ((sales_price) * item_discount_input)/100 : (item_discount_input * qty);
-      
-      sales_price-=parseFloat(discount_amt);
-
-      var tax_amount = (tax_type=='Inclusive') ? calculate_inclusive(sales_price,tax) : calculate_exclusive(sales_price,tax);
-      
-      $("#td_data_"+row_id+"_8").val(discount_amt);
-
-      $("#td_data_"+row_id+"_11").val(tax_amount);
-    }
-    //Sale Items Modal Operations End
-
-  
-    function item_qty_input(i){
-   
-      var item_qty=$("#td_data_"+i+"_3").val();
-      var available_qty=$("#tr_available_qty_"+i+"_13").val();
-      /*if(parseFloat(item_qty)>parseFloat(available_qty)){
-        $("#td_data_"+i+"_3").val(available_qty);
-        toastr["warning"]("Oops! You have only "+available_qty+" items in Stock");
-      }*/
-      calculate_tax(i);
-    }
-
       </script>
 
 
