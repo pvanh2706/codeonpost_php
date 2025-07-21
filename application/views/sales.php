@@ -492,16 +492,15 @@ function round_off($amount) {
                                             <div class="form-group">
                                                 <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Số lượng | <span class="total_quantity text-danger" >0</span></span>
                                                 <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Tổng tạm tính | <span class="text-danger" id="subtotal_amt" name="subtotal_amt">0</span> ₫</span>
-                                                <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Tổng chiết khấu | <span class="text-danger" id="discount_to_all_amt" name="discount_to_all_amt">0</span> ₫</span>
+                                                <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Phụ phí (có thuế) | <span class="text-danger" id="other_charges_amt" name="other_charges_amt">0</span> ₫</span>
+                                                <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Chiết khấu | <span class="text-danger" id="discount_to_all_amt" name="discount_to_all_amt">0</span> ₫</span>
                                                 <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Tổng trước thuế | <span class="text-danger" id="total_before_tax_amt" name="total_before_tax_amt">0</span> ₫</span>
                                                 <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Tổng tiền thuế | <span class="text-danger" id="total_tax_amt" name="total_tax_amt">0</span> ₫</span>
                                                 <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Tổng sau thuế | <span class="text-danger" id="total_after_tax_amt" name="total_after_tax_amt">0</span> ₫</span>
-                                                <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Phụ phí (có thuế) | <span class="text-danger" id="other_charges_amt" name="other_charges_amt">0</span> ₫</span>
-                                                <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Làm tròn | <span class="text-danger" id="round_off_amt" name="round_off_amt">0</span> ₫</span>
                                                 <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Tổng thanh toán | <span style="font-size:1.3em;" class="text-danger" id="total_amt" name="total_amt" >0</span> ₫</span>
                                                 <!-- Công thức: Tổng thanh toán = Tổng sau thuế + Phụ phí (có thuế) - Chiết khấu + Làm tròn -->
                                                 <div style="font-size: 11px; color: #666; margin-top: 5px; padding: 5px; border-top: 1px solid #ddd;">
-                                                    <strong>Công thức:</strong> Tổng sau thuế + Phụ phí (có thuế) - Chiết khấu + Làm tròn
+                                                    <strong>Công thức:</strong> Tổng sau thuế + Phụ phí (có thuế) - Chiết khấu
                                                 </div>
                                             </div>
                                         </div>
