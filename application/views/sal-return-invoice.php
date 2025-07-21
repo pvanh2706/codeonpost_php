@@ -55,13 +55,9 @@
                            b.`id`='$return_id' 
                            ");
                         
-    // Debug: Kiểm tra số lượng kết quả từ bảng db_salesreturn
-    echo "<div class='alert alert-info'>Debug: SQL Query executed for return_id = $return_id</div>";
-    echo "<div class='alert alert-info'>Debug: Number of rows found = " . $q3->num_rows() . "</div>";
     
     if($q3->num_rows() == 0) {
         echo "<div class='alert alert-danger'>Lỗi: Không tìm thấy dữ liệu đơn trả hàng với ID: $return_id</div>";
-        echo "<div class='alert alert-warning'>Gợi ý: Kiểm tra xem ID $return_id có tồn tại trong bảng db_salesreturn không?</div>";
         return;
     }
     
@@ -266,11 +262,9 @@
               
               // Debug: Kiểm tra số lượng kết quả
               $num_rows = $q2->num_rows();
-              echo "<div class='alert alert-info'>Debug: Found $num_rows return items for return_id = $return_id</div>";
-              
-              if($num_rows == 0) {
-                  echo "<tr><td colspan='8' class='text-center text-danger'>Không có dữ liệu sản phẩm trả hàng. Return ID: $return_id</td></tr>";
-                  echo "<div class='alert alert-warning'>Gợi ý: Kiểm tra xem có dữ liệu trong bảng db_salesitemsreturn với return_id = $return_id không?</div>";
+              if ($num_rows == 0) {
+                  echo "<tr><td colspan='8' class='text-center text-bold'>Không có dữ liệu mặt hàng hoàn trả!!</td></tr>";
+                  return;
               }
               
               foreach ($q2->result() as $res2) {
