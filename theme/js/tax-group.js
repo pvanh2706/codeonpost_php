@@ -38,7 +38,7 @@ $('#save,#update').on("click",function (e) {
     if(this_id=="save")  //Save start
     {
 
-    				if(confirm("Are you sure ?")){
+    				if(confirm("Bạn có chắc chắn không??")){
 						e.preventDefault();
 						data = new FormData($('#tax-form')[0]);//form name
 						/*Check XSS Code*/
@@ -88,7 +88,7 @@ $('#save,#update').on("click",function (e) {
     }//Save end
 	else if(this_id=="update"){  //update start
 
-					if(confirm("Are you sure ?")){
+					if(confirm("Bạn có chắc chắn không??")){
 						e.preventDefault();
 						data = new FormData($('#tax-form')[0]);//form name
 						/*Check XSS Code*/

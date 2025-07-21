@@ -22,6 +22,17 @@
         /*background-color: #5b6469;*/
         font-weight: bold;
     }
+    /* Fix cho menu text quá dài */
+    .sidebar-menu .treeview-menu li a span {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 180px;
+        display: inline-block;
+    }
+    .sidebar-menu .treeview-menu li a {
+        padding-right: 5px;
+    }
 </style>
     <!-- Logo -->
     <a href="<?php echo $base_url; ?>dashboard" class="logo">
@@ -121,7 +132,7 @@
                 <?php } ?>
                 
                 <?php if($CI->permissions('sales_view')) { ?>
-                <li class="sales-list-active-li"><a href="<?php echo $base_url; ?>sales"><i class="fa fa-list "></i> <span>Thống kê ĐƠN HÀNG</span></a></li>
+                <li class="sales-list-active-li"><a href="<?php echo $base_url; ?>sales"><i class="fa fa-list "></i> <span>Thống kê đơn hàng</span></a></li>
                 <?php } ?>
               </ul>
             </li>
@@ -139,10 +150,10 @@
           </a>
           <ul class="treeview-menu">
         <?php if($CI->permissions('sales_return_add')) { ?>
-        <li class="sales-return-active-li"><a href="<?php echo $base_url; ?>sales_return/create"><i class="fa fa-list "></i> <span>Kê đơn TRẢ HÀNG</span></a></li>
+        <li class="sales-return-active-li"><a href="<?php echo $base_url; ?>sales_return/create"><i class="fa fa-list "></i> <span>Tạo đơn trả hàng</span></a></li>
         <?php } ?>
         <?php if($CI->permissions('sales_return_view')) { ?>
-        <li class="sales-return-list-active-li"><a href="<?php echo $base_url; ?>sales_return"><i class="fa fa-list "></i> <span>Danh sách TRẢ HÀNG</span></a></li>
+        <li class="sales-return-list-active-li"><a href="<?php echo $base_url; ?>sales_return"><i class="fa fa-list "></i> <span>Danh sách trả hàng</span></a></li>
         <?php } ?>
         
           </ul>
@@ -160,11 +171,11 @@
               </a>
               <ul class="treeview-menu">
             <?php if($CI->permissions('purchase_add')) { ?>
-                <li class="purchase-active-li"><a href="<?php echo $base_url; ?>purchase/add"><i class="fa fa-list "></i> <span>Kê đơn NHẬP HÀNG</span></a></li>
+                <li class="purchase-active-li"><a href="<?php echo $base_url; ?>purchase/add"><i class="fa fa-list "></i> <span>Kê đơn nhập hàng</span></a></li>
             <?php } ?>
             
             <?php if($CI->permissions('purchase_view')) { ?>
-                <li class="purchase-list-active-li"><a href="<?php echo $base_url; ?>purchase"><i class="fa fa-list "></i> <span>Danh sách NHẬP HÀNG</span></a></li>
+                <li class="purchase-list-active-li"><a href="<?php echo $base_url; ?>purchase"><i class="fa fa-list "></i> <span>Danh sách nhập hàng</span></a></li>
             <?php } ?>
     
               </ul>

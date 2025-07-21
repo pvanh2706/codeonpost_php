@@ -1043,8 +1043,8 @@ class Dues_model extends CI_Model {
 		    </div>
 		      </div>
 		      <div class="modal-footer">
-		        <button type="button" class="btn btn-default btn-lg" data-dismiss="modal">Close</button>
-		        <button type="button" onclick="save_payment(<?=$sales_id;?>)" class="btn bg-green btn-lg place_order btn-lg payment_save">Save<i class="fa  fa-check "></i></button>
+		        <button type="button" class="btn btn-default btn-lg" data-dismiss="modal">Đóng</button>
+		        <button type="button" onclick="save_payment(<?=$sales_id;?>)" class="btn bg-green btn-lg place_order btn-lg payment_save">Lưu<i class="fa  fa-check "></i></button>
 		      </div>
 		    </div>
 		    <!-- /.modal-content -->
@@ -1198,7 +1198,7 @@ class Dues_model extends CI_Model {
                                     <th>Payment Type</th>
                                     <th>Payment Note</th>
                                     <th>Created by</th>
-                                    <th>Action</th>
+                                    <th>Thao tác</th>
                                   </tr>
                                 </thead>
                                 <tbody>
@@ -1238,7 +1238,7 @@ class Dues_model extends CI_Model {
 		    </div>
 		      </div>
 		      <div class="modal-footer">
-		        <button type="button" class="btn btn-default btn-lg" data-dismiss="modal">Close</button>
+		        <button type="button" class="btn btn-default btn-lg" data-dismiss="modal">Đóng</button>
 		        
 		      </div>
 		    </div>

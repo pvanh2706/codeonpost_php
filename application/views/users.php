@@ -164,12 +164,12 @@
                                  <!-- <div class="col-sm-4"></div> -->
                                  <?php
                                     if($username!=""){
-                                         $btn_name="Update";
+                                         $btn_name="Cập nhật";
                                          $btn_id="update";
                                     
                                     }
                                               else{
-                                                  $btn_name="Save";
+                                                  $btn_name="Lưu";
                                                   $btn_id="save";
                                               }
                                     
@@ -180,7 +180,7 @@
                                  </div>
                                  <div class="col-sm-3">
                                     <a href="<?=base_url('dashboard');?>">
-                                    <button type="button" class="col-sm-3 btn btn-block btn-warning close_btn" title="Go Dashboard">Close</button>
+                                    <button type="button" class="col-sm-3 btn btn-block btn-warning close_btn" title="Go Dashboard">Đóng</button>
                                     </a>
                                  </div>
                               </div>

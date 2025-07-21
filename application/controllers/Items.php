@@ -164,7 +164,7 @@ class Items extends MY_Controller {
 
 			 		$str2 = '<div class="btn-group" title="View Account">
 										<a class="btn btn-primary btn-o dropdown-toggle" data-toggle="dropdown" href="#">
-											Action <span class="caret"></span>
+											Thao tác <span class="caret"></span>
 										</a>
 										<ul role="menu" class="dropdown-menu dropdown-light pull-right">';
 
@@ -178,7 +178,7 @@ class Items extends MY_Controller {
 											if($this->permissions('items_delete'))
 											$str2.='<li>
 												<a style="cursor:pointer" title="Delete Record ?" onclick="delete_items('.$items->id.')">
-													<i class="fa fa-fw fa-trash text-red"></i>Xóa bỏ SP
+													<i class="fa fa-fw fa-trash text-red"></i>Xóa bỏ sản phẩm
 												</a>
 											</li>
 											

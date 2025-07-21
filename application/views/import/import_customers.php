@@ -19,7 +19,7 @@
             <section class="content-header">
                <h1>
                   <?=$page_title;?>
-                  <small>Add/Update Brand</small>
+                  <small>Thêm mới/cập nhật khách hàng</small>
                </h1>
                <ol class="breadcrumb">
                   <li><a href="<?php echo $base_url; ?>dashboard"><i class="fa fa-dashboard"></i> Home</a></li>
@@ -35,7 +35,7 @@
                      <!-- Horizontal Form -->
                      <div class="box box-info ">
                         <div class="box-header with-border">
-                           <h3 class="box-title">Please Enter Valid Data</h3>
+                           <h3 class="box-title">Vui lòng nhập dữ liệu</h3>
                         </div>
                         <!-- /.box-header -->
                         <!-- form start -->
@@ -48,7 +48,7 @@
                                  <div class="col-sm-4">
                                     <input type="file" id="import_file" name="import_file">
                                     <span id="import_file_msg" style="display:block;" class="text-danger">
-                                      Note: File must be in CSV format.
+                                      Lưu ý: Tệp phải là định dạng CSV.
                                     </span>
                                  </div>
                               </div>
@@ -57,11 +57,11 @@
                            <div class="box-footer">
                               <div class="col-sm-8 text-center">
                                  <div class="col-md-3 ">
-                                    <button type="button" id="import" class=" btn btn-block btn-success" title="Save Data"><i class="fa fa-arrow-circle-o-left "></i> Import</button>
+                                    <button type="button" id="import" class=" btn btn-block btn-success" title="Save Data"><i class="fa fa-arrow-circle-o-left "></i> Nhập tệp dữ liệu</button>
                                  </div>
                                  <div class="col-sm-3">
                                     <a href="<?=base_url('dashboard');?>">
-                                    <button type="button" class="col-sm-3 btn btn-block btn-warning close_btn" title="Go Dashboard">Close</button>
+                                    <button type="button" class="col-sm-3 btn btn-block btn-warning close_btn" title="Go Dashboard">Đóng</button>
                                     </a>
                                  </div>
                               </div>
@@ -200,13 +200,13 @@
         $("#import").on("click",function(e) {
           var base_url = $("#base_url").val();
           if($("#import_file").val()==''){
-            toastr["warning"]("Please select file to Import!");
+            toastr["warning"]("Vui lòng chọn tệp dữ liệu!");
             failed.currentTime = 0; 
             failed.play();
             return;
           }
 
-          if(confirm("Are you sure ?")){
+            if(confirm("Bạn có chắc chắn không?")){
             e.preventDefault();
             data = new FormData($('#import-form')[0]);//form name
             /*Check XSS Code*/
@@ -225,24 +225,24 @@
               //alert(result);return;
               if(result=="success")
               {
-                //toastr["success"]("Record Updated Successfully!");
-                window.location=base_url+"customers";
+              //toastr["success"]("Cập nhật dữ liệu thành công!");
+              window.location=base_url+"customers";
               }
               else if(result=="failed")
               {
-                toastr["error"]("Sorry! Failed to save Record.Try again!");
-                 //alert("Sorry! Failed to save Record.Try again");
-                 // return;
+              toastr["error"]("Xin lỗi! Lưu dữ liệu thất bại. Vui lòng thử lại!");
+               //alert("Xin lỗi! Lưu dữ liệu thất bại. Vui lòng thử lại");
+               // return;
               }
               else
               {
-                toastr["error"](result);
+              toastr["error"](result);
               }
               $("#import").attr('disabled',false);  //Enable Save or Update button
               $(".overlay").remove();
              }
              });
-        }
+          }
         });
         
         

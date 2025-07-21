@@ -849,7 +849,7 @@ class Orders_model extends CI_Model {
                </td>
                
                <!-- Unit Cost Without Tax-->
-               <td id="td_<?=$rowcount;?>_10"><input type="number" name="td_data_<?=$rowcount;?>_10" id="td_data_<?=$rowcount;?>_10" class="form-control text-right no-padding only_currency text-center" onkeyup="calculate_tax(<?=$rowcount;?>)" value="<?=$item_sales_price;?>" onclick="this.select();"></td>
+               <td id="td_<?=$rowcount;?>_10"><input type="text" name="td_data_<?=$rowcount;?>_10" id="td_data_<?=$rowcount;?>_10" class="form-control text-right no-padding only_currency text-center" onkeyup="calculate_tax(<?=$rowcount;?>)" value="<?=$item_sales_price;?>" onclick="this.select();"></td>
 
                <!-- Discount -->
                <td id="td_<?=$rowcount;?>_8">
@@ -926,7 +926,7 @@ class Orders_model extends CI_Model {
                 </td>
                 
                 <td id="td_<?=$rowcount;?>_10">
-                   <input type="number" name="td_data_<?=$rowcount;?>_update_stock" id="td_data_<?=$rowcount;?>_update_stock" class="form-control text-right no-padding only_currency text-center" value="">
+                   <input type="text" name="td_data_<?=$rowcount;?>_update_stock" id="td_data_<?=$rowcount;?>_update_stock" class="form-control text-right no-padding only_currency text-center" value="">
                 </td>
                 
                 <td>
@@ -1102,8 +1102,8 @@ class Orders_model extends CI_Model {
 		    </div>
 		      </div>
 		      <div class="modal-footer">
-		        <button type="button" class="btn btn-default btn-lg" data-dismiss="modal">Close</button>
-		        <button type="button" onclick="save_payment(<?=$sales_id;?>)" class="btn bg-green btn-lg place_order btn-lg payment_save">Save<i class="fa  fa-check "></i></button>
+		        <button type="button" class="btn btn-default btn-lg" data-dismiss="modal">Đóng</button>
+		        <button type="button" onclick="save_payment(<?=$sales_id;?>)" class="btn bg-green btn-lg place_order btn-lg payment_save">Lưu<i class="fa  fa-check "></i></button>
 		      </div>
 		    </div>
 		    <!-- /.modal-content -->
@@ -1187,8 +1187,8 @@ class Orders_model extends CI_Model {
 		    </div>
 		      </div>
 		      <div class="modal-footer">
-		        <button type="button" class="btn btn-default btn-lg" data-dismiss="modal">Close</button>
-		        <button type="button" onclick="save_stt(<?=$sales_id;?>)" class="btn bg-green btn-lg place_order btn-lg payment_save">Save<i class="fa  fa-check "></i></button>
+		        <button type="button" class="btn btn-default btn-lg" data-dismiss="modal">Đóng</button>
+		        <button type="button" onclick="save_stt(<?=$sales_id;?>)" class="btn bg-green btn-lg place_order btn-lg payment_save">Lưu<i class="fa  fa-check "></i></button>
 		      </div>
 		    </div>
 		    <!-- /.modal-content -->
@@ -1290,8 +1290,8 @@ class Orders_model extends CI_Model {
 		    </div>
 		      </div>
 		      <div class="modal-footer">
-		        <button type="button" class="btn btn-default btn-lg" data-dismiss="modal">Close</button>
-		        <button type="button" onclick="save_stt_final(<?=$sales_id;?>)" class="btn bg-green btn-lg place_order btn-lg payment_save">Save<i class="fa  fa-check "></i></button>
+		        <button type="button" class="btn btn-default btn-lg" data-dismiss="modal">Đóng</button>
+		        <button type="button" onclick="save_stt_final(<?=$sales_id;?>)" class="btn bg-green btn-lg place_order btn-lg payment_save">Lưu<i class="fa  fa-check "></i></button>
 		      </div>
 		    </div>
 		    <!-- /.modal-content -->
@@ -1393,8 +1393,8 @@ class Orders_model extends CI_Model {
 		    </div>
 		      </div>
 		      <div class="modal-footer">
-		        <button type="button" class="btn btn-default btn-lg" data-dismiss="modal">Close</button>
-		        <button type="button" onclick="save_stt_shipping(<?=$sales_id;?>)" class="btn bg-green btn-lg place_order btn-lg payment_save">Save<i class="fa  fa-check "></i></button>
+		        <button type="button" class="btn btn-default btn-lg" data-dismiss="modal">Đóng</button>
+		        <button type="button" onclick="save_stt_shipping(<?=$sales_id;?>)" class="btn bg-green btn-lg place_order btn-lg payment_save">Lưu<i class="fa  fa-check "></i></button>
 		      </div>
 		    </div>
 		    <!-- /.modal-content -->
@@ -1650,7 +1650,7 @@ class Orders_model extends CI_Model {
 		    </div>
 		      </div>
 		      <div class="modal-footer">
-		        <button type="button" class="btn btn-default btn-lg" data-dismiss="modal">Close</button>
+		        <button type="button" class="btn btn-default btn-lg" data-dismiss="modal">Đóng</button>
 		        
 		      </div>
 		    </div>

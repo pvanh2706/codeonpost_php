@@ -492,7 +492,7 @@
       if(!$("#"+id).val().trim() ) //Also check Others????
         {
 
-            $('#'+id+'_msg').fadeIn(200).show().html('Required Field').addClass('required');
+            $('#'+id+'_msg').fadeIn(200).show().html($this->lang->line('required')).addClass('required');
            // $('#'+id).css({'background-color' : '#E8E2E9'});
             flag=false;
         }

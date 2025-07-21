@@ -74,7 +74,7 @@ class Suppliers extends MY_Controller {
 			 		if($suppliers->status==1){ 
 			 			$str= "<span onclick='update_status(".$suppliers->id.",0)' id='span_".$suppliers->id."'  class='label label-success' style='cursor:pointer'> Kích hoạt </span>";}
 					else{ 
-						$str = "<span onclick='update_status(".$suppliers->id.",1)' id='span_".$suppliers->id."'  class='label label-danger' style='cursor:pointer'> Nghỉ chơi </span>";
+						$str = "<span onclick='update_status(".$suppliers->id.",1)' id='span_".$suppliers->id."'  class='label label-danger' style='cursor:pointer'> Ngừng hoạt động </span>";
 					}
 			$row[] = $str;			
 					$str2 = '<div class="btn-group" title="View Account">
@@ -104,7 +104,7 @@ class Suppliers extends MY_Controller {
 											if($this->permissions('suppliers_edit'))
 											$str2.='<li>
 												<a style="cursor:pointer" title="Delete Record ?" onclick="delete_suppliers('.$suppliers->id.')">
-													<i class="fa fa-fw fa-trash text-red"></i>Nghỉ chơi mẹ đi!
+													<i class="fa fa-fw fa-trash text-red"></i>Xóa nhà cung cấp
 												</a>
 											</li>
 											

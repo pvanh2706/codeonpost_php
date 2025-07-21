@@ -180,8 +180,8 @@
                        
                     </div>
                     <div class="modal-footer">
-                      <button type="button" class="btn btn-warning" data-dismiss="modal">Close</button>
-                      <button type="button" class="btn btn-primary add_customer">Save</button>
+                      <button type="button" class="btn btn-warning" data-dismiss="modal">Đóng</button>
+                      <button type="button" class="btn btn-primary add_customer">Lưu</button>
                     </div>
                   </div>
                   <!-- /.modal-content -->

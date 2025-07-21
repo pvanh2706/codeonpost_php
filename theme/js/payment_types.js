@@ -33,7 +33,7 @@ $('#save,#update').on("click",function (e) {
 
     if(this_id=="save")  //Save start
     {
-					if(confirm("Do You Wants to Save Record ?")){
+					if(confirm("Bạn có chắc chắn muốn lưu không ??")){
 						
 						e.preventDefault();
 						data = new FormData($('#payment-types-form')[0]);//form name
@@ -81,7 +81,7 @@ $('#save,#update').on("click",function (e) {
     {
 				
 
-					if(confirm("Do You Wants to Update Record ?")){
+					if(confirm("Bạn chắc chắn muốn cập nhật dữ liệu ??")){
 						e.preventDefault();
 						data = new FormData($('#payment-types-form')[0]);//form name
 						/*Check XSS Code*/
@@ -185,7 +185,7 @@ function update_status(id,status)
 function delete_payment_type(q_id)
 {
 	var base_url=$("#base_url").val().trim();
-   if(confirm("Do You Wants to Delete Record ?")){
+   if(confirm("Bạn có chắc chắn muốn xóa bản ghi này không?")){
    	$(".box").append('<div class="overlay"><i class="fa fa-refresh fa-spin"></i></div>');
    $.post(base_url+"payment_types/delete_payment_type",{q_id:q_id},function(result){
    //alert(result);return;

@@ -79,7 +79,7 @@ $('#save,#update,#create').on("click",function (e) {
 
     var this_id=this.id;
     
-			if(confirm("Do You Wants to Save Record ?")){
+			if(confirm("Bạn có chắc chắn muốn lưu không ?")){
 				e.preventDefault();
 				data = new FormData($('#sales-form')[0]);//form name
         /*Check XSS Code*/
@@ -294,7 +294,7 @@ function update_paid_payment_total() {
   $("#paid_amt_tot").html(tot.toFixed(2));
 }
 function delete_payment(payment_id){
- if(confirm("Do You Wants to Delete Record ?")){
+ if(confirm("Bạn có chắc chắn muốn xóa bản ghi này không?")){
     var base_url=$("#base_url").val().trim();
     $(".box").append('<div class="overlay"><i class="fa fa-refresh fa-spin"></i></div>');
    $.post(base_url+"sales_return/delete_payment",{payment_id:payment_id},function(result){
@@ -327,7 +327,7 @@ function delete_payment(payment_id){
 function delete_return(q_id)
 {
   
-   if(confirm("Do You Wants to Delete Record ?")){
+   if(confirm("Bạn có chắc chắn muốn xóa bản ghi này không?")){
     $(".box").append('<div class="overlay"><i class="fa fa-refresh fa-spin"></i></div>');
     $.post("sales_return/delete_return",{q_id:q_id},function(result){
    //alert(result);return;
@@ -352,7 +352,7 @@ function multi_delete(){
   //var base_url=$("#base_url").val().trim();
     var this_id=this.id;
     
-    if(confirm("Are you sure ?")){
+    if(confirm("Bạn có chắc chắn không??")){
       data = new FormData($('#table_form')[0]);//form name
       /*Check XSS Code*/
       if(!xss_validation(data)){ return false; }
@@ -452,13 +452,21 @@ function save_payment(return_id){
     var payment_type=$("#payment_type").val().trim();
     var payment_note=$("#payment_note").val().trim();
 
-    if(amount == 0){
-      toastr["error"]("Please Enter Valid Amount!");
+    // Xử lý số tiền có format (loại bỏ dấu phẩy, dấu chấm)
+    amount = amount.replace(/[,\.]/g, '');
+    amount = parseFloat(amount) || 0;
+
+    // Kiểm tra số tiền hợp lệ
+    if(amount <= 0){
+      toastr["error"]("Vui lòng nhập số tiền hợp lệ!");
       return false; 
     }
 
-    if(amount > parseFloat($("#due_amount_temp").html().trim())){
-      toastr["error"]("Entered Amount Should not be Greater than Due Amount!");
+    var due_amount_text = $("#due_amount_temp").html().trim();
+    var due_amount = parseFloat(due_amount_text.replace(/[,\.\s₫]/g, '')) || 0;
+    
+    if(amount > due_amount){
+      toastr["error"]("Số tiền nhập vào không được lớn hơn số tiền còn lại!");
       return false;
     }
 
@@ -470,14 +478,14 @@ function save_payment(return_id){
         if(result=="success")
         {
           $('#pay_now').modal('toggle');
-          toastr["success"]("Payment Recorded Successfully!");
+          toastr["success"]("Thanh toán đã được ghi nhận thành công!");
           success.currentTime = 0; 
           success.play();
           $('#example2').DataTable().ajax.reload();
         }
         else if(result=="failed")
         {
-           toastr["error"]("Sorry! Failed to save Record.Try again!");
+           toastr["error"]("Xin lỗi! Lưu thất bại. Vui lòng thử lại!");
            failed.currentTime = 0; 
            failed.play();
         }
@@ -493,7 +501,7 @@ function save_payment(return_id){
 }
 
 function delete_sales_payment(payment_id){
- if(confirm("Do You Wants to Delete Record ?")){
+ if(confirm("Bạn có muốn xóa bản ghi này?")){
     var base_url=$("#base_url").val().trim();
     $(".box").append('<div class="overlay"><i class="fa fa-refresh fa-spin"></i></div>');
    $.post(base_url+"sales_return/delete_payment",{payment_id:payment_id},function(result){

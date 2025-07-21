@@ -34,7 +34,7 @@ $('#save,#update').on("click",function (e) {
 
     if(this_id=="save")  //Save start
     {
-					if(confirm("Do You Wants to Save Record ?")){
+					if(confirm("Bạn có chắc chắn muốn lưu không ??")){
 						e.preventDefault();
 						data = new FormData($('#currency-form')[0]);//form name
 						/*Check XSS Code*/
@@ -81,7 +81,7 @@ $('#save,#update').on("click",function (e) {
     {
 				
 
-					if(confirm("Do You Wants to Update Record ?")){
+					if(confirm("Bạn chắc chắn muốn cập nhật dữ liệu ??")){
 						e.preventDefault();
 						data = new FormData($('#currency-form')[0]);//form name
 						/*Check XSS Code*/
@@ -185,7 +185,7 @@ function update_status(id,status)
 function delete_currency(q_id)
 {
 	
-   if(confirm("Do You Wants to Delete Record ?")){
+   if(confirm("Bạn có chắc chắn muốn xóa bản ghi này không?")){
    	$(".box").append('<div class="overlay"><i class="fa fa-refresh fa-spin"></i></div>');
    $.post("delete_currency",{q_id:q_id},function(result){
    //alert(result);return;
@@ -211,7 +211,7 @@ function multi_delete(){
 	//var base_url=$("#base_url").val().trim();
     var this_id=this.id;
     
-		if(confirm("Are you sure ?")){
+		if(confirm("Bạn có chắc chắn không??")){
 			$(".box").append('<div class="overlay"><i class="fa fa-refresh fa-spin"></i></div>');
 			$("#"+this_id).attr('disabled',true);  //Enable Save or Update button
 			

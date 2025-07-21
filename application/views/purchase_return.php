@@ -532,12 +532,12 @@
                                 <?php
                                 if($oper=='return_against_purchase'){
                                   $btn_id='save';
-                                  $btn_name="Save";
+                                  $btn_name="Lưu";
                                   echo '<input type="hidden" name="purchase_id" id="purchase_id" value="'.$purchase_id.'"/>';
                                 }
                                 if($oper=='edit_existing_return'){
                                   $btn_id='update';
-                                  $btn_name="Update";
+                                  $btn_name="Cập nhật";
                                   echo '<input type="hidden" name="return_id" id="return_id" value="'.$return_id.'"/>';
                                   echo '<input type="hidden" name="purchase_id" id="purchase_id" value="'.$purchase_id.'"/>';
                                 }
@@ -552,7 +552,7 @@
                                     <button type="button" id="<?php echo $btn_id;?>" class="btn bg-maroon btn-block btn-flat btn-lg payments_modal" title="Save Data"><?php echo $btn_name;?></button>
                                  </div>
                                  <div class="col-sm-3"><a href="<?= base_url()?>dashboard">
-                                    <button type="button" class="btn bg-gray btn-block btn-flat btn-lg" title="Go Dashboard">Close</button>
+                                    <button type="button" class="btn bg-gray btn-block btn-flat btn-lg" title="Go Dashboard">Đóng</button>
                                   </a>
                                 </div>
                               </center>
@@ -617,9 +617,9 @@
 
          
          $(".close_btn").on("click",function(){
-           if(confirm('Are you sure you want to navigate away from this page?')){
-               window.location='<?php echo $base_url; ?>dashboard';
-             }
+         if(confirm('Bạn có chắc chắn muốn rời khỏi trang này không?')){
+            window.location='<?php echo $base_url; ?>dashboard';
+         }
          });
          //Initialize Select2 Elements
              $(".select2").select2();

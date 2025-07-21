@@ -45,7 +45,7 @@
    </a>
    &nbsp;
    <a href="update">
-    <button class="btn btn-info btn-block my-4" type="button">Update</button>
+    <button class="btn btn-info btn-block my-4" type="button">Cập nhật</button>
    </a>
 
   <center><i>Version:<?php echo app_version()?></i></center>

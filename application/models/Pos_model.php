@@ -127,7 +127,7 @@ class Pos_model extends CI_Model {
 	        	}
 	        	else{
 	        		//$str="addrow($res2->id)";
-	        		//$disabled="disabled=disabled";
+	        		//$disabled="disabled";
 	        		$bg_label="info";
 	        		$bg_color="background-color:#a1db75";
 	        	}
@@ -267,7 +267,7 @@ class Pos_model extends CI_Model {
 	        	}
 	        	else{
 	        		//$str="addrow($res2->id)";
-	        		//$disabled="disabled=disabled";
+	        		//$disabled="disabled";
 	        		$bg_label="info";
 	        		$bg_color="background-color:#a1db75";
 	        	}

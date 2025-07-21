@@ -690,7 +690,6 @@ class Sales_return_model extends CI_Model {
 		return $result;
 	}
 	
-
 	public function return_row_with_data($rowcount,$info){
 		extract($info);
 		$item_amount = ($item_sales_price * $item_sales_qty) + $item_tax_amt;
@@ -699,9 +698,6 @@ class Sales_return_model extends CI_Model {
                <td id="td_<?=$rowcount;?>_1">
                   <!-- item name  -->
                   <label class='form-control' style='height:auto;' data-toggle="tooltip" title='<?=$item_name;?>' >
-                  <!--a id="td_data_<?=$rowcount;?>_1" href="javascript:void(0)" onclick="show_sales_item_modal(<?=$rowcount;?>)" title=""><?=$item_name;?></a> 
-                  		<i onclick="show_sales_item_modal(<?=$rowcount;?>)" class="fa fa-edit pointer"></i>
-                  	</label-->
                   <a id="td_data_<?=$rowcount;?>_1" href="javascript:void(0)" onclick="" title=""><?=$item_name;?></a> 
                   	</label>
                </td>
@@ -723,7 +719,6 @@ class Sales_return_model extends CI_Model {
                <td id="td_<?=$rowcount;?>_8">
                   <input type="text" data-toggle="tooltip" title="Click to Change" onclick="show_sales_item_modal(<?=$rowcount;?>)" name="td_data_<?=$rowcount;?>_8" id="td_data_<?=$rowcount;?>_8" class="pointer form-control text-right no-padding only_currency text-center item_discount" value="<?=$item_discount;?>" onkeyup="calculate_tax(<?=$rowcount;?>)" readonly>
                </td>
-
 
                <!-- Tax Details -->
                <td id="td_<?=$rowcount;?>_12" class="<?=tax_disable_class()?>">
@@ -759,7 +754,6 @@ class Sales_return_model extends CI_Model {
                <input type="hidden" id="purchase_price_<?=$rowcount;?>" name="purchase_price_<?=$rowcount;?>" value="<?=$purchase_price;?>">
             </tr>
 		<?php
-
 	}
 	public function delete_payment($payment_id){
         $this->db->trans_begin();
@@ -821,7 +815,7 @@ class Sales_return_model extends CI_Model {
 		      <div class="modal-header header-custom">
 		        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
 		          <span aria-hidden="true">&times;</span></button>
-		        <h4 class="modal-title text-center">Payments</h4>
+		        <h4 class="modal-title text-center">Thanh toán</h4>
 		      </div>
 		      <div class="modal-body">
 		        
@@ -829,7 +823,7 @@ class Sales_return_model extends CI_Model {
 		      <div class="col-md-12">
 		      	<div class="row invoice-info">
 			        <div class="col-sm-4 invoice-col">
-			          customer Information
+			          Thông tin khách hàng:
 			          <address>
 			            <strong><?php echo  $customer_name; ?></strong><br>
 			            <?php echo (!empty(trim($customer_mobile))) ? $this->lang->line('mobile').": ".$customer_mobile."<br>" : '';?>
@@ -839,19 +833,18 @@ class Sales_return_model extends CI_Model {
 			            <?php echo (!empty(trim($customer_tax_number))) ? $this->lang->line('tax_number').": ".$customer_tax_number."<br>" : '';?>
 			          </address>
 			        </div>
-			        <!-- /.col -->
-			        <div class="col-sm-4 invoice-col">
-			          sales Information:
-			          <address>
-			            <b>Invoice #<?php echo  $return_code; ?></b><br>
-			            <b>Date :<?= show_date($return_date); ?></b><br>
-			            <b>Grand Total :<?php echo $grand_total; ?></b><br>
-			          </address>
-			        </div>
-			        <!-- /.col -->
-			        <div class="col-sm-4 invoice-col">
-			          <b>Paid Amount :<span><?php echo number_format($paid_amount,2,'.',''); ?></span></b><br>
-			          <b>Due Amount :<span id='due_amount_temp'><?php echo number_format($due_amount,2,'.',''); ?></span></b><br>
+			        <!-- /.col -->		        <div class="col-sm-4 invoice-col">
+		          Thông tin thanh toán:
+		          <address>
+		            <b>Hóa đơn #<?php echo  $return_code; ?></b><br>
+		            <b>Ngày :<?= show_date($return_date); ?></b><br>
+		            <b>Tổng cộng :<?php echo number_format($grand_total, 0, ',', '.') . ' ₫'; ?></b><br>
+		          </address>
+		        </div>
+		        <!-- /.col -->
+		        <div class="col-sm-4 invoice-col">
+		          <b>Số tiền thanh toán :<span><?php echo number_format($paid_amount, 0, ',', '.') . ' ₫'; ?></span></b><br>
+		          <b>Số tiền còn lại :<span id='due_amount_temp'><?php echo number_format($due_amount, 0, ',', '.') . ' ₫'; ?></span></b><br>
 			         
 			        </div>
 			        <!-- /.col -->
@@ -867,7 +860,7 @@ class Sales_return_model extends CI_Model {
 		              <div class="row">
 		         		<div class="col-md-4">
 		                  <div class="">
-		                  <label for="payment_date">Date</label>
+		                  <label for="payment_date">Ngày</label>
 		                    <div class="input-group date">
 			                      <div class="input-group-addon">
 			                      <i class="fa fa-calendar"></i>
@@ -879,8 +872,8 @@ class Sales_return_model extends CI_Model {
 		               </div>
 		                <div class="col-md-4">
 		                  <div class="">
-		                  <label for="amount">Amount</label>
-		                    <input type="text" class="form-control text-right paid_amt" id="amount" name="amount" placeholder="" value="<?=$due_amount;?>" onkeyup="calculate_payments()">
+		                  <label for="amount">Số tiền</label>
+		                    <input type="text" class="form-control text-right paid_amt" id="amount" name="amount" placeholder="Nhập số tiền..." value="<?=number_format($due_amount, 0, ',', '.') . ' ₫';?>" onkeyup="calculate_payments()">
 		                      <span id="amount_msg" style="display:none" class="text-danger"></span>
 		                </div>
 		               </div>
@@ -908,7 +901,7 @@ class Sales_return_model extends CI_Model {
 		        <div class="row">
 		               <div class="col-md-12">
 		                  <div class="">
-		                    <label for="payment_note">Payment Note</label>
+		                    <label for="payment_note">Ghi chú</label>
 		                    <textarea type="text" class="form-control" id="payment_note" name="payment_note" placeholder="" ></textarea>
 		                    <span id="payment_note_msg" style="display:none" class="text-danger"></span>
 		                  </div>
@@ -925,8 +918,8 @@ class Sales_return_model extends CI_Model {
 		    </div>
 		      </div>
 		      <div class="modal-footer">
-		        <button type="button" class="btn btn-default btn-lg" data-dismiss="modal">Close</button>
-		        <button type="button" onclick="save_payment(<?=$return_id;?>)" class="btn bg-green btn-lg place_order btn-lg payment_save">Save<i class="fa  fa-check "></i></button>
+		        <button type="button" class="btn btn-default btn-lg" data-dismiss="modal">Đóng</button>
+		        <button type="button" onclick="save_payment(<?=$return_id;?>)" class="btn bg-green btn-lg place_order btn-lg payment_save">Lưu<i class="fa  fa-check "></i></button>
 		      </div>
 		    </div>
 		    <!-- /.modal-content -->
@@ -940,7 +933,7 @@ class Sales_return_model extends CI_Model {
 		extract($this->xss_html_filter(array_merge($this->data,$_POST,$_GET)));
 		//print_r($this->xss_html_filter(array_merge($this->data,$_POST,$_GET)));exit();
     	if($amount=='' || $amount==0){$amount=null;}
-		if($amount>0 && !empty($payment_type)){
+		if($amount != null && !empty($payment_type)){
 			$salespayments_entry = array(
 					'return_id' 		=> $return_id, 
 					'payment_date'		=> date("Y-m-d",strtotime($payment_date)),//Current Payment with sales entry
@@ -958,7 +951,7 @@ class Sales_return_model extends CI_Model {
 			$q3 = $this->db->insert('db_salespaymentsreturn', $salespayments_entry);
 			
 		}
-		else{
+		else {
 			return "Please Enter Valid Amount!";
 		}
 		
@@ -1012,7 +1005,7 @@ class Sales_return_model extends CI_Model {
 		      <div class="modal-header header-custom">
 		        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
 		          <span aria-hidden="true">&times;</span></button>
-		        <h4 class="modal-title text-center">Payments</h4>
+		        <h4 class="modal-title text-center">Thanh toán</h4>
 		      </div>
 		      <div class="modal-body">
 		        
@@ -1020,7 +1013,7 @@ class Sales_return_model extends CI_Model {
 		      <div class="col-md-12">
 		      	<div class="row invoice-info">
 			        <div class="col-sm-4 invoice-col">
-			          customer Information
+			          Thông tin khách hàng:
 			          <address>
 			            <strong><?php echo  $customer_name; ?></strong><br>
 			            <?php echo (!empty(trim($customer_mobile))) ? $this->lang->line('mobile').": ".$customer_mobile."<br>" : '';?>
@@ -1030,19 +1023,18 @@ class Sales_return_model extends CI_Model {
 			            <?php echo (!empty(trim($customer_tax_number))) ? $this->lang->line('tax_number').": ".$customer_tax_number."<br>" : '';?>
 			          </address>
 			        </div>
-			        <!-- /.col -->
-			        <div class="col-sm-4 invoice-col">
-			          sales Information:
-			          <address>
-			            <b>Invoice #<?php echo  $return_code; ?></b><br>
-			            <b>Date :<?php echo show_date($return_date); ?></b><br>
-			            <b>Grand Total :<?php echo $grand_total; ?></b><br>
-			          </address>
-			        </div>
-			        <!-- /.col -->
-			        <div class="col-sm-4 invoice-col">
-			          <b>Paid Amount :<span><?php echo number_format($paid_amount,2,'.',''); ?></span></b><br>
-			          <b>Due Amount :<span id='due_amount_temp'><?php echo number_format($due_amount,2,'.',''); ?></span></b><br>
+			        <!-- /.col -->		        <div class="col-sm-4 invoice-col">
+		          Thông tin thanh toán:
+		          <address>
+		            <b>Hóa đơn #<?php echo  $return_code; ?></b><br>
+		            <b>Ngày :<?php echo show_date($return_date); ?></b><br>
+		            <b>Tổng cộng :<?php echo number_format($grand_total, 0, ',', '.') . ' ₫'; ?></b><br>
+		          </address>
+		        </div>
+		        <!-- /.col -->
+		        <div class="col-sm-4 invoice-col">
+		          <b>Số tiền thanh toán :<span><?php echo number_format($paid_amount, 0, ',', '.') . ' ₫'; ?></span></b><br>
+		          <b>Số tiền còn lại :<span id='due_amount_temp'><?php echo number_format($due_amount, 0, ',', '.') . ' ₫'; ?></span></b><br>
 			         
 			        </div>
 			        <!-- /.col -->
@@ -1059,12 +1051,12 @@ class Sales_return_model extends CI_Model {
                                   <thead>
                                   <tr class="bg-primary">
                                     <th>#</th>
-                                    <th>Payment Date</th>
-                                    <th>Payment</th>
-                                    <th>Payment Type</th>
-                                    <th>Payment Note</th>
-                                    <th>Created by</th>
-                                    <th>Action</th>
+                                    <th>Ngày thanh toán</th>
+                                    <th>Thanh toán</th>
+                                    <th>Loại thanh toán</th>
+                                    <th>Ghi chú</th>
+                                    <th>Người tạo</th>
+                                    <th>Thao tác</th>
                                   </tr>
                                 </thead>
                                 <tbody>
@@ -1077,7 +1069,7 @@ class Sales_return_model extends CI_Model {
 											echo "<tr>";
 											echo "<td>".$i++."</td>";
 											echo "<td>".show_date($res1->payment_date)."</td>";
-											echo "<td>".$res1->payment."</td>";
+											echo "<td>".number_format($res1->payment, 0, ',', '.') . ' ₫'."</td>";
 											echo "<td>".$res1->payment_type."</td>";
 											echo "<td>".$res1->payment_note."</td>";
 											echo "<td>".ucfirst($res1->created_by)."</td>";
@@ -1104,7 +1096,7 @@ class Sales_return_model extends CI_Model {
 		    </div>
 		      </div>
 		      <div class="modal-footer">
-		        <button type="button" class="btn btn-default btn-lg" data-dismiss="modal">Close</button>
+		        <button type="button" class="btn btn-default btn-lg" data-dismiss="modal">Đóng</button>
 		        
 		      </div>
 		    </div>

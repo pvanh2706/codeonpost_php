@@ -71,7 +71,7 @@ class Payment_types extends MY_Controller {
 			$row[] = $str;			
 			         $str2 = '<div class="btn-group" title="View Account">
 										<a class="btn btn-primary btn-o dropdown-toggle" data-toggle="dropdown" href="#">
-											Action <span class="caret"></span>
+											Thao tác <span class="caret"></span>
 										</a>
 										<ul role="menu" class="dropdown-menu dropdown-light pull-right">';
 

@@ -68,7 +68,7 @@ $('#save,#update').on("click",function (e) {
     if(this_id=="save")  //Save start
     {
 
-					if(confirm("Do You Wants to Save Record ?")){
+					if(confirm("Bạn có chắc chắn muốn lưu không ??")){
 						
 						e.preventDefault();
 						data = new FormData($('#suppliers-form')[0]);//form name
@@ -114,7 +114,7 @@ $('#save,#update').on("click",function (e) {
 	else if(this_id=="update")  //Update start
     {
 							
-					if(confirm("Do You Wants to Save Record ?")){
+					if(confirm("Bạn có chắc chắn muốn lưu không ??")){
 						e.preventDefault();
 						data = new FormData($('#suppliers-form')[0]);//form name
 						/*Check XSS Code*/
@@ -182,7 +182,7 @@ function update_status(id,status)
 				  success.play();
 				  if(status==0)
 				  {
-					  status="Nghỉ chơi";
+					  status="Ngừng hoạt động";
 					  var span_class="label label-danger";
 					  $("#span_"+id).attr('onclick','update_status('+id+',1)');
 				  }
@@ -218,7 +218,7 @@ function update_status(id,status)
 function delete_suppliers(q_id)
 {
 	
-   if(confirm("Do You Wants to Delete Record ?")){
+   if(confirm("Bạn có chắc chắn muốn xóa bản ghi này không?")){
    	$(".box").append('<div class="overlay"><i class="fa fa-refresh fa-spin"></i></div>');
    $.post("suppliers/delete_suppliers",{q_id:q_id},function(result){
    //alert(result);return;
@@ -244,7 +244,7 @@ function multi_delete(){
 	//var base_url=$("#base_url").val().trim();
     var this_id=this.id;
     
-		if(confirm("Are you sure ?")){
+		if(confirm("Bạn có chắc chắn không??")){
 			$(".box").append('<div class="overlay"><i class="fa fa-refresh fa-spin"></i></div>');
 			$("#"+this_id).attr('disabled',true);  //Enable Save or Update button
 			
@@ -470,7 +470,7 @@ function save_return_due_payment(supplier_id){
     });
 }
 function delete_opening_balance_entry(entry_id){
- if(confirm("Do You Wants to Delete Record ?")){
+ if(confirm("Bạn có chắc chắn muốn xóa bản ghi này không?")){
     var base_url=$("#base_url").val().trim();
     $(".box").append('<div class="overlay"><i class="fa fa-refresh fa-spin"></i></div>');
    $.post(base_url+"suppliers/delete_opening_balance_entry",{entry_id:entry_id,supplier_id:$("#q_id").val()},function(result){

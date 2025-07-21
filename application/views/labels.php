@@ -134,7 +134,7 @@
                                                 <button type="button" id="preview" class="btn bg-maroon btn-block btn-flat btn-lg payments_modal" title="Preview Labels">Xem trước</button>
                                              </div>
                                              <div class="col-sm-3"><a href="<?= base_url()?>dashboard">
-                                                <button type="button" class="btn bg-gray btn-block btn-flat btn-lg" title="Go Dashboard">Close</button>
+                                                <button type="button" class="btn bg-gray btn-block btn-flat btn-lg" title="Go Dashboard">Đóng</button>
                                               </a>
                                             </div>
                                           </center>
@@ -154,7 +154,7 @@
                                             
                                           </span>
                                           <div class="col-sm-1">
-                                            <input type="button" class="btn btn-primary btn-flat" id="print" value="Print">
+                                            <input type="button" class="btn btn-primary btn-flat" id="print" value="In tem nhãn">
                                           </div>
                                        </div>
                                     </div>

@@ -138,7 +138,7 @@ class Customers extends MY_Controller {
 											if($this->permissions('customers_delete') && $customers->id!=1)
 											$str2.='<li>
 												<a style="cursor:pointer" title="Delete Record ?" onclick="delete_customers('.$customers->id.')">
-													<i class="fa fa-fw fa-trash text-red"></i>Khai trừ khỏi Đảng!
+													<i class="fa fa-fw fa-trash text-red"></i>Xóa khách hàng
 												</a>
 											</li>
 											

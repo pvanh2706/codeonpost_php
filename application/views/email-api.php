@@ -172,7 +172,7 @@ $sms_status = $this->db->query("select sms_status from db_company where id=1")->
               <!-- /.box-body -->
 			  
 			  <?php
-                        $btn_name="Update";
+                        $btn_name="Cập nhật";
                             $btn_id="update";
                         ?>
 						
@@ -184,7 +184,7 @@ $sms_status = $this->db->query("select sms_status from db_company where id=1")->
 					<button type="button" class="btn btn-success" id="<?php echo $btn_id; ?>"><?php echo $btn_name; ?></button>
 					
 						
-						<a href='<?php echo $base_url; ?>dashboard'><button type="button" class="btn btn-danger" title="Go Dashboard">Close</button></a>
+						<a href='<?php echo $base_url; ?>dashboard'><button type="button" class="btn btn-danger" title="Go Dashboard">Đóng</button></a>
 					 </div>  
 				   </div>  
               </div>

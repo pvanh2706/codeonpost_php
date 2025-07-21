@@ -77,7 +77,7 @@ $("#save,#update").on("click",function(e){
       }
       
 
-      if(confirm("Do you wants to update ?")){
+      if(confirm("Bạn chắc chắn muốn cập nhật dữ liệu ?")){
         e.preventDefault();
         data = new FormData($('#users-form')[0]);//form name
         /*Check XSS Code*/
@@ -114,7 +114,7 @@ $("#save,#update").on("click",function(e){
     }
       
 
-        /*if(confirm("Are you sure ?")){
+        /*if(confirm("Bạn có chắc chắn không??")){
           
           if(!xss_validation(new_user)){ return false; }
           if(!xss_validation(newpass)){ return false; }
@@ -201,7 +201,7 @@ function update_status(id,status)
 function delete_user(q_id)
 {
   
-   if(confirm("Are you sure ?")){
+   if(confirm("Bạn có chắc chắn không??")){
     $(".box").append('<div class="overlay"><i class="fa fa-refresh fa-spin"></i></div>');
    $.post("delete_user",{q_id:q_id},function(result){
    //alert(result);return;

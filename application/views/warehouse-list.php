@@ -53,7 +53,7 @@
                   <th>Mobile</th>
                   <th>Email</th>
                   <th>status</th>
-                  <th>Action</th>
+                  <th>Thao tác</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -86,7 +86,7 @@
               <td>
                 <div class="btn-group" title="View Account">
                     <a class="btn btn-primary btn-o dropdown-toggle" data-toggle="dropdown" href="#">
-                      Action <span class="caret"></span>
+                      Thao tác <span class="caret"></span>
                     </a>
                     <ul role="menu" class="dropdown-menu dropdown-light pull-right">
                       <li>
@@ -140,8 +140,8 @@
 <script type="text/javascript">
   function delete_warehouse(id)
   {
-     if(confirm("Do You Wants to Delete Record ?")){
-      $(".box").append('<div class="overlay"><i class="fa fa-refresh fa-spin"></i></div>');
+    if(confirm("Bạn có muốn xóa bản ghi này không?")){
+     $(".box").append('<div class="overlay"><i class="fa fa-refresh fa-spin"></i></div>');
      $.post("warehouse/delete_warehouse",{id:id},function(result){
      //alert(result);return;
        if(result=="success")

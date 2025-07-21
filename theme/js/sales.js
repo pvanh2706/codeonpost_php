@@ -1,3 +1,34 @@
+// Hàm format tiền tệ Việt Nam
+function formatCurrency(amount) {
+    return parseFloat(amount).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.') + '₫';
+}
+
+// Hàm format số (không có ký hiệu tiền tệ)
+function formatNumber(amount) {
+    return parseFloat(amount).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
+}
+
+// Hàm parse tiền tệ về số
+function parseCurrency(str) {
+    return parseFloat(str.replace(/[^0-9.-]+/g, ''));
+}
+
+// Format input tiền tệ cho dòng mới
+function formatNewRowInputs(rowcount) {
+    $('#td_data_' + rowcount + '_10').on('input', function() {
+        var value = $(this).val().replace(/[^0-9]/g, '');
+        if (value) {
+            $(this).val(formatNumber(value));
+        }
+    });
+    
+    $('#td_data_' + rowcount + '_8').on('input', function() {
+        var value = $(this).val().replace(/[^0-9]/g, '');
+        if (value) {
+            $(this).val(formatNumber(value));
+        }
+    });
+}
 
 //On Enter Move the cursor to desigtation Id
 function shift_cursor(kevent,target){
@@ -78,15 +109,16 @@ $('#save,#update').on("click",function (e) {
         }
     }*/
 
-    var tot_subtotal_amt=$("#subtotal_amt").text();
-    var other_charges_amt=$("#other_charges_amt").text();//other_charges include tax calcualated amount
-    var tot_discount_to_all_amt=$("#discount_to_all_amt").text();
-    var tot_round_off_amt=$("#round_off_amt").text();
-    var tot_total_amt=$("#total_amt").text();
+    // Parse về số trước khi gửi đi
+    var tot_subtotal_amt=parseCurrency($("#subtotal_amt").text());
+    var other_charges_amt=parseCurrency($("#other_charges_amt").text());//other_charges include tax calcualated amount
+    var tot_discount_to_all_amt=parseCurrency($("#discount_to_all_amt").text());
+    var tot_round_off_amt=parseCurrency($("#round_off_amt").text());
+    var tot_total_amt=parseCurrency($("#total_amt").text());
 
     
     
-			//if(confirm("Do You Wants to Save Record ?")){
+			//if(confirm("Bạn có chắc chắn muốn lưu không ??")){
 				e.preventDefault();
 				data = new FormData($('#sales-form')[0]);//form name
         /*Check XSS Code*/
@@ -277,6 +309,10 @@ function return_row_with_data(item_id){
         success.currentTime = 0;
         success.play();
         enable_or_disable_item_discount();
+        
+        // Format tiền tệ cho các input trong dòng mới
+        formatNewRowInputs(rowcount);
+        
         $("#item_search").removeClass('ui-autocomplete-loader-center');
         $("#td_data_"+rowcount+"_3").focus();
         $("#td_data_"+rowcount+"_3").select();
@@ -326,13 +362,13 @@ function update_paid_payment_total() {
   var tot=0;
   for(i=1;i<rowcount;i++){
     if(document.getElementById("paid_amt_"+i)){
-      tot += parseFloat($("#paid_amt_"+i).html());
+      tot += parseFloat($("#paid_amt_"+i).html().replace(/[^0-9]/g, ''));
     }
   }
-  $("#paid_amt_tot").html(tot.toFixed(0));
+  $("#paid_amt_tot").html(formatCurrency(tot));
 }
 function delete_payment(payment_id){
- if(confirm("Do You Wants to Delete Record ?")){
+ if(confirm("Bạn có chắc chắn muốn xóa bản ghi này không?")){
     var base_url=$("#base_url").val().trim();
     $(".box").append('<div class="overlay"><i class="fa fa-refresh fa-spin"></i></div>');
    $.post(base_url+"sales/delete_payment",{payment_id:payment_id},function(result){
@@ -365,7 +401,7 @@ function delete_payment(payment_id){
 function delete_sales(q_id)
 {
   
-   if(confirm("Do You Wants to Delete Record ?")){
+   if(confirm("Bạn có chắc chắn muốn xóa bản ghi này không?")){
     $(".box").append('<div class="overlay"><i class="fa fa-refresh fa-spin"></i></div>');
     $.post("sales/delete_sales",{q_id:q_id},function(result){
    //alert(result);return;
@@ -390,7 +426,7 @@ function multi_delete(){
   //var base_url=$("#base_url").val().trim();
     var this_id=this.id;
     
-    if(confirm("Are you sure ?")){
+    if(confirm("Bạn có chắc chắn không??")){
       data = new FormData($('#table_form')[0]);//form name
       /*Check XSS Code*/
       if(!xss_validation(data)){ return false; }
@@ -632,7 +668,7 @@ function save_stt(sales_id){
 
 
 function delete_sales_payment(payment_id){
- if(confirm("Do You Wants to Delete Record ?")){
+ if(confirm("Bạn có chắc chắn muốn xóa bản ghi này không?")){
     var base_url=$("#base_url").val().trim();
     $(".box").append('<div class="overlay"><i class="fa fa-refresh fa-spin"></i></div>');
    $.post(base_url+"sales/delete_payment",{payment_id:payment_id},function(result){

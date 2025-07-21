@@ -19,7 +19,7 @@
             <section class="content-header">
                <h1>
                   <?=$page_title;?>
-                  <small>Add/Update Brand</small>
+                  <small>Thêm mới/cập nhật nhà cung cấp</small>
                </h1>
                <ol class="breadcrumb">
                   <li><a href="<?php echo $base_url; ?>dashboard"><i class="fa fa-dashboard"></i> Home</a></li>
@@ -35,7 +35,7 @@
                      <!-- Horizontal Form -->
                      <div class="box box-info ">
                         <div class="box-header with-border">
-                           <h3 class="box-title">Please Enter Valid Data</h3>
+                           <h3 class="box-title">Vui lòng nhập dữ liệu</h3>
                         </div>
                         <!-- /.box-header -->
                         <!-- form start -->
@@ -48,7 +48,7 @@
                                  <div class="col-sm-4">
                                     <input type="file" id="import_file" name="import_file">
                                     <span id="import_file_msg" style="display:block;" class="text-danger">
-                                      Note: File must be in CSV format.
+                                      Lưu ý: Tệp phải là định dạng CSV.
                                     </span>
                                  </div>
                               </div>
@@ -57,11 +57,11 @@
                            <div class="box-footer">
                               <div class="col-sm-8 text-center">
                                  <div class="col-md-3 ">
-                                    <button type="button" id="import" class=" btn btn-block btn-success" title="Save Data"><i class="fa fa-arrow-circle-o-left "></i> Import</button>
+                                    <button type="button" id="import" class=" btn btn-block btn-success" title="Save Data"><i class="fa fa-arrow-circle-o-left "></i> Nhập dữ liệu </button>
                                  </div>
                                  <div class="col-sm-3">
                                     <a href="<?=base_url('dashboard');?>">
-                                    <button type="button" class="col-sm-3 btn btn-block btn-warning close_btn" title="Go Dashboard">Close</button>
+                                    <button type="button" class="col-sm-3 btn btn-block btn-warning close_btn" title="Go Dashboard">Đóng</button>
                                     </a>
                                  </div>
                               </div>
@@ -206,7 +206,7 @@
             return;
           }
 
-          if(confirm("Are you sure ?")){
+          if(confirm("Bạn có chắc chắn không?")){
             e.preventDefault();
             data = new FormData($('#import-form')[0]);//form name
             /*Check XSS Code*/

@@ -84,21 +84,21 @@
         console.log(cusLVs);
         var prname = $("#item_parent_"+id).find("div")[0].getAttribute('data-item-name');
         
-        var pr = $("#item_parent_"+id).find("div")[0].getAttribute('data-x-final-price').replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-        var pr0 = $("#item_parent_"+id).find("div")[0].getAttribute('data-x-sales-price0').replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-        var pr1 = $("#item_parent_"+id).find("div")[0].getAttribute('data-x-sales-price1').replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-        var pr2 = $("#item_parent_"+id).find("div")[0].getAttribute('data-x-sales-price2').replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-        var pr3 = $("#item_parent_"+id).find("div")[0].getAttribute('data-x-sales-price3').replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        var pr = $("#item_parent_"+id).find("div")[0].getAttribute('data-x-final-price').replace(/\B(?=(\d{3})+(?!\d))/g, '.') + '₫';
+        var pr0 = $("#item_parent_"+id).find("div")[0].getAttribute('data-x-sales-price0').replace(/\B(?=(\d{3})+(?!\d))/g, '.') + '₫';
+        var pr1 = $("#item_parent_"+id).find("div")[0].getAttribute('data-x-sales-price1').replace(/\B(?=(\d{3})+(?!\d))/g, '.') + '₫';
+        var pr2 = $("#item_parent_"+id).find("div")[0].getAttribute('data-x-sales-price2').replace(/\B(?=(\d{3})+(?!\d))/g, '.') + '₫';
+        var pr3 = $("#item_parent_"+id).find("div")[0].getAttribute('data-x-sales-price3').replace(/\B(?=(\d{3})+(?!\d))/g, '.') + '₫';
         var img = $("#item_parent_"+id).find("div")[0].getAttribute('data-x-images');
         
         
         $("#imgs").attr('src',img.replace('_thumb', ''));
         $(".modal-body #prname").html( prname );
-        $(".modal-body #pr").html( pr );
-        $(".modal-body #pr0").html( pr0 );
-        $(".modal-body #pr1").html( pr1 );
-        $(".modal-body #pr2").html( pr2 );
-        $(".modal-body #pr3").html( pr3 );
+        $("#sales_item2_finalprice").html( pr );
+        $("#sales_item2_finalprice0").html( pr0 );
+        $("#sales_item2_finalprice1").html( pr1 );
+        $("#sales_item2_finalprice2").html( pr2 );
+        $("#sales_item2_finalprice3").html( pr3 );
         
         
         

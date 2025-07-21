@@ -19,7 +19,44 @@
  {
  padding-left: 2px;
  padding-right: 2px;  
-
+ }
+ 
+ /* Style cho ô tìm kiếm */
+ #item_search {
+   font-size: 16px;
+   padding: 10px;
+   border: 2px solid #ddd;
+   border-radius: 5px;
+ }
+ 
+ #item_search:focus {
+   border-color: #3c8dbc;
+   box-shadow: 0 0 5px rgba(60, 141, 188, 0.5);
+ }
+ 
+ /* Style cho autocomplete loading */
+ .ui-autocomplete-loader-center {
+   background-image: url('<?= base_url(); ?>theme/images/loading.gif');
+   background-repeat: no-repeat;
+   background-position: center right;
+   background-size: 20px 20px;
+ }
+ 
+ /* Style cho bảng sản phẩm */
+ #sales_table {
+   margin-top: 15px;
+ }
+ 
+ .pointer {
+   cursor: pointer;
+ }
+ 
+ .text-center {
+   text-align: center;
+ }
+ 
+ .text-right {
+   text-align: right;
  }
 </style>
 </head>
@@ -130,6 +167,12 @@
                            <input type="hidden" id="base_url" value="<?php echo $base_url;; ?>">
                            <input type="hidden" value='1' id="hidden_rowcount" name="hidden_rowcount">
                            <input type="hidden" value='0' id="hidden_update_rowid" name="hidden_update_rowid">
+                           <?php if(!empty($sales_id)) { ?>
+                           <input type="hidden" id="sales_id" name="sales_id" value="<?= $sales_id; ?>">
+                           <?php } ?>
+                           <?php if(!empty($return_id)) { ?>
+                           <input type="hidden" id="return_id" name="return_id" value="<?= $return_id; ?>">
+                           <?php } ?>
 
                           
                            <div class="box-body">
@@ -213,14 +256,15 @@
                                 <div class="col-md-12">
                                   <div class="box">
                                     <div class="box-info">
-                                      <!--div class="box-header">
+                                      <div class="box-header">
                                         <div class="col-md-8 col-md-offset-2 d-flex justify-content" >
                                           <div class="input-group">
-                                                <span class="input-group-addon" title="Select Items"><i class="fa fa-barcode"></i></span>
-                                                 <input type="text" class="form-control " placeholder="Item name/Barcode/Itemcode" id="item_search">
+                                                <span class="input-group-addon" title="Quét mã vạch hoặc tìm kiếm sản phẩm"><i class="fa fa-barcode"></i></span>
+                                                 <input type="text" class="form-control " placeholder="Quét mã vạch hoặc nhập tên sản phẩm để tìm kiếm..." id="item_search" name="item_search" autocomplete="off">
+                                                 <span class="input-group-addon" title="Tìm kiếm"><i class="fa fa-search"></i></span>
                                               </div>
                                         </div>
-                                      </div-->
+                                      </div>
                                       <div class="box-body">
                                         <div class="table-responsive" style="width: 100%">
                                         <table class="table table-hover table-bordered" style="width:100%" id="sales_table">
@@ -505,38 +549,66 @@
 
                                 if($oper=='return_against_sales'){
                                   $btn_id='save';
-                                  $btn_name="Save";
+                                  $btn_name="Lưu";
                                   echo '<input type="hidden" name="sales_id" id="sales_id" value="'.$sales_id.'"/>';
                                 }
                                 if($oper=='edit_existing_return'){
                                   $btn_id='update';
-                                  $btn_name="Update";
+                                  $btn_name="Cập nhật";
                                   echo '<input type="hidden" name="return_id" id="return_id" value="'.$return_id.'"/>';
                                   echo '<input type="hidden" name="sales_id" id="sales_id" value="'.$sales_id.'"/>';
                                 }
                                 if($oper=='create_new_return'){
                                   $btn_id='create';
-                                  $btn_name="Create";
+                                  $btn_name="Tạo mới";
                                 }
 
                                 /*if(isset($sales_id)){
                                   $btn_id='update';
-                                  $btn_name="Update";
+                                  $btn_name="Cập nhật";
                                   echo '<input type="hidden" name="sales_id" id="sales_id" value="'.$sales_id.'"/>';
                                 }
                                 else{
                                   $btn_id='save';
-                                  $btn_name="Save";
+                                  $btn_name="Lưu";
                                 }*/
 
                                 ?>
+                                 
+                                 <?php if($oper=='edit_existing_return') { ?>
+                                 <!-- Nút in hóa đơn chỉ hiển thị khi chỉnh sửa đơn trả hàng -->
+                                 <div class="col-md-2">
+                                    <button type="button" onclick="print_return_invoice(<?= $return_id; ?>)" class="btn btn-warning btn-block btn-flat btn-lg" title="In hóa đơn trả hàng (Ctrl+P)">
+                                       <i class="fa fa-print"></i> In hóa đơn
+                                    </button>
+                                 </div>
+                                 <div class="col-md-2">
+                                    <button type="button" onclick="print_return_invoice_pos(<?= $return_id; ?>)" class="btn btn-info btn-block btn-flat btn-lg" title="In hóa đơn POS (Ctrl+Shift+P)">
+                                       <i class="fa fa-print"></i> In POS
+                                    </button>
+                                 </div>
+                                 <div class="col-md-2">
+                                    <button type="button" onclick="export_return_pdf(<?= $return_id; ?>)" class="btn btn-primary btn-block btn-flat btn-lg" title="Xuất PDF (Ctrl+D)">
+                                       <i class="fa fa-file-pdf-o"></i> PDF
+                                    </button>
+                                 </div>
+                                 <div class="col-md-3">
+                                    <button type="button" id="<?php echo $btn_id;?>" class="btn bg-maroon btn-block btn-flat btn-lg payments_modal" title="Save Data"><?php echo $btn_name;?></button>
+                                 </div>
+                                 <div class="col-sm-3"><a href="<?= base_url()?>dashboard">
+                                    <button type="button" class="btn bg-gray btn-block btn-flat btn-lg" title="Go Dashboard">Đóng</button>
+                                  </a>
+                                </div>
+                                 <?php } else { ?>
+                                 <!-- Layout cũ cho các trường hợp khác -->
                                  <div class="col-md-3 col-md-offset-3">
                                     <button type="button" id="<?php echo $btn_id;?>" class="btn bg-maroon btn-block btn-flat btn-lg payments_modal" title="Save Data"><?php echo $btn_name;?></button>
                                  </div>
                                  <div class="col-sm-3"><a href="<?= base_url()?>dashboard">
-                                    <button type="button" class="btn bg-gray btn-block btn-flat btn-lg" title="Go Dashboard">Close</button>
+                                    <button type="button" class="btn bg-gray btn-block btn-flat btn-lg" title="Go Dashboard">Đóng</button>
                                   </a>
                                 </div>
+                                 <?php } ?>
                               </center>
                            </div>
                            
@@ -591,6 +663,32 @@
             var customer_id = "<?= (!empty($customer_id)) ? $customer_id : '';  ?>";
             
             autoLoadFirstCustomer(customer_id);
+            
+            // Phím tắt in hóa đơn
+            $(document).keydown(function(e) {
+              <?php if($oper=='edit_existing_return') { ?>
+              // Ctrl + P: In hóa đơn A4
+              if (e.ctrlKey && e.keyCode == 80) {
+                e.preventDefault();
+                print_return_invoice(<?= $return_id; ?>);
+                return false;
+              }
+              
+              // Ctrl + Shift + P: In hóa đơn POS
+              if (e.ctrlKey && e.shiftKey && e.keyCode == 80) {
+                e.preventDefault();
+                print_return_invoice_pos(<?= $return_id; ?>);
+                return false;
+              }
+              
+              // Ctrl + D: Xuất PDF
+              if (e.ctrlKey && e.keyCode == 68) {
+                e.preventDefault();
+                export_return_pdf(<?= $return_id; ?>);
+                return false;
+              }
+              <?php } ?>
+            });
 
          });
          //Customer Selection Box Search - END
@@ -603,7 +701,7 @@
             <?php } ?>
          }
          $(".close_btn").on("click",function(){
-           if(confirm('Are you sure you want to navigate away from this page?')){
+           if(confirm('Bạn có chắc chắn muốn rời khỏi trang này không?')){
                window.location='<?php echo $base_url; ?>dashboard';
              }
          });
@@ -632,22 +730,21 @@
 
            //Find the Tax type and Tax amount
            var tax_type = $("#tr_tax_type_"+i).val();
-           var tax_amount = $("#td_data_"+i+"_11").val();
+           var tax_amount = parseAmount($("#td_data_"+i+"_11").val());
 
            var qty=$("#td_data_"+i+"_3").val().trim();
-           var sales_price=parseFloat($("#td_data_"+i+"_10").val().trim());
+           var sales_price = parseAmount($("#td_data_"+i+"_10").val());
            $("#td_data_"+i+"_4").val(sales_price);
            /*Discounr*/
-           var discount_amt=$("#td_data_"+i+"_8").val().trim();
-               discount_amt   =(isNaN(parseFloat(discount_amt)))    ? 0 : parseFloat(discount_amt);
+           var discount_amt = parseAmount($("#td_data_"+i+"_8").val());
 
            var amt=parseFloat(qty) * sales_price;//Taxable
 
            var total_amt=amt-discount_amt;
            total_amt = (tax_type=='Inclusive') ? total_amt : parseFloat(total_amt) + parseFloat(tax_amount);
            
-           //Set Unit cost
-           $("#td_data_"+i+"_9").val('').val(total_amt.toFixed(2));
+           //Set Unit cost - format tiền tệ
+           $("#td_data_"+i+"_9").val(formatCurrency(total_amt));
         
            final_total();
          }
@@ -656,8 +753,6 @@
         
          /* ---------- Final Description of amount ------------*/
          function final_total(){
-           
-
            var rowcount=$("#hidden_rowcount").val();
            var subtotal=parseFloat(0);
            
@@ -667,7 +762,7 @@
           if($("#other_charges_input").val()!=null && $("#other_charges_input").val()!=''){
              
               other_charges_tax_id =$('option:selected', '#other_charges_tax_id').attr('data-tax');
-             other_charges_input=$("#other_charges_input").val();
+             var other_charges_input = parseAmount($("#other_charges_input").val());
              if(other_charges_tax_id>0){
 
                other_charges_per_amt=(other_charges_tax_id * other_charges_input)/100;
@@ -690,10 +785,14 @@
              if(document.getElementById("td_data_"+i+"_3")){
                //customer_id must exist
                if($("#td_data_"+i+"_3").val()!=null && $("#td_data_"+i+"_3").val()!=''){
-                    actual_taxable=actual_taxable+ + +(parseFloat($("#td_data_"+i+"_13").val()).toFixed(2) * parseFloat($("#td_data_"+i+"_3").val()));
-                    subtotal=subtotal+ + +parseFloat($("#td_data_"+i+"_9").val()).toFixed(2);
-                    if($("#td_data_"+i+"_7").val()>=0){
-                      tax_amt=tax_amt+ + +$("#td_data_"+i+"_7").val();
+                    var unit_cost = parseAmount($("#td_data_"+i+"_13").val());
+                    var total_cost = parseAmount($("#td_data_"+i+"_9").val());
+                    var tax_amt_item = parseAmount($("#td_data_"+i+"_7").val());
+                    
+                    actual_taxable=actual_taxable + (unit_cost * parseFloat($("#td_data_"+i+"_3").val()));
+                    subtotal=subtotal + total_cost;
+                    if(tax_amt_item >= 0){
+                      tax_amt=tax_amt + tax_amt_item;
                     }   
                     total_quantity +=parseInt($("#td_data_"+i+"_3").val().trim());
                 }
@@ -710,10 +809,10 @@
            if((subtotal!=null || subtotal!='') && (subtotal!=0)){
              
              //subtotal
-             $("#subtotal_amt").html(subtotal.toFixed(2));
+             $("#subtotal_amt").html(formatCurrency(subtotal));
              
              //other charges total amount
-             $("#other_charges_amt").html(parseFloat(other_charges_total_amt).toFixed(2));
+             $("#other_charges_amt").html(formatCurrency(other_charges_total_amt));
              
              //other charges total amount
             
@@ -722,8 +821,7 @@
              
              //discount_to_all_amt
             // if($("#discount_to_all_input").val()!=null && $("#discount_to_all_input").val()!=''){
-                 var discount_input=parseFloat($("#discount_to_all_input").val());
-                 discount_input = isNaN(discount_input) ? 0 : discount_input;
+                 var discount_input = parseAmount($("#discount_to_all_input").val());
                  var discount=0;
                  if(discount_input>0){
                      var discount_type=$("#discount_to_all_type").val();
@@ -741,24 +839,23 @@
                  else{
                     //discount += $("#")
                  }
-                   discount=parseFloat(discount).toFixed(2);
                    
-                    $("#discount_to_all_amt").html(discount);  
+                    $("#discount_to_all_amt").html(formatCurrency(discount));  
                     $("#hidden_discount_to_all_amt").val(discount);  
              //}
              //subtotal_round=Math.round(taxable);
              subtotal_round=round_off(taxable);//round_off() method custom defined
              subtotal_diff=subtotal_round-taxable;
          
-             $("#round_off_amt").html(parseFloat(subtotal_diff).toFixed(2)); 
-             $("#total_amt").html(parseFloat(subtotal_round).toFixed(2)); 
+             $("#round_off_amt").html(formatCurrency(subtotal_diff)); 
+             $("#total_amt").html(formatCurrency(subtotal_round)); 
              if(save_operation()){
-               $("#amount").val(parseFloat(subtotal_round).toFixed(2));
+               $("#amount").val(formatCurrency(subtotal_round));
              }
-             $("#hidden_total_amt").val(parseFloat(subtotal_round).toFixed(2)); 
+             $("#hidden_total_amt").val(subtotal_round); 
            }
            else{
-             $("#subtotal_amt").html('0.00'); 
+             $("#subtotal_amt").html(formatCurrency(0)); 
              
              $("#tax_amt").html('0.00'); 
              $("#amount").val('0.00');  
@@ -863,8 +960,8 @@
       var tax = $("#tr_tax_value_"+row_id).val(); //%
       var qty=$("#td_data_"+row_id+"_3").val();
           qty = (isNaN(qty)) ? 0 :qty;
-      var sales_price = parseFloat($("#td_data_"+row_id+"_10").val());
-          sales_price = (isNaN(sales_price)) ? 0 :sales_price;
+      // Parse số tiền từ input đã format
+      var sales_price = parseAmount($("#td_data_"+row_id+"_10").val());
           sales_price = sales_price * qty;
 
       /*Discount*/
@@ -878,12 +975,130 @@
 
       var tax_amount = (tax_type=='Inclusive') ? calculate_inclusive(sales_price,tax) : calculate_exclusive(sales_price,tax);
       
-      $("#td_data_"+row_id+"_8").val(discount_amt);
+      $("#td_data_"+row_id+"_8").val(formatNumber(discount_amt));
 
-      $("#td_data_"+row_id+"_11").val(tax_amount);
+      $("#td_data_"+row_id+"_11").val(formatNumber(tax_amount));
 
     }
     //Sale Items Modal Operations End
+
+    // Hàm format input tiền tệ khi nhập
+    $(document).on('input', '#amount', function() {
+      var value = $(this).val().replace(/[^0-9]/g, '');
+      if (value) {
+        var formatted = new Intl.NumberFormat('vi-VN').format(value);
+        $(this).val(formatted);
+      }
+    });
+    
+    // Hàm format các input có class only_currency
+    $(document).on('input', '.only_currency', function() {
+      var value = $(this).val().replace(/[^0-9]/g, '');
+      if (value) {
+        var formatted = new Intl.NumberFormat('vi-VN').format(value);
+        $(this).val(formatted);
+      }
+    });
+
+    // Hàm chuyển đổi string có format tiền tệ thành số
+    function parseAmount(value) {
+      if (typeof value === 'string') {
+        return parseFloat(value.replace(/[^\d]/g, '')) || 0;
+      }
+      return parseFloat(value) || 0;
+    }
+    
+    // Hàm format tiền tệ theo chuẩn Việt Nam
+    function formatCurrency(amount) {
+      if (isNaN(amount) || amount === null || amount === undefined) {
+        return '0';
+      }
+      
+      // Chuyển về số và làm tròn
+      var num = parseFloat(amount);
+      
+      // Format theo chuẩn Việt Nam (dấu . phân cách hàng nghìn)
+      return num.toLocaleString('vi-VN', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      });
+    }
+    
+    // Hàm format số (không có ký hiệu tiền tệ)
+    function formatNumber(amount) {
+      if (isNaN(amount) || amount === null || amount === undefined) {
+        return '0';
+      }
+      
+      // Chuyển về số
+      var num = parseFloat(amount);
+      
+      // Format theo chuẩn Việt Nam (dấu . phân cách hàng nghìn)
+      return num.toLocaleString('vi-VN', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+    
+    // Hàm làm tròn (tương thích với cấu hình hệ thống)
+    function round_off(input = 0) {
+      <?php if(function_exists('is_enabled_round_off') && is_enabled_round_off()){ ?>
+        return Math.round(input);
+      <?php } else { ?>
+        return input;
+      <?php } ?>
+    }
+    
+    // Hàm bật/tắt chiết khấu item
+    function enable_or_disable_item_discount(){
+      var discount_to_all_input = $("#discount_to_all_input").val();
+      if(discount_to_all_input != '' && discount_to_all_input != 0){
+        $(".item_discount").attr("readonly", true);
+        $(".item_discount").val(0);
+      } else {
+        $(".item_discount").attr("readonly", false);
+      }
+      final_total();
+    }
+
+      // Hàm in hóa đơn trả hàng A4
+      function print_return_invoice(return_id) {
+        if (!return_id) {
+          toastr["error"]("Không tìm thấy ID đơn trả hàng!");
+          return;
+        }
+        
+        var base_url = $("#base_url").val();
+        var print_url = base_url + "sales_return/print_invoice/" + return_id;
+        
+        window.open(print_url, "_blank", "scrollbars=1,resizable=1,height=600,width=800");
+      }
+      
+      // Hàm in hóa đơn POS
+      function print_return_invoice_pos(return_id) {
+        if (!return_id) {
+          toastr["error"]("Không tìm thấy ID đơn trả hàng!");
+          return;
+        }
+        
+        var base_url = $("#base_url").val();
+        var print_url = base_url + "sales_return/print_invoice_pos/" + return_id;
+        
+        window.open(print_url, "_blank", "scrollbars=1,resizable=1,height=500,width=400");
+      }
+      
+      // Hàm xuất PDF
+      function export_return_pdf(return_id) {
+        if (!return_id) {
+          toastr["error"]("Không tìm thấy ID đơn trả hàng!");
+          return;
+        }
+        
+        var base_url = $("#base_url").val();
+        var pdf_url = base_url + "sales_return/pdf/" + return_id;
+        
+        window.open(pdf_url, "_blank");
+      }
 
       </script>
 

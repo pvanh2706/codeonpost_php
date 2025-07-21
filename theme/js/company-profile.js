@@ -65,7 +65,7 @@ $('#save,#update').on("click",function (e) {
 	else if(this_id=="update")  //Update start
     {
 							
-					if(confirm("Do You Wants to Update Record ?")){
+					if(confirm("Bạn chắc chắn muốn cập nhật dữ liệu ??")){
 						e.preventDefault();
 						data = new FormData($('#company-form')[0]);//form name
 						/*Check XSS Code*/
@@ -167,7 +167,7 @@ function update_status(id,status)
 function delete_suppliers(q_id)
 {
 	
-   if(confirm("Do You Wants to Delete Record ?")){
+   if(confirm("Bạn có chắc chắn muốn xóa bản ghi này không?")){
    	$(".box").append('<div class="overlay"><i class="fa fa-refresh fa-spin"></i></div>');
    $.post("suppliers/delete_suppliers",{q_id:q_id},function(result){
    //alert(result);return;
