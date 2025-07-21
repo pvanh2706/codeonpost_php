@@ -425,7 +425,7 @@
                           </th>
                        </tr>
                        <tr>
-                          <th class="text-right" style="font-size: 17px;">Phụ phí khác</th>
+                          <th class="text-right" style="font-size: 17px;">Phụ phí (có thuế)</th>
                           <th class="text-right" style="padding-left:10%;font-size: 17px;">
                              <h4><b id="other_charges_amt" name="other_charges_amt"><?=number_format($other_charges_amt, 0, ',', '.') . ' ₫';?></b></h4>
                           </th>
