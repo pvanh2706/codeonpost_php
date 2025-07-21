@@ -191,7 +191,7 @@
                     default:
                         $stts = 'Đang xử lý';
                 } ?>
-          <b>Trạng thái: <span style="color: blue;"><?php echo  $stts; ?></span></b><br>
+          <b>Trạng thái: <span style="color: blue;" id="status_display_<?=$sales_id?>"><?php echo  $stts; ?></span></b><br>
           <!--b>Mã tham chiếu: <?php echo ($reference_no == '') ? 'N/A' : $reference_no; ?></b><br-->
          
         </div>
@@ -336,7 +336,18 @@
                  <div class="form-group">
                     <label for="discount_to_all_input" class="col-sm-4 control-label" style="font-size: 17px;">Tổng chiết khấu</label>    
                     <div class="col-sm-8">
-                       <label class="control-label  " style="font-size: 17px;">: <?=($discount_to_all_input) ? $discount_to_all_input : 'Không áp dụng'; ?></label>
+                       <label class="control-label  " style="font-size: 17px;">: <?php 
+                        if($discount_to_all_input) {
+                            echo $discount_to_all_input;
+                            if($discount_to_all_type == '%') {
+                                echo ' (Phần trăm) = ' . number_format($tot_discount_to_all_amt, 0, ',', '.') . ' ₫';
+                            } else {
+                                echo ' ₫';
+                            }
+                        } else {
+                            echo 'Không áp dụng';
+                        }
+                       ?></label>
                     </div>
                  </div>
               </div>
@@ -354,7 +365,7 @@
            <div class="row">
               <div class="col-md-12">
                  <div class="form-group">
-                    <table class="table table-hover table-bordered" style="width:100%" id=""><h4 class="box-title text-info">Thông tin thanh toán: </h4>
+                    <table class="table table-hover table-bordered" style="width:100%" id="payment_table_<?=$sales_id?>"><h4 class="box-title text-info">Thông tin thanh toán: </h4>
                        <thead>
                           <tr class="bg-purple " >
                              <th>#</th>
@@ -365,7 +376,7 @@
                              
                           </tr>
                        </thead>
-                       <tbody>
+                       <tbody id="payment_tbody_<?=$sales_id?>">
                           <?php 
                             if(isset($sales_id)){
                               $q3 = $this->db->query("select * from db_salespayments where sales_id=$sales_id");
@@ -482,21 +493,21 @@
           In hóa đơn A4
         </a-->
         <?php if($sales_status == 'Quotation') { ?>
-        <span class="btn btn-warning" onclick="stt_shipping_now(<?=$sales_id?>)">
+        <span class="btn btn-warning" id="btn_shipping_<?=$sales_id?>" onclick="stt_shipping_now(<?=$sales_id?>)">
             <i class="fa fa-truck"></i> 
           Đã xuất kho
         </span>
         <?php } ?>
         
         <?php if($sales_status != 'Final') { ?>
-        <span class="btn btn-success" onclick="stt_final_now(<?=$sales_id?>)">
+        <span class="btn btn-success" id="btn_final_<?=$sales_id?>" onclick="stt_final_now(<?=$sales_id?>)">
             <i class="fa fa-check"></i> 
           Đã giao hàng
         </span>
         <?php } ?>
         
         <?php if($payment_status != 'Paid') { ?>
-        <span class="btn btn-primary" onclick="pay_now(<?=$sales_id?>)">
+        <span class="btn btn-primary" id="btn_payment_<?=$sales_id?>" onclick="pay_now(<?=$sales_id?>)">
             <i class="fa fa-dollar"></i> 
           Nhận thanh toán
         </span>
@@ -602,7 +613,17 @@
           toastr["success"]("Hoàn thành!");
           success.currentTime = 0; 
           success.play();
-          $('#example2').DataTable().ajax.reload();
+          
+          // Cập nhật lại bảng thanh toán và trạng thái
+          updatePaymentInfo(sales_id);
+          
+          // Kiểm tra và ẩn nút thanh toán nếu đã thanh toán đủ
+          checkAndUpdatePaymentStatus(sales_id);
+          
+          // Reload datatable nếu có
+          if(typeof $('#example2').DataTable === 'function') {
+            $('#example2').DataTable().ajax.reload();
+          }
         }
         else if(result=="failed")
         {
@@ -678,7 +699,17 @@ function save_stt_final(sales_id){
           toastr["success"]("Hoàn thành!");
           success.currentTime = 0; 
           success.play();
-          $('#example2').DataTable().ajax.reload();
+          
+          // Cập nhật trạng thái hiển thị
+          $("#status_display_" + sales_id).text("Đã giao hàng");
+          
+          // Ẩn nút "Đã giao hàng" vì đã hoàn thành
+          $("#btn_final_" + sales_id).hide();
+          
+          // Reload datatable nếu có
+          if(typeof $('#example2').DataTable === 'function') {
+            $('#example2').DataTable().ajax.reload();
+          }
         }
         else if(result=="failed")
         {
@@ -707,7 +738,18 @@ function save_stt_shipping(sales_id){
           toastr["success"]("Hoàn thành!");
           success.currentTime = 0; 
           success.play();
-          $('#example2').DataTable().ajax.reload();
+          
+          // Cập nhật trạng thái hiển thị
+          $("#status_display_" + sales_id).text("Đã xuất kho");
+          
+          // Ẩn nút "Đã xuất kho" và hiện nút "Đã giao hàng"
+          $("#btn_shipping_" + sales_id).hide();
+          $("#btn_final_" + sales_id).show();
+          
+          // Reload datatable nếu có
+          if(typeof $('#example2').DataTable === 'function') {
+            $('#example2').DataTable().ajax.reload();
+          }
         }
         else if(result=="failed")
         {
@@ -725,6 +767,56 @@ function save_stt_shipping(sales_id){
         $(".overlay").remove();
     });
 }
+</script>
+<script type="text/javascript">
+
+// Hàm cập nhật thông tin thanh toán
+function updatePaymentInfo(sales_id) {
+    $.post('<?= base_url();?>sales/get_payment_info', {sales_id: sales_id}, function(result) {
+        try {
+            var data = JSON.parse(result);
+            if(data.success) {
+                // Cập nhật bảng thanh toán
+                $("#payment_tbody_" + sales_id).html(data.payment_rows);
+            }
+        } catch(e) {
+            console.log('Error parsing payment info:', e);
+        }
+    });
+}
+
+// Hàm kiểm tra và cập nhật trạng thái thanh toán
+function checkAndUpdatePaymentStatus(sales_id) {
+    $.post('<?= base_url();?>sales/check_payment_status', {sales_id: sales_id}, function(result) {
+        try {
+            var data = JSON.parse(result);
+            if(data.success) {
+                if(data.payment_status == 'Paid') {
+                    // Ẩn nút thanh toán nếu đã thanh toán đủ
+                    $("#btn_payment_" + sales_id).hide();
+                    
+                    // Hiển thị thông báo đã thanh toán đủ
+                    toastr["info"]("Hóa đơn đã được thanh toán đầy đủ!");
+                }
+                
+                // Cập nhật các số liệu tổng
+                if(data.grand_total) {
+                    $("#total_amt").html(data.grand_total_formatted);
+                }
+            }
+        } catch(e) {
+            console.log('Error checking payment status:', e);
+        }
+    });
+}
+</script>
+<script>
+// Load dữ liệu thanh toán khi trang load
+$(document).ready(function() {
+    <?php if(isset($sales_id)) { ?>
+    updatePaymentInfo(<?=$sales_id?>);
+    <?php } ?>
+});
 </script>
 <!-- Make sidebar menu hughlighter/selector -->
 <script>$(".sales-list-active-li").addClass("active");</script>

@@ -394,33 +394,41 @@
       </li>
     <?php } ?>
 
-	   <!-- Users -->
-	   <?php if ($this->session->userdata('inv_userid') == '1') { ?>
-     <?php if($CI->permissions('users_add') || $CI->permissions('users_view') || $CI->permissions('roles_view')) { ?>
-     <li class="users-view-active-li users-active-li roles-list-active-li role-active-li treeview">
-          <a href="#">
-            <i class="fa fa-users text-aqua"></i> <span><?= $this->lang->line('users'); ?> Admin</span>
-            <span class="pull-right-container">
-              <i class="fa fa-angle-left pull-right"></i>
-            </span>
+    <!-- Users -->
+    <?php if ($this->session->userdata('inv_userid') == '1') { ?>
+    <?php if($CI->permissions('users_add') || $CI->permissions('users_view') || $CI->permissions('roles_view')) { ?>
+    <li class="users-view-active-li users-active-li roles-list-active-li role-active-li treeview">
+      <a href="#">
+        <i class="fa fa-users text-aqua"></i> <span>Người dùng Admin</span>
+        <span class="pull-right-container">
+          <i class="fa fa-angle-left pull-right"></i>
+        </span>
+      </a>
+      <ul class="treeview-menu">
+        <?php if($CI->permissions('users_add')) { ?>
+        <li class="users-active-li">
+          <a href="<?php echo $base_url; ?>users/add">
+         <i class="fa fa-plus-square-o"></i> <span>Thêm mới</span>
           </a>
-          <ul class="treeview-menu">
-            <?php if($CI->permissions('users_add')) { ?>
-            <li class="users-active-li"><a href="<?php echo $base_url; ?>users/add"><i class="fa fa-plus-square-o "></i> <span>Thêm mới</span></a></li>
-            <?php } ?>
-            <?php if($CI->permissions('users_view')) { ?>
-            <li class="users-view-active-li"><a href="<?php echo $base_url; ?>users/view"><i class="fa fa-list "></i> <span>Danh sách</span></a></li>
-            <?php } ?>
-            <?php if($CI->permissions('roles_view')) { ?>
-            <li class="roles-list-active-li role-active-li">
-              <a href="<?php echo $base_url; ?>roles/view">
-                <i class="fa fa-list "></i> 
-                <span>Bảng quyền hạn</span></a>
-            </li>
-            <?php } ?>
-          </ul>
         </li>
-        <?php } }?>
+        <?php } ?>
+        <?php if($CI->permissions('users_view')) { ?>
+        <li class="users-view-active-li">
+          <a href="<?php echo $base_url; ?>users/view">
+         <i class="fa fa-list"></i> <span>Danh sách</span>
+          </a>
+        </li>
+        <?php } ?>
+        <?php if($CI->permissions('roles_view')) { ?>
+        <li class="roles-list-active-li role-active-li">
+          <a href="<?php echo $base_url; ?>roles/view">
+         <i class="fa fa-list"></i> <span>Bảng quyền hạn</span>
+          </a>
+        </li>
+        <?php } ?>
+      </ul>
+       </li>
+    <?php } } ?>
     <!-- SMS -->
     <?php if ($this->session->userdata('inv_userid') == '1') { ?>
      <?php if($CI->permissions('send_sms') || $CI->permissions('sms_template_view') || $CI->permissions('sms_api_view')) { ?>

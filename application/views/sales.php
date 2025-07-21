@@ -22,20 +22,16 @@ padding-right: 2px;
 
 }
 
-/* Ensure tax columns have consistent borders with discount column */
-#sales_table td[id*="_tax_rate"],
-#sales_table td[id*="_tax_amount"],
-#sales_table td[id*="_before_tax"],
-#sales_table td[id*="_after_tax"] {
-    border: 1px solid #ddd !important;
-    padding: 8px !important;
-    vertical-align: middle !important;
-    text-align: center !important;
+/* Border styling for tax columns */
+.tax-column {
+    border-left: 2px solid #3c8dbc !important;
+    border-right: 2px solid #3c8dbc !important;
 }
-
-/* Ensure all table cells have consistent borders */
-#sales_table.table-bordered td {
-    border: 1px solid #ddd;
+.tax-percent-column {
+    border-left: 2px solid #3c8dbc !important;
+}
+.tax-total-column {
+    border-right: 2px solid #3c8dbc !important;
 }
 </style>
 
@@ -439,10 +435,10 @@ function round_off($amount) {
                                                            <th rowspan='2' style="width:8%;min-width: 120px;">S.Lượng</th>
                                                            <th rowspan='2' style="width:10%">Đ.Giá (<?= $CI->currency() ?>)</th>
                                                            <th rowspan='2' style="width:10%">C.Khấu (<?= $CI->currency() ?>)</th>
-                                                           <th rowspan='2' style="width:8%">Thuế (%)</th>
-                                                           <th rowspan='2' style="width:10%">T.Tiền thuế (<?= $CI->currency() ?>)</th>
-                                                           <th rowspan='2' style="width:10%">T.Trước thuế (<?= $CI->currency() ?>)</th>
-                                                           <th rowspan='2' style="width:12%">T.Sau thuế (<?= $CI->currency() ?>)</th>
+                                                           <th rowspan='2' style="width:8%" class="tax-percent-column">Thuế (%)</th>
+                                                           <th rowspan='2' style="width:10%" class="tax-column">T.Tiền thuế (<?= $CI->currency() ?>)</th>
+                                                           <th rowspan='2' style="width:10%" class="tax-column">T.Trước thuế (<?= $CI->currency() ?>)</th>
+                                                           <th rowspan='2' style="width:12%" class="tax-total-column">T.Sau thuế (<?= $CI->currency() ?>)</th>
                                                            <th rowspan='2' style="width:8%">T.Tác</th>
                                                         </tr>
                                                     </thead>
@@ -495,14 +491,14 @@ function round_off($amount) {
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Số lượng | <span class="total_quantity text-danger" >0</span></span>
-                                                <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Tổng tạm tính | <span class="text-danger" id="subtotal_amt" name="subtotal_amt">0</span></span>
-                                                <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Tổng chiết khấu | <span class="text-danger" id="discount_to_all_amt" name="discount_to_all_amt">0</span></span>
-                                                <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Tổng trước thuế | <span class="text-danger" id="total_before_tax_amt" name="total_before_tax_amt">0</span></span>
-                                                <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Tổng tiền thuế | <span class="text-danger" id="total_tax_amt" name="total_tax_amt">0</span></span>
-                                                <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Tổng sau thuế | <span class="text-danger" id="total_after_tax_amt" name="total_after_tax_amt">0</span></span>
-                                                <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Phụ phí khác | <span class="text-danger" id="other_charges_amt" name="other_charges_amt">0</span></span>
-                                                <!-- <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Làm tròn | <span class="text-danger" id="round_off_amt" name="round_off_amt">0</span></span> -->
-                                                <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" ><strong>Tổng thanh toán</strong> | <span style="font-size:1.3em; font-weight: bold;" class="text-danger" id="total_amt" name="total_amt" ><b>0</b></span></span>
+                                                <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Tổng tạm tính | <span class="text-danger" id="subtotal_amt" name="subtotal_amt">0</span>₫</span>
+                                                <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Tổng chiết khấu | <span class="text-danger" id="discount_to_all_amt" name="discount_to_all_amt">0</span>₫</span>
+                                                <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Tổng trước thuế | <span class="text-danger" id="total_before_tax_amt" name="total_before_tax_amt">0</span>₫</span>
+                                                <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Tổng tiền thuế | <span class="text-danger" id="total_tax_amt" name="total_tax_amt">0</span>₫</span>
+                                                <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Tổng sau thuế | <span class="text-danger" id="total_after_tax_amt" name="total_after_tax_amt">0</span>₫</span>
+                                                <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Phụ phí khác | <span class="text-danger" id="other_charges_amt" name="other_charges_amt">0</span>₫</span>
+                                                <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Làm tròn | <span class="text-danger" id="round_off_amt" name="round_off_amt">0</span>₫</span>
+                                                <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Tổng thanh toán | <span style="font-size:1.3em;" class="text-danger" id="total_amt" name="total_amt" >0</span>₫</span>
                                             </div>
                                         </div>
                                     </div>
@@ -739,17 +735,17 @@ function round_off($amount) {
                  if (existingCells.length >= 4) {
                      var discountCell = existingCells.eq(3); // Cột chiết khấu (index 3)
                      
-                     // Thêm cột thuế % sau cột chiết khấu với border styling giống discount column
-                     discountCell.after('<td id="td_' + rowNum + '_tax_rate" class="text-center" style="vertical-align: middle; border: 1px solid #ddd; padding: 8px;">0%</td>');
+                     // Thêm cột thuế % sau cột chiết khấu
+                     discountCell.after('<td id="td_' + rowNum + '_tax_rate" class="text-center tax-percent-column" style="vertical-align: middle;">0%</td>');
                      
-                     // Thêm cột tiền thuế với border styling
-                     $('#td_' + rowNum + '_tax_rate').after('<td id="td_' + rowNum + '_tax_amount" class="text-center" style="vertical-align: middle; border: 1px solid #ddd; padding: 8px;">0₫</td>');
+                     // Thêm cột tiền thuế
+                     $('#td_' + rowNum + '_tax_rate').after('<td id="td_' + rowNum + '_tax_amount" class="text-center tax-column" style="vertical-align: middle;">0₫</td>');
                      
-                     // Thêm cột tổng trước thuế với border styling
-                     $('#td_' + rowNum + '_tax_amount').after('<td id="td_' + rowNum + '_before_tax" class="text-center" style="vertical-align: middle; border: 1px solid #ddd; padding: 8px;">0₫</td>');
+                     // Thêm cột tổng trước thuế
+                     $('#td_' + rowNum + '_tax_amount').after('<td id="td_' + rowNum + '_before_tax" class="text-center tax-column" style="vertical-align: middle;">0₫</td>');
                      
-                     // Thêm cột tổng sau thuế với border styling
-                     $('#td_' + rowNum + '_before_tax').after('<td id="td_' + rowNum + '_after_tax" class="text-center" style="vertical-align: middle; border: 1px solid #ddd; padding: 8px;">0₫</td>');
+                     // Thêm cột tổng sau thuế
+                     $('#td_' + rowNum + '_before_tax').after('<td id="td_' + rowNum + '_after_tax" class="text-center tax-total-column" style="vertical-align: middle;">0₫</td>');
                      
                      console.log('Tax columns added for row ' + rowNum);
                  }

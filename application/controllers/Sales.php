@@ -410,15 +410,66 @@ class Sales extends MY_Controller {
 		echo $this->sales->save_stt_shipping();
 	}
 	
-	public function save_stt_invoice($stt){
-		$this->permission_check_with_msg('sales_add');
-		//echo $this->sales->save_stt();
+	// Method để lấy thông tin thanh toán cập nhật
+	public function get_payment_info(){
+		$this->permission_check_with_msg('sales_view');
+		$sales_id = $this->input->post('sales_id');
+		
+		if(!$sales_id) {
+			echo json_encode(['success' => false, 'message' => 'Invalid sales ID']);
+			return;
+		}
+		
+		// Lấy thông tin thanh toán
+		$q3 = $this->db->query("select * from db_salespayments where sales_id=$sales_id");
+		$payment_rows = '';
+		
+		if($q3->num_rows()>0){
+			$i=1;
+			$total_paid = 0;
+			foreach ($q3->result() as $res3) {
+				$payment_rows .= "<tr class='text-center text-bold' id='payment_row_".$res3->id."'>";
+				$payment_rows .= "<td>".$i++."</td>";
+				$payment_rows .= "<td>".show_date($res3->payment_date)."</td>";
+				$payment_rows .= "<td class='text-right'>".number_format($res3->payment, 0, ',', '.') . ' ₫'."</td>";
+				$payment_rows .= "<td>".$res3->payment_type."</td>";
+				$payment_rows .= "<td>".$res3->payment_note."</td>";
+				$payment_rows .= "</tr>";
+				$total_paid +=$res3->payment;
+			}
+			$payment_rows .= "<tr class='text-right text-bold'><td colspan='4' >Tổng thanh toán </td><td>".number_format($total_paid, 0, ',', '.') . ' ₫'."</td></tr>";
+		}
+		else{
+			$payment_rows = "<tr><td colspan='5' class='text-center text-bold'>Chưa có thanh toán nào cho hóa đơn này!!</td></tr>";
+		}
+		
+		echo json_encode(['success' => true, 'payment_rows' => $payment_rows]);
 	}
 	
-	
-	public function view_payments_modal(){
+	// Method để kiểm tra trạng thái thanh toán
+	public function check_payment_status(){
 		$this->permission_check_with_msg('sales_view');
-		$sales_id=$this->input->post('sales_id');
-		echo $this->sales->view_payments_modal($sales_id);
+		$sales_id = $this->input->post('sales_id');
+		
+		if(!$sales_id) {
+			echo json_encode(['success' => false, 'message' => 'Invalid sales ID']);
+			return;
+		}
+		
+		// Lấy thông tin hóa đơn
+		$q = $this->db->query("SELECT payment_status, grand_total, paid_amount FROM db_sales WHERE id=$sales_id");
+		if($q->num_rows() > 0) {
+			$res = $q->row();
+			
+			echo json_encode([
+				'success' => true, 
+				'payment_status' => $res->payment_status,
+				'grand_total' => $res->grand_total,
+				'grand_total_formatted' => number_format($res->grand_total, 0, ',', '.') . ' ₫',
+				'paid_amount' => $res->paid_amount
+			]);
+		} else {
+			echo json_encode(['success' => false, 'message' => 'Sales not found']);
+		}
 	}
 }

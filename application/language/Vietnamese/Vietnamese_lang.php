@@ -198,3 +198,6 @@ $lang['value'] = 'Giá trị';
 $lang['required'] = 'Bắt buộc';
 $lang['optional'] = 'Tùy chọn';
 $lang['import_file'] = 'Tập tin nhập';
+$lang['send_sms'] = 'Gửi SMS';
+$lang['sms_templates'] = 'Mẫu SMS';
+$lang['sms_api'] = 'API SMS';
