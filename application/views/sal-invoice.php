@@ -340,7 +340,7 @@
                         if($discount_to_all_input) {
                             echo $discount_to_all_input;
                             if($discount_to_all_type == '%') {
-                                echo ' (Phần trăm) = ' . number_format($tot_discount_to_all_amt, 0, ',', '.') . ' ₫';
+                                echo ' (%) = ' . number_format($tot_discount_to_all_amt, 0, ',', '.') . ' ₫';
                             } else {
                                 echo ' ₫';
                             }
@@ -425,7 +425,17 @@
                           </th>
                        </tr>
                        <tr>
-                          <th class="text-right" style="font-size: 17px;">Phụ phí (có thuế)</th>
+                          <th class="text-right" style="font-size: 17px;">Phụ phí khác
+                          <?php 
+                          // Display tax info for other charges if applicable
+                          if ($other_charges_tax_id > 0) {
+                            $q_other_tax = $this->db->query("SELECT tax_name, tax FROM db_tax WHERE id = '$other_charges_tax_id'")->row();
+                            if (!empty($q_other_tax)) {
+                              echo " <small class='text-muted'>(có thuế " . $q_other_tax->tax_name . " " . $q_other_tax->tax . "%)</small>";
+                            }
+                          }
+                          ?>
+                          </th>
                           <th class="text-right" style="padding-left:10%;font-size: 17px;">
                              <h4><b id="other_charges_amt" name="other_charges_amt"><?=number_format($other_charges_amt, 0, ',', '.') . ' ₫';?></b></h4>
                           </th>
@@ -459,6 +469,56 @@
                              <h4><b><?php 
                                 $total_after_discount = $total_before_discount - $tot_discount_to_all_amt;
                                 echo number_format($total_after_discount, 0, ',', '.') . ' ₫';
+                             ?></b></h4>
+                          </th>
+                       </tr>
+                       
+                       <?php
+                       // Collect tax details by type for breakdown display
+                       $tax_details = array();
+                       $q_tax_breakdown = $this->db->query("SELECT 
+                                                             b.tax_name, 
+                                                             b.tax, 
+                                                             SUM(a.tax_amt) as total_tax_amt
+                                                             FROM db_salesitems a
+                                                             LEFT JOIN db_tax b ON b.id = a.tax_id
+                                                             WHERE a.sales_id = '$sales_id'
+                                                             AND a.tax_amt > 0
+                                                             GROUP BY b.id, b.tax_name, b.tax");
+                       foreach ($q_tax_breakdown->result() as $tax_row) {
+                         $tax_details[] = array(
+                           'name' => $tax_row->tax_name,
+                           'rate' => $tax_row->tax,
+                           'amount' => $tax_row->total_tax_amt
+                         );
+                       }
+                       ?>
+                       
+                       <!-- Tax breakdown by type -->
+                       <?php if (!empty($tax_details)): ?>
+                         <?php foreach ($tax_details as $tax_detail): ?>
+                         <tr>
+                            <th class="text-right" style="font-size: 17px;"><?php echo $tax_detail['name']; ?> (<?php echo $tax_detail['rate']; ?>%)</th>
+                            <th class="text-right" style="padding-left:10%;font-size: 17px;">
+                               <h4><b><?php echo number_format($tax_detail['amount'], 0, ',', '.') . ' ₫'; ?></b></h4>
+                            </th>
+                         </tr>
+                         <?php endforeach; ?>
+                       <?php endif; ?>
+                       
+                       <tr>
+                          <th class="text-right" style="font-size: 17px;">Tổng tiền thuế</th>
+                          <th class="text-right" style="padding-left:10%;font-size: 17px;">
+                             <h4><b><?php echo number_format($tot_tax_amt, 0, ',', '.') . ' ₫'; ?></b></h4>
+                          </th>
+                       </tr>
+                       
+                       <tr>
+                          <th class="text-right" style="font-size: 17px;">Tổng sau thuế</th>
+                          <th class="text-right" style="padding-left:10%;font-size: 17px;">
+                             <h4><b><?php 
+                                $total_after_tax = $total_after_discount + $tot_tax_amt;
+                                echo number_format($total_after_tax, 0, ',', '.') . ' ₫';
                              ?></b></h4>
                           </th>
                        </tr>

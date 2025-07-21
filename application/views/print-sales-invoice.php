@@ -233,6 +233,7 @@ body{
               $tot_discount_amt=0;
               $tot_unit_total_cost=0;
               $tot_total_cost=0;
+              $calculated_subtotal=0; // Tổng tạm tính được tính từ items
               $q2=$this->db->query("SELECT c.item_name, a.sales_qty,
                                   a.price_per_unit, b.tax,b.tax_name,a.tax_amt,
                                   a.discount_input,a.discount_amt, a.unit_total_cost,
@@ -244,6 +245,11 @@ body{
               foreach ($q2->result() as $res2) {
                   $discount = (empty($res2->discount_input)||$res2->discount_input==0)? '0':$res2->discount_input."%";
                   $discount_amt = (empty($res2->discount_amt)||$res2->discount_input==0)? '0':$res2->discount_amt."";
+                  
+                  // Tính tổng tạm tính = số lượng × đơn giá (trước chiết khấu và thuế)
+                  $line_subtotal = $res2->sales_qty * $res2->price_per_unit;
+                  $calculated_subtotal += $line_subtotal;
+                  
                   echo "<tr>";  
                   echo "<td>".++$i."</td>";
                   echo "<td>".$res2->item_name."</td>";
@@ -278,11 +284,68 @@ body{
     <td colspan="1" style="text-align: right;" ><b><?php echo number_format(($tot_total_cost),2,'.',''); ?></b></td>
   </tr>
   <tr>
-    <td colspan="9" style="text-align: right;"><b><?= $this->lang->line('subtotal'); ?></b></td>
-    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(round($subtotal),2,'.',''); ?></b></td>
+    <td colspan="9" style="text-align: right;"><b><?= $this->lang->line('subtotal'); ?></b> <small>(trước thuế)</small></td>
+    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(round($calculated_subtotal),2,'.',''); ?></b></td>
   </tr>
   <tr>
-    <td colspan="9" style="text-align: right;"><b><?= $this->lang->line('other_charges'); ?></b></td>
+    <td colspan="9" style="text-align: right;"><b>Tổng chiết khấu sản phẩm</b></td>
+    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(($tot_discount_amt),2,'.',''); ?></b></td>
+  </tr>
+  <tr>
+    <td colspan="9" style="text-align: right;"><b>Tổng trước thuế</b> <small>(Sau CK sản phẩm)</small></td>
+    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(round($calculated_subtotal - $tot_discount_amt),2,'.',''); ?></b></td>
+  </tr>
+  <?php
+  // Collect tax details by type for breakdown display
+  $tax_details = array();
+  $q_tax_breakdown = $this->db->query("SELECT 
+                                        b.tax_name, 
+                                        b.tax, 
+                                        SUM(a.tax_amt) as total_tax_amt
+                                        FROM db_salesitems a
+                                        LEFT JOIN db_tax b ON b.id = a.tax_id
+                                        WHERE a.sales_id = '$sales_id'
+                                        AND a.tax_amt > 0
+                                        GROUP BY b.id, b.tax_name, b.tax");
+  foreach ($q_tax_breakdown->result() as $tax_row) {
+    $tax_details[] = array(
+      'name' => $tax_row->tax_name,
+      'rate' => $tax_row->tax,
+      'amount' => $tax_row->total_tax_amt
+    );
+  }
+  ?>
+  
+  <!-- Tax breakdown by type -->
+  <?php if (!empty($tax_details)): ?>
+    <?php foreach ($tax_details as $tax_detail): ?>
+    <tr>
+      <td colspan="9" style="text-align: right;"><b><?php echo $tax_detail['name']; ?> (<?php echo $tax_detail['rate']; ?>%)</b></td>
+      <td colspan="1" style="text-align: right;"><b><?php echo number_format($tax_detail['amount'], 2, '.', ''); ?></b></td>
+    </tr>
+    <?php endforeach; ?>
+  <?php endif; ?>
+  
+  <tr>
+    <td colspan="9" style="text-align: right;"><b>Tổng tiền thuế</b></td>
+    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(($tot_tax_amt),2,'.',''); ?></b></td>
+  </tr>
+  <tr>
+    <td colspan="9" style="text-align: right;"><b>Tổng sau thuế</b> <small>(Trước thuế + Thuế)</small></td>
+    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(round($calculated_subtotal - $tot_discount_amt + $tot_tax_amt),2,'.',''); ?></b></td>
+  </tr>
+  <tr>
+    <td colspan="9" style="text-align: right;"><b><?= $this->lang->line('other_charges'); ?></b>
+    <?php 
+    // Display tax info for other charges if applicable
+    if ($other_charges_tax_id > 0) {
+      $q_other_tax = $this->db->query("SELECT tax_name, tax FROM db_tax WHERE id = '$other_charges_tax_id'")->row();
+      if (!empty($q_other_tax)) {
+        echo " <small>(có thuế " . $q_other_tax->tax_name . " " . $q_other_tax->tax . "%)</small>";
+      }
+    }
+    ?>
+    </td>
     <td colspan="1" style="text-align: right;" ><b><?php echo number_format(round($other_charges_amt),2,'.',''); ?></b></td>
   </tr>
   <tr>
@@ -290,7 +353,7 @@ body{
     <td colspan="1" style="text-align: right;" ><b><?php echo number_format(round($tot_discount_to_all_amt),2,'.',''); ?></b></td>
   </tr>
   <tr>
-    <td colspan="9" style="text-align: right;"><b><?= $this->lang->line('grand_total'); ?></b></td>
+    <td colspan="9" style="text-align: right;"><b><?= $this->lang->line('grand_total'); ?></b> <small>(Sau thuế + Phụ phí - CK tổng)</small></td>
     <td colspan="1" style="text-align: right;" ><b><?php echo number_format(round($grand_total),2,'.',''); ?></b></td>
   </tr>
   <tr>

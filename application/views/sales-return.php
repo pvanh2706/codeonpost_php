@@ -309,21 +309,21 @@
                                     <div class="col-md-12">
                                        <div class="form-group">
                                           <label for="other_charges_input" class="col-sm-4 control-label">Phụ phí khác</label>    
-                                          <div class="col-sm-8">
+                                          <div class="col-sm-4">
                                              <input type="text" class="form-control text-right only_currency" id="other_charges_input" name="other_charges_input" onkeyup="final_total();" value="<?php echo  $other_charges_input; ?>">
                                           </div>
-                                          <!--div class="col-sm-4">
+                                          <div class="col-sm-4">
                                              <select class="form-control " id="other_charges_tax_id" name="other_charges_tax_id" onchange="final_total();" style="width: 100%;">
+                                                <option value="0" data-tax="0">Không thuế</option>
                                                 <?php
                                                    $q1="select * from db_tax where status=1";
                                                    $q1=$this->db->query($q1);
                                                     if($q1->num_rows()>0)
                                                     {
-                                                     echo "<option>None</option>";
                                                      foreach($q1->result() as $res1)
                                                       {
                                                         $selected=($other_charges_tax_id==$res1->id) ? 'selected' : '';
-                                                        echo "<option $selected data-tax='".$res1->tax."' value='".$res1->id."'>".$res1->tax_name."</option>";
+                                                        echo "<option $selected data-tax='".$res1->tax."' value='".$res1->id."'>".$res1->tax_name." (".$res1->tax."%)</option>";
                                                       }
                                                     }
                                                     else
@@ -334,7 +334,7 @@
                                                    }
                                                    ?>
                                              </select>
-                                          </div-->
+                                          </div>
                                        </div>
                                     </div>
                                  </div>
@@ -396,15 +396,39 @@
                                                 </th>
                                              </tr>
                                              <tr>
-                                                <th class="text-right" style="font-size: 17px;">Phụ phí khác</th>
+                                                <th class="text-right" style="font-size: 17px;">Phụ phí khác
+                                                <span id="other_charges_tax_info" style="font-size: 14px; color: #666;"></span>
+                                                </th>
                                                 <th class="text-right" style="padding-left:10%;font-size: 17px;">
                                                    <h4><b id="other_charges_amt" name="other_charges_amt">0.00</b></h4>
                                                 </th>
                                              </tr>
                                              <tr>
-                                                <th class="text-right" style="font-size: 17px;">Tổng chiêt khấu</th>
+                                                <th class="text-right" style="font-size: 17px;">Tổng chiết khấu</th>
                                                 <th class="text-right" style="padding-left:10%;font-size: 17px;">
                                                    <h4><b id="discount_to_all_amt" name="discount_to_all_amt">0.00</b></h4>
+                                                </th>
+                                             </tr>
+                                             <tr>
+                                                <th class="text-right" style="font-size: 17px;">Tổng trước thuế</th>
+                                                <th class="text-right" style="padding-left:10%;font-size: 17px;">
+                                                   <h4><b id="total_before_tax_amt" name="total_before_tax_amt">0.00</b></h4>
+                                                </th>
+                                             </tr>
+                                             <!-- Tax breakdown section -->
+                                             <tbody id="tax_breakdown_section">
+                                                <!-- Tax details will be populated here by JavaScript -->
+                                             </tbody>
+                                             <tr>
+                                                <th class="text-right" style="font-size: 17px;">Tổng tiền thuế</th>
+                                                <th class="text-right" style="padding-left:10%;font-size: 17px;">
+                                                   <h4><b id="total_tax_amt" name="total_tax_amt">0.00</b></h4>
+                                                </th>
+                                             </tr>
+                                             <tr>
+                                                <th class="text-right" style="font-size: 17px;">Tổng sau thuế</th>
+                                                <th class="text-right" style="padding-left:10%;font-size: 17px;">
+                                                   <h4><b id="total_after_tax_amt" name="total_after_tax_amt">0.00</b></h4>
                                                 </th>
                                              </tr>
                                              <!--tr style="<?= (!is_enabled_round_off()) ? 'display: none;' : '';?>">
@@ -707,6 +731,7 @@
          });
          //Initialize Select2 Elements
              $(".select2").select2();
+             $("#other_charges_tax_id").select2();
          //Date picker
              $('.datepicker').datepicker({
                autoclose: true,
@@ -764,7 +789,6 @@
               other_charges_tax_id =$('option:selected', '#other_charges_tax_id').attr('data-tax');
              var other_charges_input = parseAmount($("#other_charges_input").val());
              if(other_charges_tax_id>0){
-
                other_charges_per_amt=(other_charges_tax_id * other_charges_input)/100;
              }
              
@@ -772,13 +796,14 @@
              other_charges_total_amt=parseFloat(other_charges_per_amt)+parseFloat(other_charges_input);
            }
            else{
-             //$("#other_charges_amt").html('0.00');
+             other_charges_total_amt = 0;
            }
            
          
            var tax_amt=0;
            var actual_taxable=0;
            var total_quantity=0;
+           var tax_breakdown = {}; // Object to store tax details by tax_id
          
            for(i=1;i<=rowcount;i++){
          
@@ -788,11 +813,26 @@
                     var unit_cost = parseAmount($("#td_data_"+i+"_13").val());
                     var total_cost = parseAmount($("#td_data_"+i+"_9").val());
                     var tax_amt_item = parseAmount($("#td_data_"+i+"_7").val());
+                    var tax_id = $("#tr_tax_id_"+i).val();
+                    var tax_name = $("#td_data_"+i+"_12").html();
+                    var tax_rate = $("#tr_tax_value_"+i).val();
                     
                     actual_taxable=actual_taxable + (unit_cost * parseFloat($("#td_data_"+i+"_3").val()));
                     subtotal=subtotal + total_cost;
                     if(tax_amt_item >= 0){
                       tax_amt=tax_amt + tax_amt_item;
+                      
+                      // Collect tax breakdown by tax type
+                      if(tax_id && tax_amt_item > 0) {
+                        if(!tax_breakdown[tax_id]) {
+                          tax_breakdown[tax_id] = {
+                            name: tax_name,
+                            rate: tax_rate,
+                            amount: 0
+                          };
+                        }
+                        tax_breakdown[tax_id].amount += tax_amt_item;
+                      }
                     }   
                     total_quantity +=parseInt($("#td_data_"+i+"_3").val().trim());
                 }
@@ -814,38 +854,65 @@
              //other charges total amount
              $("#other_charges_amt").html(formatCurrency(other_charges_total_amt));
              
-             //other charges total amount
-            
-
+             // Update other charges tax info display
+             var other_charges_tax_name = $('#other_charges_tax_id option:selected').text();
+             var other_charges_tax_rate = $('#other_charges_tax_id option:selected').attr('data-tax');
+             if(other_charges_tax_rate > 0 && other_charges_input > 0) {
+               $("#other_charges_tax_info").html('<br><small>(có thuế ' + other_charges_tax_name + ')</small>');
+             } else {
+               $("#other_charges_tax_info").html('');
+             }
+             
              taxable=taxable+subtotal;
              
              //discount_to_all_amt
-            // if($("#discount_to_all_input").val()!=null && $("#discount_to_all_input").val()!=''){
-                 var discount_input = parseAmount($("#discount_to_all_input").val());
-                 var discount=0;
-                 if(discount_input>0){
-                     var discount_type=$("#discount_to_all_type").val();
-                     if(discount_type=='in_fixed'){
-                       taxable-=discount_input;
-                       discount=discount_input;
-                       //Minus
-                     }
-                     else if(discount_type=='in_percentage'){
-                         discount=(taxable*discount_input)/100;
-                        taxable-=discount;
+             var discount_input = parseAmount($("#discount_to_all_input").val());
+             var discount=0;
+             if(discount_input>0){
+                 var discount_type=$("#discount_to_all_type").val();
+                 if(discount_type=='in_fixed'){
+                   taxable-=discount_input;
+                   discount=discount_input;
+                   //Minus
+                 }
+                 else if(discount_type=='in_percentage'){
+                     discount=(taxable*discount_input)/100;
+                    taxable-=discount;
+         
+                 }
+             }
+             else{
+                //discount += $("#")
+             }
+               
+             $("#discount_to_all_amt").html(formatCurrency(discount));  
+             $("#hidden_discount_to_all_amt").val(discount);  
              
-                     }
-                 }
-                 else{
-                    //discount += $("#")
-                 }
-                   
-                    $("#discount_to_all_amt").html(formatCurrency(discount));  
-                    $("#hidden_discount_to_all_amt").val(discount);  
-             //}
-             //subtotal_round=Math.round(taxable);
-             subtotal_round=round_off(taxable);//round_off() method custom defined
-             subtotal_diff=subtotal_round-taxable;
+             // Calculate totals for new fields
+             var total_before_tax = subtotal + other_charges_total_amt - discount;
+             var total_after_tax = total_before_tax + tax_amt;
+             
+             // Update new summary fields
+             $("#total_before_tax_amt").html(formatCurrency(total_before_tax));
+             $("#total_tax_amt").html(formatCurrency(tax_amt));
+             $("#total_after_tax_amt").html(formatCurrency(total_after_tax));
+             
+             // Display tax breakdown
+             var tax_breakdown_html = '';
+             for(var tax_id in tax_breakdown) {
+               if(tax_breakdown[tax_id].amount > 0) {
+                 tax_breakdown_html += '<tr>' +
+                   '<th class="text-right" style="font-size: 15px;">' + tax_breakdown[tax_id].name + ' (' + tax_breakdown[tax_id].rate + '%)</th>' +
+                   '<th class="text-right" style="padding-left:10%;font-size: 15px;">' +
+                   '<h5><b>' + formatCurrency(tax_breakdown[tax_id].amount) + '</b></h5>' +
+                   '</th>' +
+                   '</tr>';
+               }
+             }
+             $("#tax_breakdown_section").html(tax_breakdown_html);
+             
+             subtotal_round=round_off(total_after_tax);//round_off() method custom defined
+             subtotal_diff=subtotal_round-total_after_tax;
          
              $("#round_off_amt").html(formatCurrency(subtotal_diff)); 
              $("#total_amt").html(formatCurrency(subtotal_round)); 
@@ -856,7 +923,10 @@
            }
            else{
              $("#subtotal_amt").html(formatCurrency(0)); 
-             
+             $("#total_before_tax_amt").html(formatCurrency(0));
+             $("#total_tax_amt").html(formatCurrency(0));
+             $("#total_after_tax_amt").html(formatCurrency(0));
+             $("#tax_breakdown_section").html('');
              $("#tax_amt").html('0.00'); 
              $("#amount").val('0.00');  
            }
