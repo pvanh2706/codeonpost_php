@@ -225,7 +225,7 @@ class Site_model extends CI_Model {
 		return array();
 	}
 	
-	public function save_einvoice_config($api_url_einvoice, $api_url, $username, $password, $provider_code)
+	public function save_einvoice_config($api_url_einvoice, $api_url, $username, $password, $provider_code, $tax_code)
 	{
 		$data = array(
 			'api_url_einvoice' => $api_url_einvoice,
@@ -233,6 +233,7 @@ class Site_model extends CI_Model {
 			'username' => $username,
 			'password' => $password, // Trong thực tế nên mã hóa mật khẩu
 			'provider_code' => $provider_code,
+			'tax_code' => $tax_code,
 			'updated_at' => date('Y-m-d H:i:s')
 		);
 		
@@ -263,6 +264,7 @@ class Site_model extends CI_Model {
 			`username` varchar(100) NOT NULL,
 			`password` varchar(255) NOT NULL,
 			`provider_code` varchar(50) NOT NULL,
+			`tax_code` varchar(50) NOT NULL,
 			`status` tinyint(1) DEFAULT '1',
 			`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

@@ -234,6 +234,7 @@
                     <li><strong>Link API nhà cung cấp:</strong> URL endpoint của nhà cung cấp hóa đơn điện tử</li>
                     <li><strong>Tài khoản:</strong> Username được cấp bởi nhà cung cấp</li>
                     <li><strong>Mật khẩu:</strong> Password tương ứng với tài khoản</li>
+                    <li><strong>Mã số thuế doanh nghiệp:</strong> Mã số thuế của doanh nghiệp để xác thực</li>
                     <li><strong>Mã nhà cung cấp:</strong> Mã định danh doanh nghiệp trong hệ thống</li>
                 </ul>
             </div>
@@ -277,6 +278,14 @@
                     <i class="fa fa-eye password-toggle" id="password-toggle"></i>
                 </div>
             </div>
+
+            <div class="form-group">
+                <label for="tax_code">
+                    <i class="fa fa-id-card"></i> Mã số thuế doanh nghiệp *
+                </label>
+                <input type="text" id="tax_code" name="tax_code" required 
+                       placeholder="Nhập mã số thuế doanh nghiệp"
+                       value="<?php echo isset($einvoice_config['tax_code']) ? $einvoice_config['tax_code'] : ''; ?>">
             
             <div class="form-group">
                 <label for="provider_code">
@@ -286,6 +295,7 @@
                     <option value="">-- Chọn nhà cung cấp --</option>
                     <option value="2" <?php echo (isset($einvoice_config['provider_code']) && $einvoice_config['provider_code'] == '2') ? 'selected' : ''; ?>>MInvoice</option>
                     <option value="3" <?php echo (isset($einvoice_config['provider_code']) && $einvoice_config['provider_code'] == '3') ? 'selected' : ''; ?>>Viettel</option>
+                    <option value="6" <?php echo (isset($einvoice_config['provider_code']) && $einvoice_config['provider_code'] == '6') ? 'selected' : ''; ?>>Misa</option>
                 </select>
             </div>
             
@@ -345,7 +355,8 @@ $(document).ready(function() {
             api_url: $('#api_url').val().trim(),
             username: $('#username').val().trim(),
             password: $('#password').val().trim(),
-            provider_code: $('#provider_code').val().trim()
+            provider_code: $('#provider_code').val().trim(),
+            tax_code: $('#tax_code').val().trim()
         };
         
         $.ajax({
@@ -361,7 +372,6 @@ $(document).ready(function() {
                     }
                     showAlert('success', message);
                 } else {
-                    alert('danger', '<i class="fa fa-exclamation-circle"></i> ' + response.message);
                     var errorMessage = '<i class="fa fa-exclamation-circle"></i> ' + response.message;
                     if (response.http_code) {
                         errorMessage += '<br><small>HTTP Code: ' + response.http_code + '</small>';
@@ -442,9 +452,10 @@ $(document).ready(function() {
             api_url: $('#api_url').val().trim(),
             username: $('#username').val().trim(),
             password: $('#password').val().trim(),
-            provider_code: $('#provider_code').val().trim()
+            provider_code: $('#provider_code').val().trim(),
+            tax_code: $('#tax_code').val().trim()
         };
-        
+
         $.ajax({
             url: '<?php echo site_url("sales/save_einvoice_config"); ?>',
             type: 'POST',

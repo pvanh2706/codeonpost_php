@@ -8,30 +8,35 @@
         </button>
         <h4 class="modal-title" id="orderInfoModalLabel">Thông tin chi tiết đơn hàng</h4>
         <div class="pull-right" style="margin-top: -25px; margin-right: 30px;">
-          <button type="button" class="btn btn-sm btn-info" id="createJsonEInvoiceBtn">
+          <!-- <button type="button" class="btn btn-sm btn-info" id="createJsonEInvoiceBtn">
             <i class="fa fa-cog"></i> Tạo Json
           </button>
           <button type="button" class="btn btn-sm btn-info" id="configEInvoiceBtn">
             <i class="fa fa-cog"></i> Cấu hình HĐ điện tử
+          </button> -->
+          <button type="button" class="btn btn-sm btn-primary" id="saveEInvoiceBtn">
+            <i class="fa fa-paper-plane"></i> Phát hành hóa đơn điện tử
           </button>
-          <button type="button" class="btn btn-sm btn-warning" id="saveEInvoiceBtn">
-            <i class="fa fa-file-invoice"></i> Lưu HĐ điện tử
-          </button>
-          <button type="button" class="btn btn-sm btn-success" id="viewEInvoiceJsonBtn">
+          <!-- <button type="button" class="btn btn-sm btn-success" id="viewEInvoiceJsonBtn">
             <i class="fa fa-file-code-o"></i> Xem JSON
-          </button>
-          <button type="button" class="btn btn-sm btn-primary" id="editOrderBtn" style="display: none;">
+          </button> -->
+           <button type="button" class="btn btn-sm btn-success" id="viewEInvoicePdfBtn">
+             <i class="fa fa-file-pdf-o"></i> Xem PDF
+           </button>
+          <!-- <button type="button" class="btn btn-sm btn-primary" id="editOrderBtn" style="display: none;">
             <i class="fa fa-edit"></i> Sửa
           </button>
           <button type="button" class="btn btn-sm btn-success" id="saveOrderBtn" style="display: none;">
             <i class="fa fa-save"></i> Lưu
-          </button>
-          <button type="button" class="btn btn-sm btn-default" id="cancelEditBtn" style="display: none;">
+          </button> -->
+          <button type="button" class="btn btn-sm btn-danger" id="cancelEditBtn" style="display: none;">
             <i class="fa fa-times"></i> Hủy
           </button>
         </div>
       </div>
       <div class="modal-body" id="orderInfoContent" style="max-height: 70vh; overflow-y: auto;">
+        <!-- Alert container for notifications -->
+        <div id="alert-container"></div>
         <div class="text-center">
           <i class="fa fa-spinner fa-spin fa-2x"></i>
           <p>Đang tải dữ liệu...</p>
@@ -357,6 +362,56 @@ function formatDate(dateString) {
     return date.toLocaleDateString('vi-VN') + ' ' + date.toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
 }
 
+// Show alert function
+function showAlert(type, message) {
+    // Đảm bảo alert container tồn tại
+    if ($('#alert-container').length === 0) {
+        console.log('Alert container not found, creating one');
+        // Tìm modal body để thêm alert container
+        var modalBody = $('#orderInfoContent');
+        if (modalBody.length === 0) {
+            modalBody = $('.modal-body').first();
+        }
+        if (modalBody.length === 0) {
+            modalBody = $('.box-body');
+        }
+        if (modalBody.length === 0) {
+            modalBody = $('body');
+        }
+        modalBody.prepend('<div id="alert-container"></div>');
+    }
+    
+    var alertClass = 'alert-' + type;
+    if (type === 'success') {
+        alertClass = 'alert-success';
+    } else if (type === 'danger') {
+        alertClass = 'alert-danger';
+    } else if (type === 'warning') {
+        alertClass = 'alert-warning';
+    } else if (type === 'info') {
+        alertClass = 'alert-info';
+    }
+    
+    var alertHtml = '<div class="alert ' + alertClass + ' alert-dismissible" role="alert" style="display: none; margin: 10px 0;">' +
+                    message +
+                    '<button type="button" class="close" onclick="$(this).parent().fadeOut();" aria-label="Close">' +
+                    '<span aria-hidden="true">&times;</span>' +
+                    '</button>' +
+                    '</div>';
+    
+    // Xóa alert cũ và thêm alert mới
+    $('#alert-container').html(alertHtml);
+    $('#alert-container .alert').fadeIn();
+    
+    // Scroll to top để user có thể thấy alert
+    $('#orderInfoContent').scrollTop(0);
+    
+    // Tự động ẩn alert sau 5 giây
+    setTimeout(function() {
+        $('#alert-container .alert').fadeOut();
+    }, 9000);
+}
+
 // Calculate subtotal of all items
 function calculateSubtotal() {
     var subtotal = 0;
@@ -591,6 +646,18 @@ function show_order_info() {
     });
 }
 
+function hide_order_info() {
+    $('#editOrderBtn').modal('hide');
+    resetEditMode();
+    originalOrderData = null; // Clear original data
+}
+
+function closePopup() {
+    $('#orderInfoModal').modal('hide');
+    resetEditMode();
+    originalOrderData = null; // Clear original data
+}
+
 // Edit mode functions
 function enablePartialEditMode() {
     // Address and items are already editable by default
@@ -786,7 +853,9 @@ $(document).ready(function() {
     });
 
     $(document).on('click', '#cancelEditBtn', function() {
-        cancelEdit();
+      //  cancelEdit();
+        closePopup();
+        hide_order_info();
     });
 
     // Auto calculate item total when qty or price changes
@@ -1009,6 +1078,7 @@ $(document).ready(function() {
         }
     }
     
+
     function saveOrderChanges() {
         console.log('org ==> ', originalOrderData)
         if (!originalOrderData) {
@@ -1243,6 +1313,10 @@ $(document).ready(function() {
     $(document).on('click', '#viewEInvoiceJsonBtn', function() {
         viewEInvoiceJson();
     });
+
+    $(document).on('click', '#viewEInvoicePdfBtn', function() {
+        viewEInvoicePdf();
+    });
 });
 
 // E-Invoice Configuration Functions
@@ -1463,7 +1537,7 @@ function buildOrderInfoHTML(orders) {
         html += '</td></tr>';
         
         html += '<tr><td style="font-weight: bold;"><i class="fa fa-barcode"></i> Mã số thuế:</td><td colspan="3">';
-        html += '<input type="text" class="form-control editable-field" id="edit_tax_code" value="' + (order.tax_code || '') + '" style="height: 32px;" placeholder="Nhập mã số thuế khách hàng">';
+        html += '<input type="text" class="form-control editable-field" id="customer_tax_code" value="' + (order.tax_code || '') + '" style="height: 32px;" placeholder="Nhập mã số thuế khách hàng">';
         html += '</td></tr>';
         
         // Thêm 1 dòng phương thức thanh toán
@@ -1483,7 +1557,7 @@ function buildOrderInfoHTML(orders) {
         html += '</td></tr>';
         // Thêm 1 dòng ghi chú
         html += '<tr><td style="font-weight: bold;"><i class="fa fa-comment"></i> Ghi chú:</td><td colspan="3">';
-        html += '<textarea class="form-control editable-field" id="edit_note" rows="3" style="width: 100%;">' + (order.sales_note || '') + '</textarea>';
+        html += '<textarea class="form-control editable-field" id="customer_note" rows="3" style="width: 100%;">' + (order.sales_note || '') + '</textarea>';
         html += '</td></tr>';
         html += '</table>';
         html += '</div>';
@@ -1587,7 +1661,7 @@ function buildOrderInfoHTML(orders) {
             html += '<div class="form-group">';
             html += '<label>Giảm giá theo %:</label>';
             html += '<div class="input-group">';
-            html += '<input type="number" class="form-control editable-field" id="bill_discount_percent" value="' + (order.bill_discount_percent || 0) + '" min="0" max="100" step="0.01">';
+            html += '<input type="number" class="form-control editable-field" id="bill_discount_percent" value="' + (order.discount_all_bill_percent || 0) + '" min="0" max="100" step="0.01">';
             html += '<span class="input-group-addon">%</span>';
             html += '</div>';
             html += '</div>';
@@ -1596,7 +1670,7 @@ function buildOrderInfoHTML(orders) {
             html += '<div class="form-group">';
             html += '<label>Giảm giá theo tiền:</label>';
             html += '<div class="input-group">';
-            html += '<input type="text" class="form-control editable-field" id="bill_discount_amount" value="' + formatNumber(order.bill_discount_amount || 0) + '" min="0">';
+            html += '<input type="text" class="form-control editable-field" id="bill_discount_amount" value="' + formatNumber(order.discount_all_bill_amount || 0) + '" min="0">';
             html += '<span class="input-group-addon">VNĐ</span>';
             html += '</div>';
             html += '</div>';
@@ -1686,7 +1760,7 @@ function buildOrderInfoHTML(orders) {
             }
         });
     });
-function createAndPublishInvoice() {
+function createAndPublishInvoice(invoiceData, einvoiceConfig) {
     var btn = $(this);
         var spinner = btn.find('.loading-spinner');
         
@@ -1698,12 +1772,10 @@ function createAndPublishInvoice() {
             // username: $('#username').val().trim(),
             // password: $('#password').val().trim(),
             // provider_code: $('#provider_code').val().trim()
-            api_url: '',
-            username: '',
-            password: '',
-            provider_code: ''
+           invoice_data: invoiceData,
+           einvoice_config: einvoiceConfig
         };
-        
+        console.log('Creating and publishing invoice with data:', invoiceData);
         $.ajax({
             url: '<?php echo site_url("sales/create_and_publish_einvoice"); ?>',
             type: 'POST',
@@ -1711,7 +1783,8 @@ function createAndPublishInvoice() {
             dataType: 'json',
             success: function(response) {
                 if (response.success) {
-                    var message = '<i class="fa fa-check-circle"></i> ' + response.message;
+                     console.log('Response HDDT:', response);
+                    var message = '<i class="fa fa-check-circle"></i> ' + response.message + ' Số hóa đơn: ' + response.response.Data.ThirdPartyInvoiceNumber;
                     if (response.response && response.response.data) {
                         message += '<br><small>Response Data: ' + JSON.stringify(response.response.data) + '</small>';
                     }
@@ -1755,13 +1828,15 @@ function saveEInvoiceData() {
         customer_name: $('#edit_customer_name').val(),
         customer_phone: $('#edit_mobile').val(),
         customer_address: $('#edit_address').val(),
-        customer_tax_code: $('#edit_tax_info').val(),
+        customer_tax_code: $('#customer_tax_code').val(),
         payment_method: $('#edit_payment_method').val(),
-        sales_note: $('#edit_sales_note').val(),
+        sales_note: $('#customer_note').val(),
         subtotal_amount: parseFloat($('#subtotal_amount').text().replace(/[^\d.,]/g, '').replace(/,/g, '')) || 0,
         bill_discount_amount: parseFloat($('#bill_discount_amount').val().replace(/,/g, '')) || 0,
         grand_total: parseFloat($('#final_total').text().replace(/[^\d.,]/g, '').replace(/,/g, '')) || 0,
-        items: []
+        items: [],
+        formNo: $('#edit_template_number').val(),
+        serial: $('#edit_symbol').val(),
     };
     
     // Collect items data
@@ -1796,6 +1871,8 @@ function saveEInvoiceData() {
     // Show loading
     $('#saveEInvoiceBtn').html('<i class="fa fa-spinner fa-spin"></i> Đang lưu...').prop('disabled', true);
     
+    console.log('Invoice data to save:', invoiceData);
+
     // AJAX call to save e-invoice data
     $.ajax({
         url: "<?php echo site_url('sales/save_einvoice_data'); ?>",
@@ -1819,7 +1896,53 @@ function saveEInvoiceData() {
         },
         complete: function() {
             $('#saveEInvoiceBtn').html('<i class="fa fa-file-invoice"></i> Lưu HĐ điện tử').prop('disabled', false);
-            createAndPublishInvoice();
+            createAndPublishInvoice(invoiceData, originalOrderData.einvoice_config);
+        }
+    });
+}
+
+// Function to view E-Invoice PDF
+function viewEInvoicePdf() {
+    if (!originalOrderData) {
+        alert("Không có dữ liệu đơn hàng!");
+        return;
+    }
+
+    $.ajax({
+        url: "<?php echo site_url('sales/view_pdf_invoice'); ?>", 
+        type: "POST",
+        data: {
+            order_id: originalOrderData.id
+        },
+        dataType: "json",
+        success: function(response) {
+            console.log('Response from server:', response);
+            if (response.success) {
+                if (response.pdf_url) {
+                    // Check if it's a base64 string
+                    if (response.pdf_url.indexOf('data:application/pdf;base64,') === 0) {
+                        // Handle base64 PDF
+                        var base64Data = response.pdf_url;
+                        var newWindow = window.open();
+                        newWindow.document.write('<iframe src="' + base64Data + '" style="width:100%;height:100%;border:none;"></iframe>');
+                    } else {
+                        // Handle regular URL
+                        window.open(response.pdf_url, '_blank');
+                    }
+                } else if (response.pdf_base64) {
+                    // Handle separate base64 field
+                    var base64Data = 'data:application/pdf;base64,' + response.pdf_base64;
+                    var newWindow = window.open();
+                    newWindow.document.write('<iframe src="' + base64Data + '" style="width:100%;height:100%;border:none;"></iframe>');
+                } else {
+                    alert("Không có dữ liệu PDF để hiển thị!");
+                }
+            } else {
+                alert("Không thể xem PDF: " + response.message);
+            }
+        },
+        error: function(xhr, status, error) {
+            alert("Có lỗi xảy ra khi xem PDF: " + error);
         }
     });
 }

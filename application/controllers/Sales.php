@@ -486,8 +486,9 @@ class Sales extends MY_Controller {
 								'item_name' => $item->item_name,
 								'sales_qty' => $item->sales_qty,
 								'price_per_unit' => $item->price_per_unit,
-								'discount_percent' => isset($item->discount_percent) ? $item->discount_percent : 0,
-								'discount_amount' => isset($item->discount_amount) ? $item->discount_amount : 0,
+								'discount_type' => isset($item->discount_type) ? $item->discount_type : 'percent',
+								'discount_percent' => isset($item->discount_input) ? $item->discount_input : 0,
+								'discount_amount' => isset($item->discount_amt) ? $item->discount_amt : 0,
 								'tax_percent' => isset($item->tax_percent) ? $item->tax_percent : 0,
 								'tax_amount' => isset($item->tax_amount) ? $item->tax_amount : 0,
 								'total_cost' => $item->total_cost
@@ -512,6 +513,8 @@ class Sales extends MY_Controller {
 						'subtotal_amount' => isset($order->subtotal_amount) ? $order->subtotal_amount : 0,
 						'bill_discount_percent' => isset($order->bill_discount_percent) ? $order->bill_discount_percent : 0,
 						'bill_discount_amount' => isset($order->bill_discount_amount) ? $order->bill_discount_amount : 0,
+						'discount_all_bill_percent' => isset($order->discount_to_all_input) ? $order->discount_to_all_input : 0,
+						'discount_all_bill_amount' => isset($order->tot_discount_to_all_amt) ? $order->tot_discount_to_all_amt : 0,
 						// Thông tin hóa đơn điện tử
 						'template_number' => isset($order->template_number) ? $order->template_number : '1',
 						'symbol' => isset($order->symbol) ? $order->symbol : 'C24',
@@ -771,15 +774,25 @@ class Sales extends MY_Controller {
 	{
 		$this->permission_check('site_edit');
 		
+		// var formData = {
+        //     api_url_einvoice: $('#api_url_einvoice').val().trim(),
+        //     api_url: $('#api_url').val().trim(),
+        //     username: $('#username').val().trim(),
+        //     password: $('#password').val().trim(),
+        //     provider_code: $('#provider_code').val().trim(),
+        //     tax_code: $('#tax_code').val().trim()
+        // };
+
 		$api_url_einvoice = $this->input->post('api_url_einvoice');
 		$api_url = $this->input->post('api_url');
 		$username = $this->input->post('username');
 		$password = $this->input->post('password');
 		$provider_code = $this->input->post('provider_code');
+		$tax_code = $this->input->post('tax_code');
 		
 		$this->load->model('site_model', 'site');
-		$result = $this->site->save_einvoice_config($api_url_einvoice, $api_url, $username, $password, $provider_code);
-		
+		$result = $this->site->save_einvoice_config($api_url_einvoice, $api_url, $username, $password, $provider_code, $tax_code);
+
 		if ($result) {
 			$response = array(
 				'success' => true,
@@ -856,6 +869,7 @@ class Sales extends MY_Controller {
 		$username = $this->input->post('username');
 		$password = $this->input->post('password');
 		$provider_code = $this->input->post('provider_code');
+		$tax_code = $this->input->post('tax_code');
 		
 		// Cấu trúc API theo yêu cầu
 		$data = array(
@@ -864,7 +878,8 @@ class Sales extends MY_Controller {
 					'Partner' => $provider_code,
 					'PartnerUrl' => $api_url,
 					'Username' => $username,
-					'Password' => $password
+					'Password' => $password,
+					'TaxNumber' => $tax_code,
 				),
 				'ExtraDataMap' => array()
 			)
@@ -902,12 +917,24 @@ class Sales extends MY_Controller {
 			);
 		} else if ($http_code == 200) {
 			$response_data = json_decode($response, true);
-			$result = array(
-				'success' => true,
-				'message' => 'Kiểm tra kết nối thành công',
-				'http_code' => $http_code,
-				'response' => $response_data
-			);
+			if ($response_data['Status'] == 200) {
+				// Kết nối thành công
+				$result = array(
+					'success' => true,
+					'message' => 'Kiểm tra kết nối thành công11',
+					'http_code' => $http_code,
+					'response' => $response_data
+				);
+			} else {
+				// Kết nối thất bại
+				$result = array(
+					'success' => false,
+					'message' => 'Kiểm tra kết nối thất bại: Nội dung lỗi ' . $response_data['Message'],
+					'http_code' => $response_data['Status'],
+					'response' => $response_data
+				);
+			}
+			
 		} else {
 			$result = array(
 				'success' => false,
@@ -928,13 +955,39 @@ class Sales extends MY_Controller {
 		$username = $this->input->post('username');
 		$password = $this->input->post('password');
 		$provider_code = $this->input->post('provider_code');
-		
+
+		$invoice_data = $this->input->post('invoice_data');
+		$einvoiceConfig = $this->input->post('einvoice_config');
+		// Dữ liệu mẫu để gửi đến API
+		$formNo = $invoice_data['formNo']; // Mẫu số
+		$serial = $invoice_data['serial']; // Ký hiệu
+		$invoiceDate = $invoice_data['invoice_date']; // Ngày hóa đơn
+		// Chuyển đổi từ yyyy-mm-dd thành dd/mm/yyyy
+		if ($invoiceDate) {
+			$invoiceDate = date('d/m/Y', strtotime($invoiceDate));
+		}
+		$customerName = $invoice_data['customer_name']; // Tên người mua hàng
+		$customerPhone = $invoice_data['customer_phone']; // Số điện thoại người mua hàng
+		$customerTax = $invoice_data['customer_tax_code']; // Mã số thuế người mua hàng
+		$customerAddress = $invoice_data['customer_address']; // Địa chỉ người mua hàng
+		$customerEmail = ''; // Email người mua hàng
+		$customerCompanyName = ''; // Tên công ty người mua hàng
+		$note = $invoice_data['note']; // Ghi chú cho hóa đơn
+		$subAmount = $invoice_data['subtotal_amount']; // Tổng tiền trước thuế phí
+		$serviceRate = 0; // Phần trăm phí
+		$serviceCharge = 0; // Tổng tiền phí
+		$beforeTaxAmount = $subAmount; // Tổng tiền trước thuế
+		$taxRate = 0; // Phần trăm thuế
+		$taxAmount = 0; // Tổng tiền thuế
+		$afterTaxAmount = $invoice_data['grand_total']; // Tổng tiền sau thuế phí	
+		$paymentMethod = $invoice_data['payment_method']; // Tên phương thức thanh toán
+
 		// Cấu trúc API theo yêu cầu
 		$data = array(
 			'Invoice' => array(
 				'ezInvoiceId' => null, // Mã định danh cho hóa đơn
-				'FormNo' => '1', // Mẫu số - Nhà cung cấp sẽ gửi thông tin này
-				'Serial' => '1C25MOC', // Ký hiệu - Nhà cung cấp sẽ gửi thông tin này
+				'FormNo' => $formNo, // Mẫu số - Nhà cung cấp sẽ gửi thông tin này
+				'Serial' => '1C25MOC', // Ký hiệu - Nhà cung cấp sẽ gửi thông tin này VD: 1C25MOC
 				'InvoiceNo' => null, // Số hóa đơn - Giá trị trả ra khi phát hành hóa đơn thành công (trường ThirdPartyInvoiceNumber) - Dùng khi điểu chỉnh hóa đơn đã phát hành
 				'InvoiceDate' => '20/07/2025', // Ngày hóa đơn
 				'CustomerName' => ' 22', // Tên người mua hàng
@@ -1008,14 +1061,23 @@ class Sales extends MY_Controller {
 				)
 			),
 			'SiteConfigInfo' => array(
+				// 'Site' => array(
+				// 	"TaxNumber" => "0101243150-339", // Mã số thuế khách hàng
+				// 	"Partner" => 6,
+				// 	"PartnerUrl" => "https://testapi.meinvoice.vn/api/v3/", // API nhà cung cấp
+				// 	"Username" => "testmisa@yahoo.com", // Tài khoản api
+				// 	"Password" => "123456Aa", // Mật khẩu api
+				// 	"Username2" => "string", // Tài khoản thử 2, nhà cung cấp VNPT sẽ cấp thông tin này
+				// 	"Password2" => "string" // Mật khẩu api thứ 2, nhà cung cấp VNPT sẽ cấp thông tin này
+				// ),
 				'Site' => array(
-					"TaxNumber" => "0101243150-339", // Mã số thuế khách hàng
-					"Partner" => 6,
-					"PartnerUrl" => "https://testapi.meinvoice.vn/api/v3/", // API nhà cung cấp
-					"Username" => "testmisa@yahoo.com", // Tài khoản api
-					"Password" => "123456Aa", // Mật khẩu api
-					"Username2" => "string", // Tài khoản thử 2, nhà cung cấp VNPT sẽ cấp thông tin này
-					"Password2" => "string" // Mật khẩu api thứ 2, nhà cung cấp VNPT sẽ cấp thông tin này
+					"TaxNumber" => $einvoiceConfig['tax_code'], // Mã số thuế khách hàng
+					"Partner" => $einvoiceConfig['provider_code'], // Mã đối tác - Nhà cung cấp sẽ gửi thông tin này
+					"PartnerUrl" => $einvoiceConfig['api_url'], // API nhà cung cấp
+					"Username" => $einvoiceConfig['username'], // Tài khoản api
+					"Password" => $einvoiceConfig['password'], // Mật khẩu api
+					"Username2" => $einvoiceConfig['username2'], // Tài khoản thử 2, nhà cung cấp VNPT sẽ cấp thông tin này
+					"Password2" => $einvoiceConfig['password2'] // Mật khẩu api thứ 2, nhà cung cấp VNPT sẽ cấp thông tin này
 				),
 				'ExtraDataMap' => array()
 			)
@@ -1026,6 +1088,7 @@ class Sales extends MY_Controller {
 		
 		// URL Health Check endpoint
 		// $health_check_url = rtrim($api_url, '/') . '/api/ezInvoice/HealthCheck';
+		// $health_check_url = rtrim($einvoiceConfig['api_url_einvoice'], '/') . '/api/ezInvoice/HealthCheck';
 		$health_check_url = rtrim('https://ms-api-test.ezinvoice.vn', '/') . '/api/ezInvoice/CreateAndPublishInvoice';
 		
 		curl_setopt($ch, CURLOPT_URL, $health_check_url);
@@ -1055,20 +1118,174 @@ class Sales extends MY_Controller {
 			$response_data = json_decode($response, true);
 			$result = array(
 				'success' => true,
-				'message' => 'Kiểm tra kết nối thành công',
+				'message' => 'Phát hành hóa đơn thành công',
 				'http_code' => $http_code,
 				'response' => $response_data
 			);
 		} else {
 			$result = array(
 				'success' => false,
-				'message' => 'Kiểm tra kết nối thất bại. HTTP Code: ' . $http_code,
+				'message' => 'Phát hành hóa đơn thất bại. HTTP Code: ' . $http_code,
 				'http_code' => $http_code,
 				'response' => $response
 			);
 		}
 		
 		echo json_encode($result);
+	}
+
+	public function view_pdf_invoice() {
+		$this->permission_check('sales_view');
+		// Dữ liệu mẫu để gửi đến API
+		// {
+		// 	"ezInvoiceId": "6fa8e7a4-4f3b-49c5-aac7-72644a05c81e", // Mã đinh danh cho hóa đon 
+		// 	"ThirdPartyInvoiceNumber": "00000038", // Key trả ra khi phát hành hóa đơn thành công
+		// 	"ThirdPartyInvoiceCode": "",
+		// 	"TransactionId": "E4HNH643B2", // Key trả ra khi phát hanh hoa đon thành công
+		// 	"InvoiceType": 0, // Enum: 0: HDDT thường, 1: Vé điện tử, 2: Biên lai điện tử (HDDT - Hóa đơn điện tử)
+		// 	"searchCode": "XWH2HDG4BQ", // Key trả ra khi phát hanh hoa đon thành công
+		// 	"invtmp": 0,
+		// 	"FormNo": "1", // Mẫu số 
+		// 	"TypeEinvoice": 1,
+		// 	"TypeFileDownload": null,
+		// 	"Serial": "1C25MOC", // Ký hiệu
+		// 	"SiteConfigInfo": {
+		// 		"Site": {
+		// 			"TaxNumber": "0101243150-339",
+		// 			"Partner": 6,
+		// 			"PartnerUrl": "https://testapi.meinvoice.vn/api/v3/", 
+		// 			"PartnerUrl2": "string",
+		// 			"Username": "testmisa@yahoo.com",
+		// 			"Password": "123456Aa",
+		// 			"Username2": "string",
+		// 			"Password2": "string"
+		// 		},
+		// 		"ExtraDataMap": []
+		// 	}
+		// }
+
+		// Get parameters from POST request
+		// $ezInvoiceId = $this->input->post('ezInvoiceId');
+		// $thirdPartyInvoiceNumber = $this->input->post('thirdPartyInvoiceNumber');
+		// $thirdPartyInvoiceCode = $this->input->post('thirdPartyInvoiceCode');
+		// $transactionId = $this->input->post('transactionId');
+		// $searchCode = $this->input->post('searchCode');
+		// $formNo = $this->input->post('formNo');
+		// $serial = $this->input->post('serial');
+
+		// Fix giá trị mẫu để test
+		$ezInvoiceId = '6fa8e7a4-4f3b-49c5-aac7-72644a05c81e';
+		$thirdPartyInvoiceNumber = '00000038';
+		$thirdPartyInvoiceCode = '';
+		$transactionId = 'E4HNH643B2';
+		$searchCode = 'XWH2HDG4BQ';
+		$formNo = '1';
+		$serial = '1C25MOC';
+
+		// Load einvoice config
+		$this->load->model('site_model', 'site');
+		$einvoice_config = $this->site->get_einvoice_config();
+		
+		// Prepare API data
+		$data = array(
+			'ezInvoiceId' => $ezInvoiceId,
+			'ThirdPartyInvoiceNumber' => $thirdPartyInvoiceNumber,
+			'ThirdPartyInvoiceCode' => $thirdPartyInvoiceCode,
+			'TransactionId' => $transactionId,
+			'InvoiceType' => 0,
+			'searchCode' => $searchCode,
+			'invtmp' => 0,
+			'FormNo' => $formNo,
+			'TypeEinvoice' => 1,
+			'TypeFileDownload' => null,
+			'Serial' => $serial,
+			'SiteConfigInfo' => array(
+				'Site' => array(
+					'TaxNumber' => $einvoice_config['tax_code'],
+					'Partner' => $einvoice_config['provider_code'],
+					'PartnerUrl' => $einvoice_config['api_url'],
+					'PartnerUrl2' => 'string',
+					'Username' => $einvoice_config['username'],
+					'Password' => $einvoice_config['password'],
+					'Username2' => 'string',
+					'Password2' => 'string'
+				),
+				'ExtraDataMap' => array()
+			)
+		);
+		
+		// Initialize cURL
+		$ch = curl_init();
+		
+		// API URL for downloading PDF
+		// $api_url = rtrim($einvoice_config['api_url_einvoice'], '/') . '/api/ezInvoice/DownloadPDF';
+		$api_url = rtrim('https://ms-api-test.ezinvoice.vn', '/') . '/api/ezInvoice/DownloadPDF';
+		
+		// Set cURL options
+		curl_setopt($ch, CURLOPT_URL, $api_url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_TIMEOUT, 60);
+		curl_setopt($ch, CURLOPT_POST, true);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+		curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+			'Content-Type: application/json',
+			//'Authorization: Bearer ' . (isset($einvoice_config['token']) ? $einvoice_config['token'] : '')
+		));
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+		
+		// Execute cURL request
+		$response = curl_exec($ch);
+		$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		$content_type = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
+		$error = curl_error($ch);
+		curl_close($ch);
+		
+		// Handle response
+		if ($error) {
+			$result = array(
+				'success' => false,
+				'message' => 'Lỗi kết nối: ' . $error
+			);
+			echo json_encode($result);
+		} else if ($http_code == 200) {
+			// Check if response is PDF
+			if (strpos($content_type, 'application/pdf') !== false) {
+				// Set headers for PDF download
+				header('Content-Type: application/pdf');
+				header('Content-Disposition: inline; filename="invoice_' . $thirdPartyInvoiceNumber . '.pdf"');
+				header('Content-Length: ' . strlen($response));
+				
+				// Output PDF content
+				echo $response;
+			} else {
+				// Response is JSON (error or success message)
+				$response_data = json_decode($response, true);
+				if ($response_data && isset($response_data['Status']) && $response_data['Status'] == 200) {
+					$result = array(
+						'success' => true,
+						'message' => 'Tải PDF thành công',
+						'data' => $response_data,
+						'pdf_base64' => isset($response_data['Data']['InvoicePDF']) ? $response_data['Data']['InvoicePDF'] : null
+					);
+				} else {
+					$result = array(
+						'success' => false,
+						'message' => 'Tải PDF thất bại: ' . (isset($response_data['Message']) ? $response_data['Message'] : 'Unknown error'),
+						'response' => $response_data
+					);
+				}
+				echo json_encode($result);
+			}
+		} else {
+			$result = array(
+				'success' => false,
+				'message' => 'Tải PDF thất bại. HTTP Code: ' . $http_code,
+				'http_code' => $http_code,
+				'response' => $response
+			);
+			echo json_encode($result);
+		}
 	}
 
 	public function save_einvoice_data() {
