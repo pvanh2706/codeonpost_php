@@ -608,8 +608,6 @@ function show_order_info() {
         success: function(response) {
             if (response.success) {
                 originalOrderData = response.data[0]; // Store original data
-                console.log('Original Order Data1:', originalOrderData);
-                console.log('Response Data1:', response.data);
                 var html = buildOrderInfoHTML(response.data);
                 $('#orderInfoContent').html(html);
                 $('#editOrderBtn').show();
@@ -1784,6 +1782,11 @@ function createAndPublishInvoice(invoiceData, einvoiceConfig) {
             success: function(response) {
                 if (response.success) {
                      console.log('Response HDDT:', response);
+                    if (response.response && response.response.Status === 200) {
+                        console.log('Response Data:', response.response.Data);
+                    } else {
+                        showAlert('danger', 'No Data in response: ' + response.response.Status + ' - Nội dung lỗi: ' + response.response.Message);
+                    }
                     var message = '<i class="fa fa-check-circle"></i> ' + response.message + ' Số hóa đơn: ' + response.response.Data.ThirdPartyInvoiceNumber;
                     if (response.response && response.response.data) {
                         message += '<br><small>Response Data: ' + JSON.stringify(response.response.data) + '</small>';
@@ -1895,7 +1898,7 @@ function saveEInvoiceData() {
             alert("Không thể lưu thông tin hóa đơn điện tử: " + error);
         },
         complete: function() {
-            $('#saveEInvoiceBtn').html('<i class="fa fa-file-invoice"></i> Lưu HĐ điện tử').prop('disabled', false);
+           // $('#saveEInvoiceBtn').html('<i class="fa fa-file-invoice"></i> Lưu HĐ điện tử').prop('disabled', false);
             createAndPublishInvoice(invoiceData, originalOrderData.einvoice_config);
         }
     });
@@ -1903,6 +1906,8 @@ function saveEInvoiceData() {
 
 // Function to view E-Invoice PDF
 function viewEInvoicePdf() {
+     // gọi hàm show_order_info để cập nhật thông tin đơn hàng
+                    show_order_info();
     if (!originalOrderData) {
         alert("Không có dữ liệu đơn hàng!");
         return;
@@ -1912,7 +1917,9 @@ function viewEInvoicePdf() {
         url: "<?php echo site_url('sales/view_pdf_invoice'); ?>", 
         type: "POST",
         data: {
-            order_id: originalOrderData.id
+            order_id: originalOrderData.id,
+            einvoice_data: originalOrderData.einvoice_data || null,
+            einvoice_config: originalOrderData.einvoice_config || null
         },
         dataType: "json",
         success: function(response) {

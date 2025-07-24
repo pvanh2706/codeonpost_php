@@ -445,7 +445,10 @@ class Sales extends MY_Controller {
 			
 			// Lấy cấu hình hóa đơn điện tử
 			$einvoice_config = $this->site->get_einvoice_config();
-			
+
+			// Lấy thông tin hóa đơn điện tử
+			$einvoice_data = $this->site->get_einvoice_data($order_ids);
+
 			// Khởi tạo và lấy danh sách mẫu số và ký hiệu
 			$this->site->init_default_einvoice_templates();
 			$einvoice_templates = $this->site->get_einvoice_templates();
@@ -524,7 +527,9 @@ class Sales extends MY_Controller {
 						// Cấu hình hóa đơn điện tử
 						'einvoice_config' => $einvoice_config,
 						'einvoice_templates' => $einvoice_templates,
-						'einvoice_payments' => $einvoice_payments
+						'einvoice_payments' => $einvoice_payments,
+						// Dữ liệu hóa đơn điện tử
+						'einvoice_data' => $einvoice_data,
 					);
 					
 					$orders[] = $order_data;
@@ -981,36 +986,63 @@ class Sales extends MY_Controller {
 		$taxAmount = 0; // Tổng tiền thuế
 		$afterTaxAmount = $invoice_data['grand_total']; // Tổng tiền sau thuế phí	
 		$paymentMethod = $invoice_data['payment_method']; // Tên phương thức thanh toán
+		// Thông tin chi tiết hóa đơn
+		$listDetails = [];
+		$details = $invoice_data['items']; // Danh sách sản phẩm chi tiết
+		foreach ($details as $item) {
+			$listDetails[] = array(
+				// 'transdate' => date('d/m/Y', strtotime($item['transdate'])), // Ngày trên bảng sản phẩm
+				'ItemName' => $item['item_name'], // Tên sản phẩm
+				'UnitName' => '', // Tên đơn vị
+				'Quantity' => $item['quantity'], // Số lượng
+				'Price' => $item['unit_price'], // Giá sản phẩm 
+				'DiscountAmount' => $item['discount_amount'], // Số tiền giảm giá sản phẩm
+				'DiscountPercent' => $item['discount_percent'], // % Giảm giá
+				'SubAmount' => $item['quantity'] * $item['unit_price'] - $item['discount_amount'], // Tiền sau giảm giá
+				'ServiceRate' => 0, // % phí
+				'ServiceCharge' => 0, // Tiền phí
+				'BeforeTaxAmount' => $item['quantity'] * $item['unit_price'] - $item['discount_amount'], // Tiền trước thuế
+				'TaxRate' => $item['tax_percent'], // % Thuế 
+				'TAXAmount' => $item['tax_amount'], // Tiền thuế
+				'AfterTaxAmount' => $item['total_amount'], // Tiền sau thuế phí
+				// Những trường dưới tạm thời không dùng
+				'Note' => '', 
+				// 'ExciseTaxRate' => null,
+				// 'ExciseTaxCharge' => null,
+				// 'TaxReduction43Amount' => null,
+				// 'TaxReduction43AmountOC' => null
+			);
+		}
 
 		// Cấu trúc API theo yêu cầu
 		$data = array(
 			'Invoice' => array(
 				'ezInvoiceId' => null, // Mã định danh cho hóa đơn
 				'FormNo' => $formNo, // Mẫu số - Nhà cung cấp sẽ gửi thông tin này
-				'Serial' => '1C25MOC', // Ký hiệu - Nhà cung cấp sẽ gửi thông tin này VD: 1C25MOC
+				'Serial' => $serial, // Ký hiệu - Nhà cung cấp sẽ gửi thông tin này VD: 1C25MOC, Minvoice: 1C25TAV
 				'InvoiceNo' => null, // Số hóa đơn - Giá trị trả ra khi phát hành hóa đơn thành công (trường ThirdPartyInvoiceNumber) - Dùng khi điểu chỉnh hóa đơn đã phát hành
-				'InvoiceDate' => '20/07/2025', // Ngày hóa đơn
-				'CustomerName' => ' 22', // Tên người mua hàng
-				'CustomerPhone' => '', // Số điện thoại người mua hàng
-				'CustomerTax' => '', // Mã số thuế người mua hàng
-				'CustomerAddress' => '', // Địa chỉ người mua hàng 
-				'CustomerEmail' => '', // Email người mua hàng
-				'CompanyName' => '', // Tên công ty người mua hàng
+				'InvoiceDate' => $invoiceDate, // Ngày hóa đơn
+				'CustomerName' => $customerName, // Tên người mua hàng
+				'CustomerPhone' => $customerPhone, // Số điện thoại người mua hàng
+				'CustomerTax' => $customerTax, // Mã số thuế người mua hàng
+				'CustomerAddress' => $customerAddress, // Địa chỉ người mua hàng
+				'CustomerEmail' => $customerEmail, // Email người mua hàng
+				'CompanyName' => $customerCompanyName, // Tên công ty người mua hàng
 				'BankAccount' => '', // Số tài khoản người mua hàng
 				'BankName' => '', // Tên tài khoàn người mua hàng
 				'CurrencyCode' => 'VND', // Fix 
 				'ExchangeRate' => 1.0, // Fix
-				'PaymentMethod' => 'TM', // Tên phương thưc thanh toán - Thường dùng tên viết tắt của phương thức. VD: Tiền mặt ~ TM, Chuyển khoản - CK,....
+				'PaymentMethod' => $paymentMethod, // Tên phương thưc thanh toán - Thường dùng tên viết tắt của phương thức. VD: Tiền mặt ~ TM, Chuyển khoản - CK,....
 				'PaymentBankAccount' => '',  // Số tài khoản thanh toán
 				'PaymentBankName' => '', // Tên tài khoản thanh toán
-				'Notice' => '', // Ghi chú cho hóa đơn
-				'SubAmount' => 11.0, // Tổng tiền trước thuế phí
-				'ServiceRate' => 5.0, // Phần trăm phí 
-				'ServiceCharge' => 0.0, // Tổng tiền phí 
-				'BeforeTaxAmount' => 11.0, // Tổng tiền trước thuế 
-				'TaxRate' => 10.0, // Phần trăm thuế - Nếu trong danh sách sản phẩm có nhiều mức thuế thì không cần truyền - Lúc này dùng đến TaxSummarys
-				'TaxAmount' => 1.0, // Tổng tiền thuế
-				'AfterTaxAmount' => 12.0, // Tổng tiền sau thuế phí
+				'Notice' => $note, // Ghi chú cho hóa đơn
+				'SubAmount' => $subAmount, // Tổng tiền trước thuế phí
+				'ServiceRate' => $serviceRate, // Phần trăm phí
+				'ServiceCharge' => $serviceCharge, // Tổng tiền phí
+				'BeforeTaxAmount' => $beforeTaxAmount, // Tổng tiền trước thuế
+				'TaxRate' => $taxRate, // Phần trăm thuế - Nếu trong danh sách sản phẩm có nhiều mức thuế thì không cần truyền - Lúc này dùng đến TaxSummarys
+				'TaxAmount' => $taxAmount, // Tổng tiền thuế
+				'AfterTaxAmount' => $afterTaxAmount, // Tổng tiền sau thuế phí
 				// Những trường dưới đây cứ khai báo nhưng tạm thời chưa dùng
 				'HotelExtra' => null, 
 				'sid' => null,
@@ -1027,37 +1059,38 @@ class Sales extends MY_Controller {
 				'TaxReductionType' => null
 			),
 			// Thông tin sản phẩm
-			'Details' => array(
-				array(
-					// 'transdate' => date('d/m/Y'), // Cột ngày trên bảng sản phẩm
-					'transdate' => '19/04/2025', // Cột ngày trên bảng sản phẩm
-					'ItemName' => 'Sản phẩm 1', // Tên sản phẩm
-					'UnitName' => 'cái', // Tên đơn vị
-					'Quantity' => 1.0, // Số lượng
-					'Price' => 10.0, // Giá sản phẩm 
-					'DiscountAmount' => 0.0, // Số tiền giảm giá sản phẩm
-					'DiscountPercent' => 0.0, // % Giảm giá
-					'SubAmount' => 10.0, // Tiền sau giảm giá 
-					'ServiceRate' => 5.0, // % phí
-					'ServiceCharge' => 0.0, // Tiền phí
-					'BeforeTaxAmount' => 10.0, // Tiền trước thuế
-					'TaxRate' => 10.0, // % Thuế 
-					'TaxAmount' => 1.0, // Tiền thuế
-					'AfterTaxAmount' => 11.0, // Tiền sau thuế phí
-					'Note' => null, // Ghi chú cho sản phẩm
-					// Những trường dưới tạm thời không dùng
-					'ExciseTaxRate' => null,
-					'ExciseTaxCharge' => null,
-					'TaxReduction43Amount' => null,
-					'TaxReduction43AmountOC' => null
-				)
-			),
+			// 'Details' => array(
+			// 	array(
+			// 		// 'transdate' => date('d/m/Y'), // Cột ngày trên bảng sản phẩm
+			// 		'transdate' => '19/04/2025', // Cột ngày trên bảng sản phẩm
+			// 		'ItemName' => 'Sản phẩm 1', // Tên sản phẩm
+			// 		'UnitName' => 'cái', // Tên đơn vị
+			// 		'Quantity' => 1.0, // Số lượng
+			// 		'Price' => 10.0, // Giá sản phẩm 
+			// 		'DiscountAmount' => 0.0, // Số tiền giảm giá sản phẩm
+			// 		'DiscountPercent' => 0.0, // % Giảm giá
+			// 		'SubAmount' => 10.0, // Tiền sau giảm giá 
+			// 		'ServiceRate' => 5.0, // % phí
+			// 		'ServiceCharge' => 0.0, // Tiền phí
+			// 		'BeforeTaxAmount' => 10.0, // Tiền trước thuế
+			// 		'TaxRate' => 10.0, // % Thuế 
+			// 		'TaxAmount' => 1.0, // Tiền thuế
+			// 		'AfterTaxAmount' => 11.0, // Tiền sau thuế phí
+			// 		'Note' => null, // Ghi chú cho sản phẩm
+			// 		// Những trường dưới tạm thời không dùng
+			// 		'ExciseTaxRate' => null,
+			// 		'ExciseTaxCharge' => null,
+			// 		'TaxReduction43Amount' => null,
+			// 		'TaxReduction43AmountOC' => null
+			// 	)
+			// ),
+			'Details' => $listDetails, // Danh sách sản phẩm chi tiết
 			// Tổng hợp tiền thuế
 			'TaxSummarys' => array(
 				array(
-					'BeforeTaxAmount' => 11.0,
-					'TaxRate' => 10.0,
-					'TaxAmount' => 1.0
+					'BeforeTaxAmount' => 0,
+					'TaxRate' => 0,
+					'TaxAmount' => 0
 				)
 			),
 			'SiteConfigInfo' => array(
@@ -1067,6 +1100,15 @@ class Sales extends MY_Controller {
 				// 	"PartnerUrl" => "https://testapi.meinvoice.vn/api/v3/", // API nhà cung cấp
 				// 	"Username" => "testmisa@yahoo.com", // Tài khoản api
 				// 	"Password" => "123456Aa", // Mật khẩu api
+				// 	"Username2" => "string", // Tài khoản thử 2, nhà cung cấp VNPT sẽ cấp thông tin này
+				// 	"Password2" => "string" // Mật khẩu api thứ 2, nhà cung cấp VNPT sẽ cấp thông tin này
+				// ),
+				// 'Site' => array(
+				// 	"TaxNumber" => "0106026495-999", // Mã số thuế khách hàng
+				// 	"Partner" => 2,
+				// 	"PartnerUrl" => "https://0106026495-999.minvoice.app/", // API nhà cung cấp
+				// 	"Username" => "EZTEST", // Tài khoản api
+				// 	"Password" => "R#k6#76Zd!S@!t", // Mật khẩu api
 				// 	"Username2" => "string", // Tài khoản thử 2, nhà cung cấp VNPT sẽ cấp thông tin này
 				// 	"Password2" => "string" // Mật khẩu api thứ 2, nhà cung cấp VNPT sẽ cấp thông tin này
 				// ),
@@ -1116,11 +1158,25 @@ class Sales extends MY_Controller {
 			);
 		} else if ($http_code == 200) {
 			$response_data = json_decode($response, true);
+			// Lấy thông tin Data trong $response_data
+			$response_data_thirdPartyInvoiceNumber = isset($response_data['Data']['ThirdPartyInvoiceNumber']) ? $response_data['Data']['ThirdPartyInvoiceNumber'] : null;
+			$response_data_invoiceID = isset($response_data['Data']['ezInvoiceId']) ? $response_data['Data']['ezInvoiceId'] : null;
+			$response_data_searchCode = isset($response_data['Data']['SearchCode']) ? $response_data['Data']['SearchCode'] : null;
+			$response_data_MaCQT = isset($response_data['Data']['MaCQT']) ? $response_data['Data']['MaCQT'] : null;
+			$invoice_data_einvoice = array(
+				'ThirdPartyInvoiceNumber' => $response_data_thirdPartyInvoiceNumber, // Số hóa đơn trả về
+				'ezInvoiceId' => $response_data_invoiceID, // Mã định danh cho hóa đơn
+				'SearchCode' => $response_data_searchCode, // Mã tra cứu
+				'MaCQT' => $response_data_MaCQT // Mã cơ quan thuế
+			);
+			// Update lại thông tin vào bảng
+			$this->update_invoice_data($invoice_data['order_id'], $invoice_data_einvoice);
 			$result = array(
 				'success' => true,
 				'message' => 'Phát hành hóa đơn thành công',
 				'http_code' => $http_code,
-				'response' => $response_data
+				'response' => $response_data,
+				'thirdPartyInvoiceNumber' => $response_data_einvoice, // Số hóa đơn trả về
 			);
 		} else {
 			$result = array(
@@ -1164,23 +1220,25 @@ class Sales extends MY_Controller {
 		// 	}
 		// }
 
+		$einvoice_data = $this->input->post('einvoice_data');
+		$einvoice_config = $this->input->post('einvoice_config');
 		// Get parameters from POST request
-		// $ezInvoiceId = $this->input->post('ezInvoiceId');
-		// $thirdPartyInvoiceNumber = $this->input->post('thirdPartyInvoiceNumber');
-		// $thirdPartyInvoiceCode = $this->input->post('thirdPartyInvoiceCode');
-		// $transactionId = $this->input->post('transactionId');
-		// $searchCode = $this->input->post('searchCode');
-		// $formNo = $this->input->post('formNo');
-		// $serial = $this->input->post('serial');
+		$ezInvoiceId = $einvoice_data['partner_invoice_id'];
+		$thirdPartyInvoiceNumber = $einvoice_data['partner_invoice_number'];
+		$thirdPartyInvoiceCode = $einvoice_data['thirdPartyInvoiceCode'];
+		$transactionId = $einvoice_data['partner_invoice_search_code'];
+		$searchCode = $einvoice_data['partner_invoice_search_code'];
+		$formNo = $einvoice_data['formNo']; // Mẫu số
+		$serial = $einvoice_data['serial']; // Ký hiệu
 
 		// Fix giá trị mẫu để test
-		$ezInvoiceId = '6fa8e7a4-4f3b-49c5-aac7-72644a05c81e';
-		$thirdPartyInvoiceNumber = '00000038';
-		$thirdPartyInvoiceCode = '';
-		$transactionId = 'E4HNH643B2';
-		$searchCode = 'XWH2HDG4BQ';
-		$formNo = '1';
-		$serial = '1C25MOC';
+		// $ezInvoiceId = '6fa8e7a4-4f3b-49c5-aac7-72644a05c81e';
+		// $thirdPartyInvoiceNumber = '00000038';
+		// $thirdPartyInvoiceCode = '';
+		// $transactionId = 'E4HNH643B2';
+		// $searchCode = 'XWH2HDG4BQ';
+		// $formNo = '1';
+		// $serial = '1C25TAV';
 
 		// Load einvoice config
 		$this->load->model('site_model', 'site');
@@ -1209,6 +1267,13 @@ class Sales extends MY_Controller {
 					'Password' => $einvoice_config['password'],
 					'Username2' => 'string',
 					'Password2' => 'string'
+					// "TaxNumber" => "0106026495-999", // Mã số thuế khách hàng
+					// "Partner" => 2,
+					// "PartnerUrl" => "https://0106026495-999.minvoice.app/", // API nhà cung cấp
+					// "Username" => "EZTEST", // Tài khoản api
+					// "Password" => "R#k6#76Zd!S@!t", // Mật khẩu api
+					// "Username2" => "string", // Tài khoản thử 2, nhà cung cấp VNPT sẽ cấp thông tin này
+					// "Password2" => "string" // Mật khẩu api thứ 2, nhà cung cấp VNPT sẽ cấp thông tin này
 				),
 				'ExtraDataMap' => array()
 			)
@@ -1286,6 +1351,59 @@ class Sales extends MY_Controller {
 			);
 			echo json_encode($result);
 		}
+	}
+
+	public function update_invoice_data($order_id, $invoice_data_einvoice) {
+		// Lấy thông tin dòng dữ liệu trong bảng db_einvoice_header theo order_id
+		$existing_invoice = $this->db->where('order_id', $order_id)
+									->get('db_einvoice_header')
+									->row();
+		
+		// Nếu có thông tin thì cập nhật các trường liên quan đến hóa đơn điện tử
+		if ($existing_invoice) {
+			$update_data = array();
+			
+			// Cập nhật các trường với tên đúng theo cấu trúc database
+			if (isset($invoice_data_einvoice['ezInvoiceId'])) {
+				$update_data['partner_invoice_id'] = $invoice_data_einvoice['ezInvoiceId'];
+			}
+			
+			if (isset($invoice_data_einvoice['ThirdPartyInvoiceNumber'])) {
+				$update_data['partner_invoice_number'] = $invoice_data_einvoice['ThirdPartyInvoiceNumber'];
+			}
+			
+			if (isset($invoice_data_einvoice['SearchCode'])) {
+				$update_data['partner_invoice_search_code'] = $invoice_data_einvoice['SearchCode'];
+			}
+			
+			if (isset($invoice_data_einvoice['MaCQT'])) {
+				$update_data['partner_invoice_tax_code'] = $invoice_data_einvoice['MaCQT'];
+			}
+			
+			// Cập nhật thời gian modified
+			$update_data['updated_at'] = date('Y-m-d H:i:s');
+			$update_data['updated_by'] = $this->session->userdata('user_id');
+			
+			// Thực hiện cập nhật nếu có dữ liệu để update
+			if (!empty($update_data)) {
+				$this->db->where('id', $existing_invoice->id);
+				$this->db->update('db_einvoice_header', $update_data);
+				
+				// Kiểm tra kết quả update
+				if ($this->db->affected_rows() > 0) {
+					log_message('info', 'Updated einvoice data for order_id: ' . $order_id);
+					return true;
+				} else {
+					log_message('error', 'Failed to update einvoice data for order_id: ' . $order_id);
+					return false;
+				}
+			}
+		} else {
+			log_message('error', 'No existing invoice found for order_id: ' . $order_id);
+			return false;
+		}
+		
+		return true;
 	}
 
 	public function save_einvoice_data() {
@@ -1414,6 +1532,10 @@ class Sales extends MY_Controller {
 					`created_by` int(11) DEFAULT NULL,
 					`updated_at` datetime DEFAULT NULL,
 					`updated_by` int(11) DEFAULT NULL,
+					`partner_invoice_id` varchar(150) DEFAULT NULL,
+					`partner_invoice_number` varchar(50) DEFAULT NULL,
+					`partner_invoice_search_code` varchar(150) DEFAULT NULL,
+					`partner_invoice_tax_code` varchar(150) DEFAULT NULL,
 					PRIMARY KEY (`id`),
 					UNIQUE KEY `order_id` (`order_id`),
 					KEY `sales_code` (`sales_code`),

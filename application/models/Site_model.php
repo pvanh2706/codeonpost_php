@@ -224,6 +224,17 @@ class Site_model extends CI_Model {
 		
 		return array();
 	}
+
+	public function get_einvoice_data($orderid)
+	{
+		$query = $this->db->query("SELECT * FROM db_einvoice_header WHERE order_id = ?", array($orderid));
+		
+		if ($query->num_rows() > 0) {
+			return $query->row_array();
+		}
+		
+		return array();
+	}
 	
 	public function save_einvoice_config($api_url_einvoice, $api_url, $username, $password, $provider_code, $tax_code)
 	{
