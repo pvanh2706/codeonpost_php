@@ -213,6 +213,268 @@ class Site_model extends CI_Model {
 		    return "failed";
 		}
 	}
+	
+	public function get_einvoice_config()
+	{
+		$query = $this->db->query("SELECT * FROM db_einvoice_config WHERE id = 1");
+		
+		if ($query->num_rows() > 0) {
+			return $query->row_array();
+		}
+		
+		return array();
+	}
+
+	public function get_einvoice_data($orderid)
+	{
+		$query = $this->db->query("SELECT * FROM db_einvoice_header WHERE order_id = ?", array($orderid));
+		
+		if ($query->num_rows() > 0) {
+			return $query->row_array();
+		}
+		
+		return array();
+	}
+	
+	public function save_einvoice_config($api_url_einvoice, $api_url, $username, $password, $provider_code, $tax_code)
+	{
+		$data = array(
+			'api_url_einvoice' => $api_url_einvoice,
+			'api_url' => $api_url,
+			'username' => $username,
+			'password' => $password, // Trong thực tế nên mã hóa mật khẩu
+			'provider_code' => $provider_code,
+			'tax_code' => $tax_code,
+			'updated_at' => date('Y-m-d H:i:s')
+		);
+		
+		// Kiểm tra xem có bản ghi nào chưa
+		$query = $this->db->query("SELECT id FROM db_einvoice_config WHERE id = 1");
+		
+		if ($query->num_rows() > 0) {
+			// Cập nhật
+			$this->db->where('id', 1);
+			$result = $this->db->update('db_einvoice_config', $data);
+		} else {
+			// Tạo mới
+			$data['id'] = 1;
+			$data['created_at'] = date('Y-m-d H:i:s');
+			$result = $this->db->insert('db_einvoice_config', $data);
+		}
+		
+		return $result;
+	}
+	
+	public function create_einvoice_config_table()
+	{
+		// Tạo bảng cấu hình hóa đơn điện tử nếu chưa tồn tại
+		$sql = "CREATE TABLE IF NOT EXISTS `db_einvoice_config` (
+			`id` int(11) NOT NULL AUTO_INCREMENT,
+			`api_url_einvoice` varchar(255) NOT NULL,
+			`api_url` varchar(255) NOT NULL,
+			`username` varchar(100) NOT NULL,
+			`password` varchar(255) NOT NULL,
+			`provider_code` varchar(50) NOT NULL,
+			`tax_code` varchar(50) NOT NULL,
+			`status` tinyint(1) DEFAULT '1',
+			`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+			PRIMARY KEY (`id`)
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+		
+		return $this->db->simple_query($sql);
+	}
+
+	// E-invoice Template Methods
+	public function create_einvoice_template_table()
+	{
+		$sql = "CREATE TABLE IF NOT EXISTS `db_einvoice_templates` (
+			`id` int(11) NOT NULL AUTO_INCREMENT,
+			`template_number` varchar(50) NOT NULL,
+			`symbol` varchar(50) NOT NULL,
+			`description` text,
+			`status` tinyint(1) DEFAULT '1',
+			`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+			PRIMARY KEY (`id`),
+			UNIQUE KEY `template_symbol` (`template_number`, `symbol`)
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+		
+		return $this->db->simple_query($sql);
+	}
+
+	public function get_einvoice_templates()
+	{
+		$query = $this->db->query("SELECT * FROM db_einvoice_templates WHERE status = 1 ORDER BY id DESC");
+		return $query->result_array();
+	}
+
+	public function create_einvoice_template($template_number, $symbol, $description = '')
+	{
+		$data = array(
+			'template_number' => $template_number,
+			'symbol' => $symbol,
+			'description' => $description,
+			'status' => 1
+		);
+		
+		return $this->db->insert('db_einvoice_templates', $data);
+	}
+
+	public function update_einvoice_template($id, $template_number, $symbol, $description = '')
+	{
+		$data = array(
+			'template_number' => $template_number,
+			'symbol' => $symbol,
+			'description' => $description
+		);
+		
+		$this->db->where('id', $id);
+		return $this->db->update('db_einvoice_templates', $data);
+	}
+
+	public function delete_einvoice_template($id)
+	{
+		$data = array('status' => 0);
+		$this->db->where('id', $id);
+		return $this->db->update('db_einvoice_templates', $data);
+	}
+
+	// E-invoice Payment Methods
+	public function create_einvoice_payment_table()
+	{
+		$sql = "CREATE TABLE IF NOT EXISTS `db_einvoice_payments` (
+			`id` int(11) NOT NULL AUTO_INCREMENT,
+			`payment_code` varchar(50) NOT NULL,
+			`payment_name` varchar(100) NOT NULL,
+			`description` text,
+			`status` tinyint(1) DEFAULT '1',
+			`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+			PRIMARY KEY (`id`),
+			UNIQUE KEY `payment_code` (`payment_code`)
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+		
+		return $this->db->simple_query($sql);
+	}
+
+	public function get_einvoice_payments()
+	{
+		$query = $this->db->query("SELECT * FROM db_einvoice_payments WHERE status = 1 ORDER BY id DESC");
+		return $query->result_array();
+	}
+
+	public function create_einvoice_payment($payment_code, $payment_name, $description = '')
+	{
+		$data = array(
+			'payment_code' => $payment_code,
+			'payment_name' => $payment_name,
+			'description' => $description,
+			'status' => 1
+		);
+		
+		return $this->db->insert('db_einvoice_payments', $data);
+	}
+
+	public function update_einvoice_payment($id, $payment_code, $payment_name, $description = '')
+	{
+		$data = array(
+			'payment_code' => $payment_code,
+			'payment_name' => $payment_name,
+			'description' => $description
+		);
+		
+		$this->db->where('id', $id);
+		return $this->db->update('db_einvoice_payments', $data);
+	}
+
+	public function delete_einvoice_payment($id)
+	{
+		$data = array('status' => 0);
+		$this->db->where('id', $id);
+		return $this->db->update('db_einvoice_payments', $data);
+	}
+
+	// Migration for E-invoice fields in db_sales table
+	public function add_einvoice_fields_to_sales_table()
+	{
+		// Check if columns exist, if not add them
+		$query = $this->db->query("SHOW COLUMNS FROM db_sales LIKE 'template_number'");
+		if ($query->num_rows() == 0) {
+			$this->db->query("ALTER TABLE db_sales ADD COLUMN template_number VARCHAR(50) DEFAULT '1' AFTER sales_note");
+		}
+
+		$query = $this->db->query("SHOW COLUMNS FROM db_sales LIKE 'symbol'");
+		if ($query->num_rows() == 0) {
+			$this->db->query("ALTER TABLE db_sales ADD COLUMN symbol VARCHAR(50) DEFAULT 'C24' AFTER template_number");
+		}
+
+		$query = $this->db->query("SHOW COLUMNS FROM db_sales LIKE 'payment_method'");
+		if ($query->num_rows() == 0) {
+			$this->db->query("ALTER TABLE db_sales ADD COLUMN payment_method VARCHAR(50) DEFAULT 'TM' AFTER symbol");
+		}
+
+		$query = $this->db->query("SHOW COLUMNS FROM db_sales LIKE 'tax_code'");
+		if ($query->num_rows() == 0) {
+			$this->db->query("ALTER TABLE db_sales ADD COLUMN tax_code VARCHAR(100) DEFAULT '' AFTER payment_method");
+		}
+
+		return true;
+	}
+
+	// Initialize default E-invoice templates
+	public function init_default_einvoice_templates()
+	{
+		// Create table first
+		$this->create_einvoice_template_table();
+		
+		// Check if templates exist
+		$query = $this->db->query("SELECT COUNT(*) as count FROM db_einvoice_templates WHERE status = 1");
+		$count = $query->row()->count;
+		
+		if ($count == 0) {
+			// Insert default templates
+			$default_templates = array(
+				array('template_number' => '1', 'symbol' => 'C24', 'description' => 'Mẫu số 1 - Ký hiệu C24'),
+				array('template_number' => '1', 'symbol' => 'C25', 'description' => 'Mẫu số 1 - Ký hiệu C25'),
+				array('template_number' => '2', 'symbol' => 'C24', 'description' => 'Mẫu số 2 - Ký hiệu C24'),
+				array('template_number' => '2', 'symbol' => 'C25', 'description' => 'Mẫu số 2 - Ký hiệu C25')
+			);
+			
+			foreach ($default_templates as $template) {
+				$this->create_einvoice_template($template['template_number'], $template['symbol'], $template['description']);
+			}
+		}
+		
+		return true;
+	}
+
+	// Initialize default E-invoice payment methods
+	public function init_default_einvoice_payments()
+	{
+		// Create table first
+		$this->create_einvoice_payment_table();
+		
+		// Check if payment methods exist
+		$query = $this->db->query("SELECT COUNT(*) as count FROM db_einvoice_payments WHERE status = 1");
+		$count = $query->row()->count;
+		
+		if ($count == 0) {
+			// Insert default payment methods
+			$default_payments = array(
+				array('payment_code' => 'TM', 'payment_name' => 'Tiền mặt', 'description' => 'Thanh toán bằng tiền mặt'),
+				array('payment_code' => 'CK', 'payment_name' => 'Chuyển khoản', 'description' => 'Thanh toán bằng chuyển khoản ngân hàng'),
+				array('payment_code' => 'THE', 'payment_name' => 'Thẻ tín dụng', 'description' => 'Thanh toán bằng thẻ tín dụng'),
+				array('payment_code' => 'COMBO', 'payment_name' => 'Kết hợp', 'description' => 'Thanh toán kết hợp nhiều phương thức')
+			);
+			
+			foreach ($default_payments as $payment) {
+				$this->create_einvoice_payment($payment['payment_code'], $payment['payment_name'], $payment['description']);
+			}
+		}
+		
+		return true;
+	}
 }
 
 /* End of file Site_model.php */

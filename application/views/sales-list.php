@@ -44,6 +44,38 @@
     </div>
     <div class="view_payments_modal">
     </div>
+    
+    <!-- Include Order Info Modal -->
+    <?php include('sales-order-info-modal.php'); ?>
+
+    <script type="text/javascript">
+    // Ensure required functions are available globally
+    window.formatNumber = window.formatNumber || function(num) {
+        if (isNaN(num) || num === null || num === undefined) {
+            return '0';
+        }
+        return new Intl.NumberFormat('de-DE', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 2
+        }).format(num);
+    };
+
+    window.updateGrandTotal = window.updateGrandTotal || function() {
+        // Placeholder function - will be overridden by modal
+        console.log('updateGrandTotal called but not yet loaded');
+    };
+
+    // Safely check for autocomplete
+    $(document).ready(function() {
+        // Check if autocomplete is available before using
+        if (typeof $.fn.autocomplete !== 'undefined') {
+            // Initialize autocomplete if available
+            console.log('Autocomplete is available');
+        } else {
+            console.log('Autocomplete not available - this is normal if not needed');
+        }
+    });
+    </script>
 
     <!-- Main content -->
     <?= form_open('#', array('class' => '', 'id' => 'table_form')); ?>
@@ -263,6 +295,13 @@
                     multi_delete();
                 }
             },
+            {
+                className: 'btn bg-blue color-palette btn-flat hidden order_info_btn pull-left',
+                text: 'Thông tin đơn hàng',
+                action: function ( e, dt, node, config ) {
+                    show_order_info();
+                }
+            },
             { extend: 'copy', className: 'btn bg-teal color-palette btn-flat',exportOptions: { columns: [1,2,3,4,5,6,7,8,9,10]} },
             { extend: 'excel', className: 'btn bg-teal color-palette btn-flat',exportOptions: { columns: [1,2,3,4,5,6,7,8,9,10]} },
             { extend: 'pdf', className: 'btn bg-teal color-palette btn-flat',exportOptions: { columns: [1,2,3,4,5,6,7,8,9,10]} },
@@ -368,6 +407,7 @@ $("#sales_from_date,#sales_to_date,#user_created_by,#search_customer_id").on("ch
           $('#example2').DataTable().destroy();
           load_datatable();
       });
+
 </script>
 <script src="<?php echo $theme_link; ?>js/sales.js?v=<?= time(); ?>"></script>
 <script type="text/javascript">

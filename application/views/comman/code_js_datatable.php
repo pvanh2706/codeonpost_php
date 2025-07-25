@@ -93,10 +93,12 @@ $(function($) { // this script needs to be loaded on every page where an ajax PO
   if(parseInt(check_count)>0){
     $(".delete_btn").removeClass('hidden').show();
     $(".paid_all_btn").removeClass('hidden').show();
+    $(".order_info_btn").removeClass('hidden').show();
   }    
   else{
     $(".delete_btn").addClass('hidden').hide();
     $(".paid_all_btn").addClass('hidden').hide();
+    $(".order_info_btn").addClass('hidden').hide();
   }
 
   if($('#example2 > tbody').find('.checkbox').length == check_count){
@@ -116,10 +118,12 @@ function show_paid_all_btn() {
   if(parseInt(check_count)>0){
     $(".delete_btn").removeClass('hidden').show();
     $(".paid_all_btn").removeClass('hidden').show();
+    $(".order_info_btn").removeClass('hidden').show();
   }    
   else{
     $(".delete_btn").addClass('hidden').hide();
     $(".paid_all_btn").addClass('hidden').hide();
+    $(".order_info_btn").addClass('hidden').hide();
   }
 
   if($('#example2 > tbody').find('.checkbox').length == check_count){

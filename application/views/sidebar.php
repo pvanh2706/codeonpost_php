@@ -467,7 +467,7 @@
     
 		<!--<li class="header">SETTINGS</li>-->
     <?php if($change_password=true && $CI->permissions('dashboard')) { ?>
-		<li class=" company-profile-active-li site-settings-active-li  change-pass-active-li dbbackup-active-li warehouse-active-li warehouse-list-active-li tax-active-li currency-view-active-li currency-active-li  database_updater-active-li tax-list-active-li units-list-active-li unit-active-li payment_types_list-active-li payment_types-active-li treeview">
+		<li class=" company-profile-active-li site-settings-active-li  change-pass-active-li dbbackup-active-li warehouse-active-li warehouse-list-active-li tax-active-li currency-view-active-li currency-active-li  database_updater-active-li tax-list-active-li units-list-active-li unit-active-li payment_types_list-active-li payment_types-active-li einvoice-config-active-li einvoice-template-active-li einvoice-payment-active-li treeview">
           <a href="#">
             <i class="fa fa-gears text-aqua"></i> <span>Cài đặt chung</span>
             <span class="pull-right-container">
@@ -498,6 +498,11 @@
             <li class="currency-view-active-li currency-active-li"><a href="<?php echo $base_url; ?>currency/view"><i class="fa fa-gg "></i> <span>Loại tiền tệ Admin</span></a></li>
             <?php } ?>
             
+            <?php if($CI->permissions('site_edit')) { ?>
+            <li class="einvoice-config-active-li"><a href="<?php echo $base_url; ?>sales/einvoice_config"><i class="fa fa-file-text-o "></i> <span>Cấu hình hóa đơn điện tử</span></a></li>
+            <li class="einvoice-template-active-li"><a href="<?php echo $base_url; ?>sales/einvoice_template"><i class="fa fa-file-code-o "></i> <span>Cấu hình Mẫu số, Ký hiệu HDDT</span></a></li>
+            <li class="einvoice-payment-active-li"><a href="<?php echo $base_url; ?>sales/einvoice_payment"><i class="fa fa-credit-card "></i> <span>Cấu hình phương thức thanh toán HDDT</span></a></li>
+            <?php } ?>
             
             <!--li class="change-pass-active-li"><a href="<?php echo $base_url; ?>users/password_reset"><i class="fa fa-lock "></i> <span>Đổi mật khẩu</span></a></li-->
 
