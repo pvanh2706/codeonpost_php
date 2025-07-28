@@ -163,7 +163,7 @@ $("#item_search").autocomplete({
                 if (res.length) {
                     result = $.map(res, function(el){
                         return {
-                            label: el.item_code +'--[Qty:'+el.stock+'] --'+ el.label,
+                            label: el.item_code +'--[Số lượng:'+el.stock+'] --'+ el.label,
                             value: '',
                             id: el.id,
                             item_name: el.value,

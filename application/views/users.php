@@ -68,7 +68,7 @@
                               <div class="form-group">
                                  <label for="new_user" class="col-sm-4 control-label">Tên đăng nhập <label class="text-danger">*</label></label>
                                  <div class="col-sm-8">
-                                    <input type="text" readonly class="form-control input-sm" id="new_user" name="new_user" placeholder="" onkeyup="shift_cursor(event,'mobile')" value="<?php print $username; ?>"  autofocus>
+                                    <input type="text" class="form-control input-sm" id="new_user" name="new_user" placeholder="" onkeyup="shift_cursor(event,'mobile')" value="<?php print $username; ?>"  autofocus>
                                     <span id="new_user_msg" style="display:none" class="text-danger"></span>
                                  </div>
                               </div>

@@ -230,8 +230,8 @@ $("#item_search").autocomplete({
                                 fi_level = 'Giá Lẻ: ';
                             }
                         return {
-                            //label: el.item_code +'--[Qty:'+el.stock+'] --'+ el.label,
-                            label: el.label + ' (Kho: ' + el.stock + ')' + ' - CTB: ' + el.cansold + ' - ' + fi_level  + fi_price,
+                            label: el.item_code +'--[Số lượng:'+el.stock+'] --'+ el.label,
+                            label: el.label + ' (Kho: ' + el.stock + ')' + ' - có thể bán: ' + el.cansold + ' - ' + fi_level  + fi_price,
                             value: '',
                             id: el.id,
                             item_name: el.value,

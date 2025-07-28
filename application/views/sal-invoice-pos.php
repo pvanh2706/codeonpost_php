@@ -321,7 +321,7 @@ $after_tax = $before_tax + $tax_amt; // Sau thuế = trước thuế + thuế
     <td style=" padding-left: 2px; padding-right: 2px;" align="right"><?= number_format($total_discount); ?>₫</td>
 </tr>
 
-<tr class="<?=tax_disable_class()?>">
+<tr>
     <td style=" padding-left: 2px; padding-right: 2px;" colspan="3" align="left">Tổng trước thuế <small>(Sau CK sản phẩm)</small></td>
     <td style=" padding-left: 2px; padding-right: 2px;" align="right"><?= number_format($before_tax);?>₫</td>
 </tr>
@@ -329,19 +329,19 @@ $after_tax = $before_tax + $tax_amt; // Sau thuế = trước thuế + thuế
 <?php if (!empty($tax_details)) { ?>
 <!-- Chi tiết thuế theo từng loại -->
 <?php foreach ($tax_details as $tax_key => $tax_info) { ?>
-<tr class="<?=tax_disable_class()?>">
+<tr>
     <td style=" padding-left: 2px; padding-right: 2px; font-size: 0.85em; font-style: italic;" colspan="3" align="left">- <?= $tax_info['name']; ?> (<?= $tax_info['rate']; ?>%)</td>
     <td style=" padding-left: 2px; padding-right: 2px; font-size: 0.85em;" align="right"><?= number_format($tax_info['amount']);?>₫</td>
 </tr>
 <?php } ?>
 <?php } ?>
 
-<tr class="<?=tax_disable_class()?>">
+<tr>
     <td style=" padding-left: 2px; padding-right: 2px; font-weight: bold; border-top: 1px solid #ddd;" colspan="3" align="left">Tổng thuế</td>
     <td style=" padding-left: 2px; padding-right: 2px; font-weight: bold; border-top: 1px solid #ddd;" align="right"><?= number_format($tax_amt);?>₫</td>
 </tr>
 
-<tr class="<?=tax_disable_class()?>">
+<tr>
     <td style=" padding-left: 2px; padding-right: 2px; font-weight: bold;" colspan="3" align="left">Tổng sau thuế <small>(Trước thuế + Thuế)</small></td>
     <td style=" padding-left: 2px; padding-right: 2px; font-weight: bold;" align="right"><?= number_format($after_tax);?>₫</td>
 </tr>
@@ -361,7 +361,7 @@ $after_tax = $before_tax + $tax_amt; // Sau thuế = trước thuế + thuế
 </tr>
 <?php if(!empty($tot_discount_to_all_amt) && $tot_discount_to_all_amt!=0) {?>
 <tr>
-    <td style=" padding-left: 2px; padding-right: 2px;" colspan="3" align="left"><?= $this->lang->line('discount_on_all'); ?> <?= ($discount_to_all_type=='in_percentage') ? $discount_to_all_input .'%' : $discount_to_all_input.'[Fixed]' ;?></td>
+    <td style=" padding-left: 2px; padding-right: 2px;" colspan="3" align="left"><?= $this->lang->line('discount_on_all'); ?></td>
     <td style=" padding-left: 2px; padding-right: 2px;" align="right"><?= number_format($tot_discount_to_all_amt); ?>₫</td>
 </tr>
 <?php } ?>

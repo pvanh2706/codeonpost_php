@@ -91,17 +91,17 @@
                               
                               <div class="form-group col-md-3">
                                  <label for="sku">Mã SKU</label>
-                                 <input type="text" class="form-control" id="sku" name="sku" placeholder="" value="<?php print $sku; ?>" readonly>
+                                 <input type="text" class="form-control" id="sku" name="sku" placeholder="Nhập mã SKU" value="<?php print $sku; ?>">
                                  <span id="sku_msg" style="display:none" class="text-danger"></span>
                               </div>
                               <div class="form-group col-md-3">
                                  <label for="hsn" >Mã HSN</label>
-                                 <input type="text" class="form-control" id="hsn" name="hsn" placeholder="" value="<?php print $hsn; ?>" readonly>
+                                 <input type="text" class="form-control" id="hsn" name="hsn" placeholder="Nhập mã HSN" value="<?php print $hsn; ?>">
                                  <span id="hsn_msg" style="display:none" class="text-danger"></span>
                               </div>
                               <div class="form-group col-md-3">
                                  <label for="custom_barcode" >Mã Barcode</label>
-                                 <input type="text" class="form-control" id="custom_barcode" name="custom_barcode" placeholder=""  value="<?php print $custom_barcode; ?>" readonly>
+                                 <input type="text" class="form-control" id="custom_barcode" name="custom_barcode" placeholder="Nhập mã barcode"  value="<?php print $custom_barcode; ?>">
                                  <span id="custom_barcode_msg" style="display:none" class="text-danger"></span>
                               </div>
                            </div>

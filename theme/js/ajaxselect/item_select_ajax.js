@@ -69,7 +69,7 @@ $(document).ready(function(){
             }
 
             //return repo.text + " - "+ repo.item_code;
-            return repo.text + " (Kho: "+ repo.stock + ") - CTB: " + repo.cansold;
+            return repo.text + " (Kho: "+ repo.stock + ") - có thể bán: " + repo.cansold;
          }
 
          //Selected data view

@@ -310,7 +310,7 @@
                                        <div class="form-group">
                                           <label for="other_charges_input" class="col-sm-4 control-label">Phụ phí khác</label>    
                                           <div class="col-sm-4">
-                                             <input type="text" class="form-control text-right only_currency" id="other_charges_input" name="other_charges_input" onkeyup="final_total();" value="<?php echo  $other_charges_input; ?>">
+                                             <input type="text" class="form-control text-right" id="other_charges_input" name="other_charges_input" onkeyup="final_total();" value="<?php echo  $other_charges_input; ?>" placeholder="Nhập số tiền (VD: 50000)">
                                           </div>
                                           <div class="col-sm-4">
                                              <select class="form-control " id="other_charges_tax_id" name="other_charges_tax_id" onchange="final_total();" style="width: 100%;">
@@ -343,7 +343,7 @@
                                        <div class="form-group">
                                           <label for="discount_to_all_input" class="col-sm-4 control-label">Chiết khấu</label>    
                                           <div class="col-sm-4">
-                                             <input type="text" class="form-control  text-right only_currency" id="discount_to_all_input" name="discount_to_all_input" onkeyup="enable_or_disable_item_discount();" value="<?php echo  $discount_input; ?>">
+                                             <input type="text" class="form-control text-right" id="discount_to_all_input" name="discount_to_all_input" onkeyup="enable_or_disable_item_discount();" value="<?php echo  $discount_input; ?>" placeholder="Nhập số (VD: 5 hoặc 10000)">
                                           </div>
                                           <div class="col-sm-4">
                                              <select class="form-control" onchange="final_total();" id='discount_to_all_type' name="discount_to_all_type">
@@ -392,7 +392,7 @@
                                              <tr>
                                                 <th class="text-right" style="font-size: 17px;">Tổng tạm tính</th>
                                                 <th class="text-right" style="padding-left:10%;font-size: 17px;">
-                                                   <h4><b id="subtotal_amt" name="subtotal_amt">0.00</b></h4>
+                                                   <h4><b id="subtotal_amt" name="subtotal_amt">0 ₫</b></h4>
                                                 </th>
                                              </tr>
                                              <tr>
@@ -400,19 +400,19 @@
                                                 <span id="other_charges_tax_info" style="font-size: 14px; color: #666;"></span>
                                                 </th>
                                                 <th class="text-right" style="padding-left:10%;font-size: 17px;">
-                                                   <h4><b id="other_charges_amt" name="other_charges_amt">0.00</b></h4>
+                                                   <h4><b id="other_charges_amt" name="other_charges_amt">0 ₫</b></h4>
                                                 </th>
                                              </tr>
                                              <tr>
                                                 <th class="text-right" style="font-size: 17px;">Tổng chiết khấu</th>
                                                 <th class="text-right" style="padding-left:10%;font-size: 17px;">
-                                                   <h4><b id="discount_to_all_amt" name="discount_to_all_amt">0.00</b></h4>
+                                                   <h4><b id="discount_to_all_amt" name="discount_to_all_amt">0 ₫</b></h4>
                                                 </th>
                                              </tr>
                                              <tr>
                                                 <th class="text-right" style="font-size: 17px;">Tổng trước thuế</th>
                                                 <th class="text-right" style="padding-left:10%;font-size: 17px;">
-                                                   <h4><b id="total_before_tax_amt" name="total_before_tax_amt">0.00</b></h4>
+                                                   <h4><b id="total_before_tax_amt" name="total_before_tax_amt">0 ₫</b></h4>
                                                 </th>
                                              </tr>
                                              <!-- Tax breakdown section -->
@@ -422,13 +422,13 @@
                                              <tr>
                                                 <th class="text-right" style="font-size: 17px;">Tổng tiền thuế</th>
                                                 <th class="text-right" style="padding-left:10%;font-size: 17px;">
-                                                   <h4><b id="total_tax_amt" name="total_tax_amt">0.00</b></h4>
+                                                   <h4><b id="total_tax_amt" name="total_tax_amt">0 ₫</b></h4>
                                                 </th>
                                              </tr>
                                              <tr>
                                                 <th class="text-right" style="font-size: 17px;">Tổng sau thuế</th>
                                                 <th class="text-right" style="padding-left:10%;font-size: 17px;">
-                                                   <h4><b id="total_after_tax_amt" name="total_after_tax_amt">0.00</b></h4>
+                                                   <h4><b id="total_after_tax_amt" name="total_after_tax_amt">0 ₫</b></h4>
                                                 </th>
                                              </tr>
                                              <!--tr style="<?= (!is_enabled_round_off()) ? 'display: none;' : '';?>">
@@ -444,7 +444,7 @@
                                              <tr>
                                                 <th class="text-right" style="font-size: 17px;">Tổng thanh toán</th>
                                                 <th class="text-right" style="padding-left:10%;font-size: 17px;">
-                                                   <h4><b id="total_amt" name="total_amt">0.00</b></h4>
+                                                   <h4><b id="total_amt" name="total_amt">0 ₫</b></h4>
                                                 </th>
                                              </tr>
                                           </table>
@@ -787,7 +787,7 @@
           if($("#other_charges_input").val()!=null && $("#other_charges_input").val()!=''){
              
               other_charges_tax_id =$('option:selected', '#other_charges_tax_id').attr('data-tax');
-             var other_charges_input = parseAmount($("#other_charges_input").val());
+             var other_charges_input = parseDirectNumber($("#other_charges_input").val());
              if(other_charges_tax_id>0){
                other_charges_per_amt=(other_charges_tax_id * other_charges_input)/100;
              }
@@ -866,7 +866,7 @@
              taxable=taxable+subtotal;
              
              //discount_to_all_amt
-             var discount_input = parseAmount($("#discount_to_all_input").val());
+             var discount_input = parseDirectNumber($("#discount_to_all_input").val());
              var discount=0;
              if(discount_input>0){
                  var discount_type=$("#discount_to_all_type").val();
@@ -1078,10 +1078,16 @@
       return parseFloat(value) || 0;
     }
     
+    // Hàm parse số trực tiếp (cho phụ phí và chiết khấu)
+    function parseDirectNumber(value) {
+      if (!value) return 0;
+      return parseFloat(value) || 0;
+    }
+    
     // Hàm format tiền tệ theo chuẩn Việt Nam
     function formatCurrency(amount) {
       if (isNaN(amount) || amount === null || amount === undefined) {
-        return '0';
+        return '0 ₫';
       }
       
       // Chuyển về số và làm tròn
@@ -1091,7 +1097,7 @@
       return num.toLocaleString('vi-VN', {
         minimumFractionDigits: 0,
         maximumFractionDigits: 0
-      });
+      }) + ' ₫';
     }
     
     // Hàm format số (không có ký hiệu tiền tệ)
