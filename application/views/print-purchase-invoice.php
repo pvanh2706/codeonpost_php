@@ -278,31 +278,31 @@ body{
 <tfoot>
    <tr>
     <td colspan="<?=$colspan_2+4?>" style="text-align: center;font-weight: bold;"><?= $this->lang->line('total'); ?></td>
-    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(($tot_discount_amt),2,'.',''); ?></b></td>
-    <td colspan="1" style="font-weight: bold;"><?=number_format($tot_qty,2); ?></td>
+    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(($tot_discount_amt),0,'.',''); ?></b></td>
+    <td colspan="1" style="font-weight: bold;"><?=number_format($tot_qty,0); ?></td>
     <?php if(!is_tax_disabled()) { ?>
     <td colspan="1" style=""></td>
-    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(($tot_tax_amt),2,'.',''); ?></b></td>
+    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(($tot_tax_amt),0,'.',''); ?></b></td>
     <?php } ?>
     
-    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(($tot_unit_total_cost),2,'.',''); ?></b></td>
-    <td colspan="<?=$colspan_2+1?>" style="text-align: right;" ><b><?php echo number_format(($tot_total_cost),2,'.',''); ?></b></td>
+    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(($tot_unit_total_cost),0,'.',''); ?></b></td>
+    <td colspan="<?=$colspan_2+1?>" style="text-align: right;" ><b><?php echo number_format(($tot_total_cost),0,'.',''); ?></b></td>
   </tr>
   <tr>
     <td colspan="<?=9-$colspan_2?>" style="text-align: right;"><b><?= $this->lang->line('subtotal'); ?></b></td>
-    <td colspan="<?=$colspan_2+1?>" style="text-align: right;" ><b><?php echo number_format(round($subtotal),2,'.',''); ?></b></td>
+    <td colspan="<?=$colspan_2+1?>" style="text-align: right;" ><b><?php echo number_format(round($subtotal),0,'.',''); ?></b></td>
   </tr>
   <tr>
     <td colspan="<?=9-$colspan_2?>" style="text-align: right;"><b><?= $this->lang->line('other_charges'); ?></b></td>
-    <td colspan="<?=$colspan_2+1?>" style="text-align: right;" ><b><?php echo number_format(round($other_charges_amt),2,'.',''); ?></b></td>
+    <td colspan="<?=$colspan_2+1?>" style="text-align: right;" ><b><?php echo number_format(round($other_charges_amt),0,'.',''); ?></b></td>
   </tr>
   <tr>
     <td colspan="<?=9-$colspan_2?>" style="text-align: right;"><b><?= $this->lang->line('discount_on_all'); ?>(<?= $discount_to_all_input." ".$discount_to_all_type; ?>)</b></td>
-    <td colspan="<?=$colspan_2+1?>" style="text-align: right;" ><b><?php echo number_format(round($tot_discount_to_all_amt),2,'.',''); ?></b></td>
+    <td colspan="<?=$colspan_2+1?>" style="text-align: right;" ><b><?php echo number_format(round($tot_discount_to_all_amt),0,'.',''); ?></b></td>
   </tr>
   <tr>
     <td colspan="<?=9-$colspan_2?>" style="text-align: right;"><b><?= $this->lang->line('grand_total'); ?></b></td>
-    <td colspan="<?=$colspan_2+1?>" style="text-align: right;" ><b><?php echo number_format(round($grand_total),2,'.',''); ?></b></td>
+    <td colspan="<?=$colspan_2+1?>" style="text-align: right;" ><b><?php echo number_format(round($grand_total),0,'.',''); ?></b></td>
   </tr>
   <tr>
     <td colspan="10">

@@ -76,7 +76,7 @@ class MY_Controller extends CI_Controller{
         $value = trim($value);
 
         if(!empty($value) && is_numeric($value)){
-          $value= ($with_comma) ? number_format($value,3) : number_format($value,3,'.','');
+          $value= ($with_comma) ? number_format($value,0) : number_format($value,0,'.','');
         }
 
         if($this->session->userdata('currency_placement')=='Left'){

@@ -409,7 +409,7 @@
                                                         $total_paid +=$res3->payment;
                                                         $i++;
                                                       }
-                                                      echo "<tr class='text-right text-bold'><td colspan='4' >Total</td><td data-rowcount='$i' id='paid_amt_tot'>".number_format($total_paid,2,'.','')."</td><td></td></tr>";
+                                                      echo "<tr class='text-right text-bold'><td colspan='4' >Total</td><td data-rowcount='$i' id='paid_amt_tot'>".number_format($total_paid,0,'.','')."</td><td></td></tr>";
                                                     }
                                                     else{
                                                       echo "<tr><td colspan='6' class='text-center text-bold'>No Previous Payments Found!!</td></tr>";

@@ -411,7 +411,7 @@ body { margin: 5px; }
                   //echo "<td colspan='2' class='text-right'>".number_format($before_tax,2)."</td>";
                   //echo "<td class='text-right'>".$res2->price_per_unit."</td>";
                   
-                  echo "<td colspan='2' class='text-right'>".number_format($res2->total_cost,2)."</td>";
+                  echo "<td colspan='2' class='text-right'>".number_format($res2->total_cost,0)."</td>";
                   echo "</tr>";  
                   $tot_qty +=$res2->sales_qty;
                   $tot_sales_price +=$res2->price_per_unit;
@@ -433,53 +433,53 @@ body { margin: 5px; }
 
   <tr class="bg-sky">
     <td colspan="8" class='text-center text-bold'><?= $this->lang->line('total'); ?></td>
-    <td colspan="2" class='text-right' ><b><?php echo number_format(($tot_sales_price),2); ?></b></td>
-    <td colspan="<?=$colspan_1?>" class='text-bold text-center'><?=number_format($tot_qty,2); ?></td>
+    <td colspan="2" class='text-right' ><b><?php echo number_format(($tot_sales_price),0); ?></b></td>
+    <td colspan="<?=$colspan_1?>" class='text-bold text-center'><?=number_format($tot_qty,0); ?></td>
     <?php if(!is_tax_disabled()) { ?>
     <td colspan="1" class='text-bold text-center'></td>
-    <td colspan="1" class='text-right' ><b><?php echo number_format(($tot_tax_amt),2); ?></b></td>
+    <td colspan="1" class='text-right' ><b><?php echo number_format(($tot_tax_amt),0); ?></b></td>
     <?php } ?>
-    <td colspan="<?=$colspan_1?>" class='text-right' ><b><?php echo number_format(($tot_discount_amt),2); ?></b></td>
-    <td colspan="2" class='text-right' ><b><?php echo number_format(($tot_total_cost),2); ?></b></td>
+    <td colspan="<?=$colspan_1?>" class='text-right' ><b><?php echo number_format(($tot_discount_amt),0); ?></b></td>
+    <td colspan="2" class='text-right' ><b><?php echo number_format(($tot_total_cost),0); ?></b></td>
   </tr>
   <tr>
     <td colspan="14" class='text-right'><b><?= $this->lang->line('subtotal'); ?></b></td>
-    <td colspan="2" class='text-right' ><b><?php echo number_format($tot_total_cost,2); ?></b></td>
+    <td colspan="2" class='text-right' ><b><?php echo number_format($tot_total_cost,0); ?></b></td>
   </tr>
 
 
   <tr>
     <td colspan="14" class='text-right'><b><?= $this->lang->line('other_charges'); ?></b></td>
-    <td colspan="2" class='text-right' ><b><?php echo number_format($other_charges_amt,2); ?></b></td>
+    <td colspan="2" class='text-right' ><b><?php echo number_format($other_charges_amt,0); ?></b></td>
   </tr>
   
   <tr>
     <td colspan="14" class='text-right'><b><?= $this->lang->line('discount_on_all'); ?>(<?= $discount_to_all_input." ".$discount_to_all_type; ?>)</b></td>
-    <td colspan="2" class='text-right' ><b><?php echo number_format($tot_discount_to_all_amt,2); ?></b></td>
+    <td colspan="2" class='text-right' ><b><?php echo number_format($tot_discount_to_all_amt,0); ?></b></td>
   </tr>
   
   <tr>
     <td colspan="14" class='text-right'><b><?= $this->lang->line('grand_total'); ?></b></td>
-    <td colspan="2" class='text-right' ><b><?php echo number_format($grand_total,2); ?></b></td>
+    <td colspan="2" class='text-right' ><b><?php echo number_format($grand_total,0); ?></b></td>
   </tr>
 
   <tr>
     <td colspan="14" class='text-right'><b><?= $this->lang->line('invoice_paid'); ?></b></td>
-    <td colspan="2" class='text-right' ><b><?php echo number_format($paid_amount,2); ?></b></td>
+    <td colspan="2" class='text-right' ><b><?php echo number_format($paid_amount,0); ?></b></td>
   </tr>
   <tr>
     <td colspan="14" class='text-right'><b><?= $this->lang->line('invoice_due'); ?></b></td>
-    <td colspan="2" class='text-right' ><b><?php echo number_format($grand_total-$paid_amount,2); ?></b></td>
+    <td colspan="2" class='text-right' ><b><?php echo number_format($grand_total-$paid_amount,0); ?></b></td>
   </tr>
 
   <tr>
     <td colspan="14" class='text-right'><b><?= $this->lang->line('previous_due'); ?></b></td>
-    <td colspan="2" class='text-right' ><b><?php echo number_format($previous_due,2); ?></b></td>
+    <td colspan="2" class='text-right' ><b><?php echo number_format($previous_due,0); ?></b></td>
   </tr>
 
   <tr>
     <td colspan="14" class='text-right'><b><?= $this->lang->line('customer_total_due'); ?></b></td>
-    <td colspan="2" class='text-right' ><b><?php echo number_format($total_due,2); ?></b></td>
+    <td colspan="2" class='text-right' ><b><?php echo number_format($total_due,0); ?></b></td>
   </tr>
 
   <tr>
