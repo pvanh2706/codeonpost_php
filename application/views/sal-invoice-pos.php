@@ -261,7 +261,10 @@
     			              $tot_qty=0;
     			              $subtotal=0;
     			              $tax_amt=0;
-    			              $q2=$this->db->query(" select b.sales_price, a.description, a.discount_type,a.discount_input,a.discount_amt, b.sku, b.id, b.item_name,a.sales_qty,a.unit_total_cost,a.price_per_unit,a.tax_amt,c.tax,a.total_cost from db_salesitems a,db_items b,db_tax c where c.id=a.tax_id and b.id=a.item_id and a.sales_id='$sales_id'");
+    			              $calculated_subtotal=0; // Tổng tạm tính thực tế (qty × price)
+    			              $tax_details = array(); // Mảng lưu chi tiết thuế theo từng loại
+    			              
+    			              $q2=$this->db->query(" select b.sales_price, a.description, a.discount_type,a.discount_input,a.discount_amt, b.sku, b.id, b.item_name,a.sales_qty,a.unit_total_cost,a.price_per_unit,a.tax_amt,c.tax,c.tax_name,a.total_cost from db_salesitems a,db_items b,db_tax c where c.id=a.tax_id and b.id=a.item_id and a.sales_id='$sales_id'");
 foreach ($q2->result() as $res2) {
     echo "<tr style='border-bottom-style: dashed;border-width: 0.1px;'>";  
         if ($res2->description) {
@@ -277,40 +280,88 @@ foreach ($q2->result() as $res2) {
         echo "<td style='text-align:center; padding-right: 2px; font-size: 0.8em;'>".number_format($res2->price_per_unit)."₫</td>";
         echo "<td style='text-align:right;padding-left: 2px; padding-right: 2px; font-size: 0.8em;' >".number_format($res2->total_cost)."₫</td>";
     echo "</tr>";  
+    
+    // Tính tổng tạm tính = số lượng × đơn giá (trước chiết khấu và thuế)
+    $line_subtotal = $res2->sales_qty * $res2->price_per_unit;
+    $calculated_subtotal += $line_subtotal;
+    
     $subtotal+=($res2->total_cost);
     $tax_amt+=$res2->tax_amt;
     $total_discount+=$res2->discount_amt;
+    
+    // Thu thập chi tiết thuế theo từng loại
+    if ($res2->tax_amt > 0) {
+        $tax_key = $res2->tax . '%';
+        $tax_name = $res2->tax_name ? $res2->tax_name : 'Thuế ' . $res2->tax . '%';
+        
+        if (!isset($tax_details[$tax_key])) {
+            $tax_details[$tax_key] = array(
+                'name' => $tax_name,
+                'rate' => $res2->tax,
+                'amount' => 0
+            );
+        }
+        $tax_details[$tax_key]['amount'] += $res2->tax_amt;
+    }
 }
-$before_tax = $subtotal-$tax_amt;
+$before_tax = $calculated_subtotal - $total_discount; // Trước thuế = tạm tính - chiết khấu
+$after_tax = $before_tax + $tax_amt; // Sau thuế = trước thuế + thuế
 			              ?>
 					
 				    </tbody>
 					<tfoot>
 					<tr><td colspan="4"><hr></td></tr>
-					<tr >
-    <td style=" padding-left: 2px; padding-right: 2px;" colspan="3" align="left">
-        <?= (is_tax_disabled()) ? "Tổng tạm tính" : "Tổng trước thuế"; ?>
-    </td>
-    <td style=" padding-left: 2px; padding-right: 2px;" align="right"><?= number_format($before_tax);?>₫</td>
-</tr>
-
-<tr class="<?=tax_disable_class()?>">
-    <td style=" padding-left: 2px; padding-right: 2px;" colspan="3" align="left">Tổng thuế</td>
-    <td style=" padding-left: 2px; padding-right: 2px;" align="right"><?= number_format($tax_amt);?>₫</td>
+					<tr>
+    <td style=" padding-left: 2px; padding-right: 2px;" colspan="3" align="left">Tổng tạm tính <small>(trước thuế)</small></td>
+    <td style=" padding-left: 2px; padding-right: 2px;" align="right"><?= number_format($calculated_subtotal);?>₫</td>
 </tr>
 
 <tr>
-    <td style=" padding-left: 2px; padding-right: 2px;" colspan="3" align="left">Tổng chiết khấu</td>
+    <td style=" padding-left: 2px; padding-right: 2px;" colspan="3" align="left">Tổng chiết khấu sản phẩm</td>
     <td style=" padding-left: 2px; padding-right: 2px;" align="right"><?= number_format($total_discount); ?>₫</td>
 </tr>
 
 <tr>
-    <td style=" padding-left: 2px; padding-right: 2px;" colspan="3" align="left">Các phụ phí khác</td>
+    <td style=" padding-left: 2px; padding-right: 2px;" colspan="3" align="left">Tổng trước thuế <small>(Sau CK sản phẩm)</small></td>
+    <td style=" padding-left: 2px; padding-right: 2px;" align="right"><?= number_format($before_tax);?>₫</td>
+</tr>
+
+<?php if (!empty($tax_details)) { ?>
+<!-- Chi tiết thuế theo từng loại -->
+<?php foreach ($tax_details as $tax_key => $tax_info) { ?>
+<tr>
+    <td style=" padding-left: 2px; padding-right: 2px; font-size: 0.85em; font-style: italic;" colspan="3" align="left">- <?= $tax_info['name']; ?> (<?= $tax_info['rate']; ?>%)</td>
+    <td style=" padding-left: 2px; padding-right: 2px; font-size: 0.85em;" align="right"><?= number_format($tax_info['amount']);?>₫</td>
+</tr>
+<?php } ?>
+<?php } ?>
+
+<tr>
+    <td style=" padding-left: 2px; padding-right: 2px; font-weight: bold; border-top: 1px solid #ddd;" colspan="3" align="left">Tổng thuế</td>
+    <td style=" padding-left: 2px; padding-right: 2px; font-weight: bold; border-top: 1px solid #ddd;" align="right"><?= number_format($tax_amt);?>₫</td>
+</tr>
+
+<tr>
+    <td style=" padding-left: 2px; padding-right: 2px; font-weight: bold;" colspan="3" align="left">Tổng sau thuế <small>(Trước thuế + Thuế)</small></td>
+    <td style=" padding-left: 2px; padding-right: 2px; font-weight: bold;" align="right"><?= number_format($after_tax);?>₫</td>
+</tr>
+
+<tr>
+    <td style=" padding-left: 2px; padding-right: 2px;" colspan="3" align="left">
+        Phụ phí khác 
+        <?php if($other_charges_tax_id && $other_charges_tax_id != '' && $other_charges_input > 0) { 
+            // Lấy thông tin thuế cho phụ phí
+            $other_charges_tax_info = $this->db->query("SELECT tax, tax_name FROM db_tax WHERE id = '$other_charges_tax_id'")->row();
+            if($other_charges_tax_info) {
+                echo '<small>(có thuế ' . $other_charges_tax_info->tax . '%)</small>';
+            }
+        } ?>
+    </td>
     <td style=" padding-left: 2px; padding-right: 2px;" align="right"><?= number_format($other_charges_amt); ?>₫</td>
 </tr>
 <?php if(!empty($tot_discount_to_all_amt) && $tot_discount_to_all_amt!=0) {?>
 <tr>
-    <td style=" padding-left: 2px; padding-right: 2px;" colspan="3" align="left"><?= $this->lang->line('discount_on_all'); ?> <?= ($discount_to_all_type=='in_percentage') ? $discount_to_all_input .'%' : $discount_to_all_input.'[Fixed]' ;?></td>
+    <td style=" padding-left: 2px; padding-right: 2px;" colspan="3" align="left"><?= $this->lang->line('discount_on_all'); ?></td>
     <td style=" padding-left: 2px; padding-right: 2px;" align="right"><?= number_format($tot_discount_to_all_amt); ?>₫</td>
 </tr>
 <?php } ?>
@@ -319,6 +370,15 @@ $before_tax = $subtotal-$tax_amt;
     <td style=" padding-left: 2px; padding-right: 2px;font-weight: bold;" colspan="3" align="left">Tổng cần thanh toán</td>
     <td style=" padding-left: 2px; padding-right: 2px;font-weight: bold;" align="right"><?= number_format($grand_total); ?>₫</td>
 </tr>
+
+<?php if ($tax_amt > 0) { ?>
+<tr style="border-bottom-style: dashed;border-width: 0.1px;">
+    <td style=" padding-left: 2px; padding-right: 2px; font-size: 0.85em; font-style: italic;" colspan="3" align="left">
+        <em>Tổng thuế đã bao gồm: <?= number_format($tax_amt); ?>₫</em>
+    </td>
+    <td style=" padding-left: 2px; padding-right: 2px;" align="right"></td>
+</tr>
+<?php } ?>
 					
 					<!-- change_return_status -->
 					<?php if(change_return_status()) {

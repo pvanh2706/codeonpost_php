@@ -42,8 +42,10 @@ function save(print=false,pay_all=false){
 	
 	var base_url=$("#base_url").val().trim();
     
-    if($(".items_table tr").length==1){
-    	toastr["warning"]("Đơn hàng trống!!");
+    // Kiểm tra validation sản phẩm - sử dụng tr.itemrows để chính xác hơn
+    var productCount = $("tr.itemrows").length;
+    if(productCount == 0){
+    	toastr["warning"]("Vui lòng thêm ít nhất một sản phẩm vào đơn hàng!");
 		return;
     }
 
@@ -227,8 +229,11 @@ function savetam(print=false,pay_all=false,in_tam){
 	
 	var base_url=$("#base_url").val().trim();
     
-    if($(".items_table tr").length==1){
-    	toastr["warning"]("Đơn hàng trống!!");
+    // Kiểm tra validation sản phẩm - sử dụng tr.itemrows để chính xác hơn
+    var productCount = $("tr.itemrows").length;
+    if(productCount == 0){
+    	toastr["warning"]("Vui lòng thêm ít nhất một sản phẩm vào đơn hàng!");
+		isProcessingTam = false; // Reset flag khi có lỗi
 		return;
     }
 
@@ -394,8 +399,9 @@ function savetam(print=false,pay_all=false,in_tam){
 $('#hold_invoice').on("click",function (e) {
 
 	//table should not be empty
-	if($(".items_table tr").length==1){
-    	toastr["error"]("Đơn chưa có sản phẩm nào!!!");
+	var productCount = $("tr.itemrows").length;
+	if(productCount == 0){
+    	toastr["error"]("Vui lòng thêm ít nhất một sản phẩm vào đơn hàng!");
     	failed.currentTime = 0;
 		failed.play();
 		return;
@@ -591,8 +597,9 @@ function get_id_value(id){
 $('#collect_customer_info').on("click",function (e) {
 	
 	//table should not be empty
-	if($(".items_table tr").length==1){
-    	toastr["error"]("Đơn chưa có sản phẩm nào!!!");
+	var productCount = $("tr.itemrows").length;
+	if(productCount == 0){
+    	toastr["error"]("Vui lòng thêm ít nhất một sản phẩm vào đơn hàng!");
     	failed.currentTime = 0;
 		failed.play();
 		return;
@@ -611,8 +618,9 @@ $('#collect_customer_info').on("click",function (e) {
 $('.show_payments_modal').on("click",function (e) {
 	
 	//table should not be empty
-	if($(".items_table tr").length==1){
-    	toastr["error"]("Đơn chưa có sản phẩm nào!!!");
+	var productCount = $("tr.itemrows").length;
+	if(productCount == 0){
+    	toastr["error"]("Vui lòng thêm ít nhất một sản phẩm vào đơn hàng!");
     	failed.currentTime = 0;
 		failed.play();
 		return;
@@ -626,8 +634,9 @@ $('.show_payments_modal').on("click",function (e) {
 }); //hold_invoice end
 $('#show_cash_modal').on("click",function (e) {
 	//table should not be empty
-	if($(".items_table tr").length==1){
-    	toastr["error"]("Đơn chưa có sản phẩm nào!!!");
+	var productCount = $("tr.itemrows").length;
+	if(productCount == 0){
+    	toastr["error"]("Vui lòng thêm ít nhất một sản phẩm vào đơn hàng!");
     	failed.currentTime = 0;
 		failed.play();
 		return;
@@ -645,8 +654,9 @@ $('#add_payment_row').on("click",function (e) {
 	
 	var base_url=$("#base_url").val().trim();
 	//table should not be empty
-	if($(".items_table tr").length==1){
-    	toastr["error"]("Đơn chưa có sản phẩm nào!!!");
+	var productCount = $("tr.itemrows").length;
+	if(productCount == 0){
+    	toastr["error"]("Vui lòng thêm ít nhất một sản phẩm vào đơn hàng!");
     	failed.currentTime = 0;
 		failed.play();
 		return;

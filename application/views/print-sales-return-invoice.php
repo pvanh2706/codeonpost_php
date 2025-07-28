@@ -247,6 +247,7 @@ function formatNumber($number) {
               $tot_discount_amt=0;
               $tot_unit_total_cost=0;
               $tot_total_cost=0;
+              $calculated_subtotal=0; // Tổng tạm tính được tính từ items
               $q2=$this->db->query("SELECT c.item_name, a.return_qty,
                                   a.price_per_unit, b.tax,b.tax_name,a.tax_amt,
                                   a.discount_input,a.discount_amt, a.unit_total_cost,
@@ -258,6 +259,11 @@ function formatNumber($number) {
               foreach ($q2->result() as $res2) {
                   $discount = (empty($res2->discount_input)||$res2->discount_input==0)? '-':$res2->discount_input."%";
                   $discount_amt = (empty($res2->discount_amt)||$res2->discount_input==0)? '-':formatCurrency($res2->discount_amt);
+                  
+                  // Tính tổng tạm tính = số lượng × đơn giá (trước chiết khấu và thuế)
+                  $line_subtotal = $res2->return_qty * $res2->price_per_unit;
+                  $calculated_subtotal += $line_subtotal;
+                  
                   echo "<tr>";  
                   echo "<td>".++$i."</td>";
                   echo "<td colspan='".($colspan_2+1)."'>".$res2->item_name."</td>";
@@ -296,9 +302,27 @@ function formatNumber($number) {
     <td colspan="<?=$colspan_2+1?>" style="text-align: right;" ><b><?php echo formatCurrency($tot_total_cost); ?></b></td>
   </tr>
   <tr>
-    <td colspan="<?=9-$colspan_2?>" style="text-align: right;"><b>Tổng tạm tính</b></td>
-    <td colspan="<?=$colspan_2+1?>" style="text-align: right;" ><b><?php echo formatCurrency($subtotal); ?></b></td>
+    <td colspan="<?=9-$colspan_2?>" style="text-align: right;"><b>Tổng tạm tính</b> <small>(Qty × Đơn giá)</small></td>
+    <td colspan="<?=$colspan_2+1?>" style="text-align: right;" ><b><?php echo formatCurrency($calculated_subtotal); ?></b></td>
   </tr>
+  <?php if(!is_tax_disabled()) { ?>
+  <tr>
+    <td colspan="<?=9-$colspan_2?>" style="text-align: right;"><b>Tổng chiết khấu sản phẩm</b></td>
+    <td colspan="<?=$colspan_2+1?>" style="text-align: right;" ><b><?php echo formatCurrency($tot_discount_amt); ?></b></td>
+  </tr>
+  <tr>
+    <td colspan="<?=9-$colspan_2?>" style="text-align: right;"><b>Tổng trước thuế</b> <small>(Sau CK sản phẩm)</small></td>
+    <td colspan="<?=$colspan_2+1?>" style="text-align: right;" ><b><?php echo formatCurrency($calculated_subtotal - $tot_discount_amt); ?></b></td>
+  </tr>
+  <tr>
+    <td colspan="<?=9-$colspan_2?>" style="text-align: right;"><b>Tổng tiền thuế</b></td>
+    <td colspan="<?=$colspan_2+1?>" style="text-align: right;" ><b><?php echo formatCurrency($tot_tax_amt); ?></b></td>
+  </tr>
+  <tr>
+    <td colspan="<?=9-$colspan_2?>" style="text-align: right;"><b>Tổng sau thuế</b> <small>(Trước thuế + Thuế)</small></td>
+    <td colspan="<?=$colspan_2+1?>" style="text-align: right;" ><b><?php echo formatCurrency($calculated_subtotal - $tot_discount_amt + $tot_tax_amt); ?></b></td>
+  </tr>
+  <?php } ?>
   <tr>
     <td colspan="<?=9-$colspan_2?>" style="text-align: right;"><b>Phụ phí khác</b></td>
     <td colspan="<?=$colspan_2+1?>" style="text-align: right;" ><b><?php echo formatCurrency($other_charges_amt); ?></b></td>
@@ -308,7 +332,7 @@ function formatNumber($number) {
     <td colspan="<?=$colspan_2+1?>" style="text-align: right;" ><b><?php echo formatCurrency($tot_discount_to_all_amt); ?></b></td>
   </tr>
   <tr>
-    <td colspan="<?=9-$colspan_2?>" style="text-align: right;"><b>Tổng thanh toán</b></td>
+    <td colspan="<?=9-$colspan_2?>" style="text-align: right;"><b>Tổng thanh toán</b> <?php if(!is_tax_disabled()) { ?><small>(Sau thuế + Phụ phí - CK tổng)</small><?php } ?></td>
     <td colspan="<?=$colspan_2+1?>" style="text-align: right;" ><b><?php echo formatCurrency($grand_total); ?></b></td>
   </tr>
   <tr>

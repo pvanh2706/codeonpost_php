@@ -198,7 +198,7 @@ $("#item_search").autocomplete({
                     result = $.map(res, function(el){
                         return {
                             //label: el.label + ' (' + el.stock + ')',
-                            label: el.label + ' (Kho: ' + el.stock + ')' + ' - CTB: ' + el.cansold,
+                            label: el.label + ' (Kho: ' + el.stock + ')' + ' - có thể bán: ' + el.cansold,
                             value: '',
                             id: el.id,
                             item_name: el.value,
