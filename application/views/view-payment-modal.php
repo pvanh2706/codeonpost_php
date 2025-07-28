@@ -55,9 +55,9 @@ $due_amount = $grand_total - $payment_amount;
                             <div class="card-body">
                                 <p><strong><?php echo $this->lang->line('invoice'); ?>:</strong> <?php echo $sales_return->return_code; ?></p>
                                 <p><strong><?php echo $this->lang->line('date'); ?>:</strong> <?php echo date('d-m-Y', strtotime($sales_return->return_date)); ?></p>
-                                <p><strong><?php echo $this->lang->line('grand_total'); ?>:</strong> <?php echo number_format($grand_total, 2); ?></p>
-                                <p><strong><?php echo $this->lang->line('paid_amount'); ?>:</strong> <?php echo number_format($payment_amount, 2); ?></p>
-                                <p><strong><?php echo $this->lang->line('due_amount'); ?>:</strong> <?php echo number_format($due_amount, 2); ?></p>
+                                <p><strong><?php echo $this->lang->line('grand_total'); ?>:</strong> <?php echo number_format($grand_total, 0); ?></p>
+                                <p><strong><?php echo $this->lang->line('paid_amount'); ?>:</strong> <?php echo number_format($payment_amount, 0); ?></p>
+                                <p><strong><?php echo $this->lang->line('due_amount'); ?>:</strong> <?php echo number_format($due_amount, 0); ?></p>
                             </div>
                         </div>
                     </div>
@@ -86,7 +86,7 @@ $due_amount = $grand_total - $payment_amount;
                                                 <tr>
                                                     <td><?php echo date('d-m-Y', strtotime($payment->payment_date)); ?></td>
                                                     <td><?php echo $payment->payment_type; ?></td>
-                                                    <td><?php echo number_format($payment->payment, 2); ?></td>
+                                                    <td><?php echo number_format($payment->payment, 0); ?></td>
                                                     <td><?php echo $payment->payment_note; ?></td>
                                                     <td><?php echo $payment->created_by; ?></td>
                                                 </tr>

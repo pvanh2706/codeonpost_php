@@ -261,9 +261,9 @@ body{
                   $discount = (empty($res2->discount_input)||$res2->discount_input==0)? '-':$res2->discount_input."%";
                   $discount_amt = (empty($res2->discount_amt)||$res2->discount_input==0)? '-':$res2->discount_amt."";
 
-                  $unit_price= number_format($res2->price_per_unit,2,'.','');
-                  $tax_amt= number_format($res2->tax_amt,2,'.','');
-                  
+                  $unit_price= number_format($res2->price_per_unit,0,'.','');
+                  $tax_amt= number_format($res2->tax_amt,0,'.','');
+
                   echo "<tr>";
                   echo "<td style='border-right: 0.5px solid;border-top: 0.5px solid;'>".++$i."</td>";
                   echo "<td style='border-right: 0.5px solid;border-top: 0.5px solid;' colspan='".$colspan_1."'>".$res2->item_name."</td>";
@@ -291,39 +291,39 @@ body{
     <td colspan="3" style="text-align: center;font-weight: bold;"><?= $this->lang->line('total'); ?></td>
     <td colspan="1" style="font-weight: bold;"><?=$tot_qty; ?></td>
     <td colspan="1" style="">-</td>
-    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(($tot_tax_amt),2,'.',''); ?></b></td>
+    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(($tot_tax_amt),0,'.',''); ?></b></td>
     <td colspan="1" style="">-</td>
-    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(($tot_discount_amt),2,'.',''); ?></b></td>
-    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(($tot_unit_total_cost),2,'.',''); ?></b></td>
-    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(($tot_total_cost),2,'.',''); ?></b></td>
+    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(($tot_discount_amt),0,'.',''); ?></b></td>
+    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(($tot_unit_total_cost),0,'.',''); ?></b></td>
+    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(($tot_total_cost),0,'.',''); ?></b></td>
   </tr> -->
   <tr>
     <td colspan="9" style="text-align: right;"><b><?= $this->lang->line('total'); ?></b></td>
-    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(($tot_total_cost),2,'.',''); ?></b></td>
+    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(($tot_total_cost),0,'.',''); ?></b></td>
   </tr>
   <!-- <tr>
     <td colspan="9" style="text-align: right;"><b><?= $this->lang->line('subtotal'); ?></b></td>
-    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(round($subtotal),2,'.',''); ?></b></td>
+    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(round($subtotal),0,'.',''); ?></b></td>
   </tr> -->
   
   <tr>
     <td colspan="9" style="text-align: right;"><b><?= $this->lang->line('other_charges'); ?></b></td>
-    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(($other_charges_amt),2,'.',''); ?></b></td>
+    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(($other_charges_amt),0,'.',''); ?></b></td>
   </tr>
   <tr>
     <td colspan="9" style="text-align: right;"><b><?= $this->lang->line('discount_on_all'); ?>(<?= $discount_to_all_input." ".$discount_to_all_type; ?>)</b></td>
-    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(($tot_discount_to_all_amt),2,'.',''); ?></b></td>
+    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(($tot_discount_to_all_amt),0,'.',''); ?></b></td>
   </tr>
   <tr>
     <td colspan="9" style="text-align: right;"><b><?= $this->lang->line('round_off'); ?></b></td>
-    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(($round_off),2,'.',''); ?></b></td>
+    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(($round_off),0,'.',''); ?></b></td>
   </tr>
   <tr>
     <td colspan="8">
       <?php echo "<span class='amt-in-word'>Amount in words: <i style='font-weight:bold;'>".NumberToWords(($grand_total))."</i></span>"; ?>
     </td>
     <td colspan="1" style="text-align: right;"><b><?= $this->lang->line('grand_total'); ?></b></td>
-    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(($grand_total),2,'.',''); ?></b></td>
+    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(($grand_total),0,'.',''); ?></b></td>
   </tr>
 
   <?php if(!empty(trim($terms_and_conditions))){ ?>

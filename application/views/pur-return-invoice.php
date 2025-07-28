@@ -309,13 +309,13 @@
             <tfoot class="text-right text-bold bg-gray">
               <tr>
                 <td colspan="4" class="text-center"><?= $this->lang->line('total'); ?></td>
-                <td><?= $CI->currency(number_format($tot_discount_amt,2,'.','')) ;?></td>
-                <td class="text-left"><?=number_format($tot_qty,2);?></td>
+                <td><?= $CI->currency(number_format($tot_discount_amt,0,'.','')) ;?></td>
+                <td class="text-left"><?=number_format($tot_qty,0);?></td>
                 <td class="<?=tax_disable_class()?>"></td>
                 <td class="<?=tax_disable_class()?>"><?=$CI->currency($tot_tax_amt);?></td>
-                
-                <td><?= $CI->currency(number_format($tot_unit_total_cost,2,'.','')) ;?></td>
-                <td><?= $CI->currency(number_format($tot_total_cost,2,'.','')) ;?></td>
+
+                <td><?= $CI->currency(number_format($tot_unit_total_cost,0,'.','')) ;?></td>
+                <td><?= $CI->currency(number_format($tot_total_cost,0,'.','')) ;?></td>
               </tr>
             </tfoot>
           </table>
@@ -376,7 +376,7 @@
                                   echo "</tr>";
                                   $total_paid +=$res3->payment;
                                 }
-                                echo "<tr class='text-right text-bold'><td colspan='4' >Total</td><td>".$CI->currency(number_format($total_paid,2,'.',''))."</td></tr>";
+                                echo "<tr class='text-right text-bold'><td colspan='4' >Total</td><td>".$CI->currency(number_format($total_paid,0,'.',''))."</td></tr>";
                               }
                               else{
                                 echo "<tr><td colspan='5' class='text-center text-bold'>No Previous Payments Found!!</td></tr>";

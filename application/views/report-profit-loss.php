@@ -61,12 +61,12 @@
                               <!-- Total Gross Profit -->
                               <tr>
                                  <td>Tổng lợi nhuận trừ vốn</td>
-                                 <td class="text-right text-bold gross_profit"><?php echo $CI->currency(number_format(0,2,'.','')); ?></td>
+                                 <td class="text-right text-bold gross_profit"><?php echo $CI->currency(number_format(0,0,'.','')); ?></td>
                               </tr>
                               <!-- Total Net Profit -->
                               <tr>
                                  <td>Lợi nhuận ròng (Đã trừ chi phí)</td>
-                                 <td class="text-right text-bold tot_net_profit"><?php echo $CI->currency(number_format(0,2,'.','')); ?></td>
+                                 <td class="text-right text-bold tot_net_profit"><?php echo $CI->currency(number_format(0,0,'.','')); ?></td>
                               </tr>
                            </table>
                         </div>
@@ -93,32 +93,32 @@
                               <!-- Total Purchase -->
                               <tr>
                                  <td>Tổng nhập hàng</td>
-                                 <td class="text-right text-bold pur_total"><?php echo $CI->currency(number_format(0,2,'.','')); ?></td>
+                                 <td class="text-right text-bold pur_total"><?php echo $CI->currency(number_format(0,0,'.','')); ?></td>
                               </tr>
                               <!-- Total Purchase Tax -->
                               <tr>
                                  <td>Tổng thuế nhập</td>
-                                 <td class="text-right text-bold purchase_tax_amt"><?php echo $CI->currency(number_format((0),2,'.','')); ?></td>
+                                 <td class="text-right text-bold purchase_tax_amt"><?php echo $CI->currency(number_format((0),0,'.','')); ?></td>
                               </tr>
                               <!-- Total Purchase Other Charges -->
                               <tr>
                                  <td>Tổng phụ phí nhập</td>
-                                 <td class="text-right text-bold pur_other_charges_amt"><?php echo $CI->currency(number_format(0,2,'.','')); ?></td>
+                                 <td class="text-right text-bold pur_other_charges_amt"><?php echo $CI->currency(number_format(0,0,'.','')); ?></td>
                               </tr>
                               <!-- Total Purchase Doscount -->
                               <tr>
                                  <td>Tổng chiếc khấu nhập</td>
-                                 <td class="text-right text-bold purchase_discount_amt"><?php echo $CI->currency(number_format(0,2,'.','')); ?></td>
+                                 <td class="text-right text-bold purchase_discount_amt"><?php echo $CI->currency(number_format(0,0,'.','')); ?></td>
                               </tr>
                               <!-- Total Purchase Paid Amount -->
                               <tr>
                                  <td>Tổng nhập đã thanh toán</td>
-                                 <td class="text-right text-bold text-success purchase_paid_amount"><?php echo $CI->currency(number_format(0,2,'.','')); ?></td>
+                                 <td class="text-right text-bold text-success purchase_paid_amount"><?php echo $CI->currency(number_format(0,0,'.','')); ?></td>
                               </tr>
                               <!-- Total Purchase Due -->
                               <tr>
                                  <td>Tổng nợ nhập chưa thanh toán</td>
-                                 <td class="text-right text-bold text-danger purchase_due_total"><?php echo $CI->currency(number_format(0,2,'.','')); ?></td>
+                                 <td class="text-right text-bold text-danger purchase_due_total"><?php echo $CI->currency(number_format(0,0,'.','')); ?></td>
                               </tr>
                               <tr>
                                  <td colspan="2" class="text-bold font-italic text-primary">Trả hàng nhập</td>
@@ -126,32 +126,32 @@
                               <!-- Total Purchase Return -->
                               <tr>
                                  <td>Tổng trả hàng nhập</td>
-                                 <td class="text-right text-bold pur_return_total"><?php echo $CI->currency(number_format(0,2,'.','')); ?></td>
+                                 <td class="text-right text-bold pur_return_total"><?php echo $CI->currency(number_format(0,0,'.','')); ?></td>
                               </tr>
                               <!-- Total Purchase return Tax -->
                               <tr>
                                  <td>Tổng thuế trả hàng nhập</td>
-                                 <td class="text-right text-bold purchase_return_tax_amt"><?php echo $CI->currency(number_format(0,2,'.','')); ?></td>
+                                 <td class="text-right text-bold purchase_return_tax_amt"><?php echo $CI->currency(number_format(0,0,'.','')); ?></td>
                               </tr>
                               <!-- Total Purchase return Other Charges -->
                               <tr>
                                  <td>Tổng phụ phí trả hàng nhập</td>
-                                 <td class="text-right text-bold pur_return_other_charges_amt"><?php echo $CI->currency(number_format(0,2,'.','')); ?></td>
+                                 <td class="text-right text-bold pur_return_other_charges_amt"><?php echo $CI->currency(number_format(0,0,'.','')); ?></td>
                               </tr>
                               <!-- Total Purchase return Doscount -->
                               <tr>
                                  <td>Tổng chiếc khấu trả hàng nhập</td>
-                                 <td class="text-right text-bold purchase_return_discount_amt"><?php echo $CI->currency(number_format(0,2,'.','')); ?></td>
+                                 <td class="text-right text-bold purchase_return_discount_amt"><?php echo $CI->currency(number_format(0, 0,'.','')); ?></td>
                               </tr>
                               <!-- Total Purchase Return Paid Amount -->
                               <tr>
                                  <td>Tổng trả hàng nhập đã thanh toán</td>
-                                 <td class="text-right text-bold text-success purchase_return_paid_amount"><?php echo $CI->currency(number_format(0,2,'.','')); ?></td>
+                                 <td class="text-right text-bold text-success purchase_return_paid_amount"><?php echo $CI->currency(number_format(0,0,'.','')); ?></td>
                               </tr>
                               <!-- Total Purchase returns Due -->
                               <tr>
                                  <td>Tổng nợ trả hàng chưa thanh toán</td>
-                                 <td class="text-right text-bold text-danger purchase_return_due_total"><?php echo $CI->currency(number_format(0,2,'.','')); ?></td>
+                                 <td class="text-right text-bold text-danger purchase_return_due_total"><?php echo $CI->currency(number_format(0,0,'.','')); ?></td>
                               </tr>
                            </table>
                         </div>
@@ -170,7 +170,7 @@
                               <!-- Total Expenses -->
                               <tr>
                                  <td>Tổng chi phí vận hành</td>
-                                 <td class="text-right text-bold exp_total"><?php echo $CI->currency(number_format(0,2,'.','')); ?></td>
+                                 <td class="text-right text-bold exp_total"><?php echo $CI->currency(number_format(0,0,'.','')); ?></td>
                               </tr>
                               <tr>
                                  <td colspan="2" class="text-bold font-italic text-primary">Bán hàng</td>
@@ -178,32 +178,32 @@
                               <!-- Total Sales -->
                               <tr>
                                  <td>Tổng số đơn hàng</td>
-                                 <td class="text-right text-bold sal_total"><?php echo $CI->currency(number_format(0,2,'.','')); ?></td>
+                                 <td class="text-right text-bold sal_total"><?php echo $CI->currency(number_format(0,0,'.','')); ?></td>
                               </tr>
                               <!-- Total Sales Tax -->
                               <tr>
                                  <td>Tổng thuế đơn hàng</td>
-                                 <td class="text-right text-bold sales_tax_amt"><?php echo $CI->currency(number_format(0,2,'.','')); ?></td>
+                                 <td class="text-right text-bold sales_tax_amt"><?php echo $CI->currency(number_format(0,0,'.','')); ?></td>
                               </tr>
                               <!-- Total Sales Other Charges -->
                               <tr>
                                  <td>Tổng phụ phí đơn hàng</td>
-                                 <td class="text-right text-bold sal_other_charges_amt"><?php echo $CI->currency(number_format(0,2,'.','')); ?></td>
+                                 <td class="text-right text-bold sal_other_charges_amt"><?php echo $CI->currency(number_format(0,0,'.','')); ?></td>
                               </tr>
                               <!-- Total Sales Doscount -->
                               <tr>
                                  <td>Tổng chiếc khấu đơn hàng</td>
-                                 <td class="text-right text-bold sales_discount_amt"><?php echo $CI->currency(number_format(0,2,'.','')); ?></td>
+                                 <td class="text-right text-bold sales_discount_amt"><?php echo $CI->currency(number_format(0,0,'.','')); ?></td>
                               </tr>
                               <!-- Total Sales Paid Amount -->
                               <tr>
                                  <td>Tổng đơn hàng đã thanh toán</td>
-                                 <td class="text-right text-bold text-success sales_paid_amount"><?php echo $CI->currency(number_format(0,2,'.','')); ?></td>
+                                 <td class="text-right text-bold text-success sales_paid_amount"><?php echo $CI->currency(number_format(0,0,'.','')); ?></td>
                               </tr>
                               <!-- Total Sales Due -->
                               <tr>
                                  <td>Tổng nợ đơn hàng chưa thanh toán</td>
-                                 <td class="text-right text-bold text-danger sales_due_total"><?php echo $CI->currency(number_format(0,2,'.','')); ?></td>
+                                 <td class="text-right text-bold text-danger sales_due_total"><?php echo $CI->currency(number_format(0,0,'.','')); ?></td>
                               </tr>
                               <tr>
                                  <td colspan="2" class="text-bold font-italic text-primary">Trả hàng bán</td>
@@ -211,32 +211,32 @@
                               <!-- Total sales Return -->
                               <tr>
                                  <td>Tổng đơn trả hàng</td>
-                                 <td class="text-right text-bold sal_return_total"><?php echo $CI->currency(number_format(0,2,'.','')); ?></td>
+                                 <td class="text-right text-bold sal_return_total"><?php echo $CI->currency(number_format(0,0,'.','')); ?></td>
                               </tr>
                               <!-- Total sales return Tax -->
                               <tr>
                                  <td>Tổng thuế đơn trả hàng</td>
-                                 <td class="text-right text-bold sales_return_tax_amt"><?php echo $CI->currency(number_format(0,2,'.','')); ?></td>
+                                 <td class="text-right text-bold sales_return_tax_amt"><?php echo $CI->currency(number_format(0,0,'.','')); ?></td>
                               </tr>
                               <!-- Total Sales return Other Charges -->
                               <tr>
                                  <td>Tổng phụ phí đơn trả hàng</td>
-                                 <td class="text-right text-bold sal_return_other_charges_amt"><?php echo $CI->currency(number_format(0,2,'.','')); ?></td>
+                                 <td class="text-right text-bold sal_return_other_charges_amt"><?php echo $CI->currency(number_format(0,0,'.','')); ?></td>
                               </tr>
                               <!-- Total Sales return Doscount -->
                               <tr>
                                  <td>Tổng chiếc khấu đơn trả hàng</td>
-                                 <td class="text-right text-bold sales_return_discount_amt"><?php echo $CI->currency(number_format(0,2,'.','')); ?></td>
+                                 <td class="text-right text-bold sales_return_discount_amt"><?php echo $CI->currency(number_format(0,0,'.','')); ?></td>
                               </tr>
                               <!-- Total Sales return Paid Amount -->
                               <tr>
                                  <td>Tổng đơn trả hàng đã hoàn tiền</td>
-                                 <td class="text-right text-bold text-success sales_return_paid_amount"><?php echo $CI->currency(number_format(0,2,'.','')); ?></td>
+                                 <td class="text-right text-bold text-success sales_return_paid_amount"><?php echo $CI->currency(number_format(0,0,'.','')); ?></td>
                               </tr>
                               <!-- Total Sales Return Due -->
                               <tr>
                                  <td>Tổng đơn trả hàng chưa hoàn tiền</td>
-                                 <td class="text-right text-bold text-danger sales_return_due_total"><?php echo $CI->currency(number_format(0,2,'.','')); ?></td>
+                                 <td class="text-right text-bold text-danger sales_return_due_total"><?php echo $CI->currency(number_format(0,0,'.','')); ?></td>
                               </tr>
                            </table>
                         </div>

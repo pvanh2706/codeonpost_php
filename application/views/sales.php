@@ -439,6 +439,7 @@ function round_off($amount) {
                                                            <th rowspan='2' style="width:10%" class="tax-column">T.Tiền thuế (<?= $CI->currency() ?>)</th>
                                                            <th rowspan='2' style="width:10%" class="tax-column">T.Trước thuế (<?= $CI->currency() ?>)</th>
                                                            <th rowspan='2' style="width:12%" class="tax-total-column">T.Sau thuế (<?= $CI->currency() ?>)</th>
+                                                            <th rowspan='2' style="width:12%">T.Tổng (<?= $CI->currency() ?>)</th>
                                                            <th rowspan='2' style="width:8%">T.Tác</th>
                                                         </tr>
                                                     </thead>
@@ -673,7 +674,7 @@ function round_off($amount) {
             $('.only_currency').each(function() {
                 var rawValue = $(this).val().replace(/[^0-9]/g, '');
                 if (rawValue) {
-                    $(this).val(formatNumber(rawValue));
+                    $(this).val(formatCurrency(formatNumber(rawValue)));
                 }
             });
             
@@ -681,14 +682,14 @@ function round_off($amount) {
             $(document).on('input', '.only_currency', function() {
                 var rawValue = $(this).val().replace(/[^0-9]/g, '');
                 if (rawValue) {
-                    $(this).val(formatNumber(rawValue));
+                    $(this).val(formatCurrency(formatNumber(rawValue)));
                 }
             });
             
             $(document).on('blur', '.only_currency', function() {
                 var rawValue = $(this).val().replace(/[^0-9]/g, '');
                 if (rawValue) {
-                    $(this).val(formatNumber(rawValue));
+                    $(this).val(formatCurrency(formatNumber(rawValue)));
                 }
             });
             
@@ -697,9 +698,29 @@ function round_off($amount) {
                 updateRowTaxColumns(this);
             });
             
+            // Thêm event listener cho việc thay đổi giá trị trong các cột tổng tiền
+            $(document).on('change blur', '[id^="td_data_"][id$="_9"]', function() {
+                var rowId = $(this).attr('id').match(/td_data_(\d+)_9/);
+                if (rowId && rowId[1]) {
+                    formatRowTotalColumn(rowId[1]);
+                }
+            });
+            
+            // Thêm event listener cho việc cập nhật số lượng và giá
+            $(document).on('change blur', '[id^="td_data_"][id$="_3"], [id^="td_data_"][id$="_10"], [id^="td_data_"][id$="_8"]', function() {
+                var rowId = $(this).attr('id').match(/td_data_(\d+)_/);
+                if (rowId && rowId[1]) {
+                    // Delay một chút để đảm bảo tính toán hoàn tất
+                    setTimeout(function() {
+                        formatRowTotalColumn(rowId[1]);
+                    }, 100);
+                }
+            });
+            
             // Sửa chữa các cột thuế cho dòng hiện có sau khi trang load
             setTimeout(function() {
                 fixAllTaxColumns();
+                formatAllTotalColumns(); // Format tất cả các cột tổng tiền
                 final_total();
             }, 500);
 
@@ -709,6 +730,12 @@ function round_off($amount) {
          function parseCurrency(value) {
              if (!value) return 0;
              return parseFloat(value.toString().replace(/[^0-9]/g, '')) || 0;
+         }
+         
+         // Hàm parse số trực tiếp (cho phụ phí và chiết khấu)
+         function parseDirectNumber(value) {
+             if (!value) return 0;
+             return parseFloat(value) || 0;
          }
          
          // Hàm format số thành tiền tệ VN
@@ -742,13 +769,13 @@ function round_off($amount) {
                      discountCell.after('<td id="td_' + rowNum + '_tax_rate" class="text-center tax-percent-column" style="vertical-align: middle;">0%</td>');
                      
                      // Thêm cột tiền thuế
-                     $('#td_' + rowNum + '_tax_rate').after('<td id="td_' + rowNum + '_tax_amount" class="text-center tax-column" style="vertical-align: middle;">0 ₫</td>');
+                     $('#td_' + rowNum + '_tax_rate').after('<td id="td_' + rowNum + '_tax_amount" class="text-center tax-column" style="vertical-align: middle;">0</td>');
                      
                      // Thêm cột tổng trước thuế
-                     $('#td_' + rowNum + '_tax_amount').after('<td id="td_' + rowNum + '_before_tax" class="text-center tax-column" style="vertical-align: middle;">0 ₫</td>');
+                     $('#td_' + rowNum + '_tax_amount').after('<td id="td_' + rowNum + '_before_tax" class="text-center tax-column" style="vertical-align: middle;">0</td>');
                      
                      // Thêm cột tổng sau thuế
-                     $('#td_' + rowNum + '_before_tax').after('<td id="td_' + rowNum + '_after_tax" class="text-center tax-total-column" style="vertical-align: middle;">0 ₫</td>');
+                     $('#td_' + rowNum + '_before_tax').after('<td id="td_' + rowNum + '_after_tax" class="text-center tax-total-column" style="vertical-align: middle;">0</td>');
                      
                      console.log('Tax columns added for row ' + rowNum);
                  }
@@ -758,6 +785,29 @@ function round_off($amount) {
              setTimeout(function() {
                  calculate_tax(rowNum);
              }, 100);
+         }
+         
+         // Hàm cập nhật định dạng cho cột tổng tiền của dòng
+         function formatRowTotalColumn(rowNum) {
+             var $totalCell = $('#td_data_' + rowNum + '_9');
+             if ($totalCell.length > 0) {
+                 // Lấy giá trị hiện tại
+                 var currentValue = $totalCell.val() || $totalCell.text() || '0';
+                 var numericValue = parseCurrency(currentValue);
+                 
+                 // Cập nhật với định dạng tiền tệ
+                 if ($totalCell.is('input')) {
+                     $totalCell.val(numericValue); // Lưu giá trị số cho tính toán
+                     // Tạo span hiển thị bên cạnh input
+                     if ($totalCell.next('.total-display').length === 0) {
+                        //  $totalCell.after('<span class="total-display text-right" style="margin-left: 5px; color: #d73925; font-weight: bold;">' + formatNumber(numericValue) + '</span>');
+                     } else {
+                         $totalCell.next('.total-display').html(formatNumber(numericValue));
+                     }
+                 } else {
+                    //  $totalCell.html('<span class="text-right" style="color: #d73925; font-weight: bold;">' + formatNumber(numericValue) + '</span>');
+                 }
+             }
          }
          
          // Hàm kiểm tra và sửa chữa các cột thuế cho tất cả dòng
@@ -806,15 +856,18 @@ function round_off($amount) {
              var taxAmount = (afterDiscount * taxRate) / 100;
              var totalWithTax = afterDiscount + taxAmount;
              
-             // Cập nhật các cột thuế (chỉ sử dụng formatNumber, ký hiệu ₫ đã có trong HTML)
+             // Cập nhật các cột thuế với định dạng tiền tệ Việt Nam
              $('#td_' + rowId + '_tax_rate').html(taxRate + '%');
-             $('#td_' + rowId + '_tax_amount').html(formatNumber(taxAmount) + ' ₫');
-             $('#td_' + rowId + '_before_tax').html(formatNumber(afterDiscount) + ' ₫');
-             $('#td_' + rowId + '_after_tax').html(formatNumber(totalWithTax) + ' ₫');
+             $('#td_' + rowId + '_tax_amount').html(formatNumber(taxAmount));
+             $('#td_' + rowId + '_before_tax').html(formatNumber(afterDiscount));
+             $('#td_' + rowId + '_after_tax').html(formatNumber(totalWithTax));
+             
+             // Cập nhật cột tổng tiền trong bảng chính (td_data_X_9)
+             $('#td_data_' + rowId + '_9').html('<span class="text-right">' + formatNumber(totalWithTax) + '</span>');
              
              // Debug log
-             console.log('Row ' + rowId + ' - Qty: ' + qty + ', Unit Price: ' + unitPrice + ', Discount: ' + discount + ', Tax Rate: ' + taxRate + '%');
-             console.log('Row ' + rowId + ' - Line Total: ' + lineTotal + ', After Discount: ' + afterDiscount + ', Tax Amount: ' + taxAmount + ', Total With Tax: ' + totalWithTax);
+            //  console.log('Row ' + rowId + ' - Số lượng: ' + qty + ', Giá: ' + unitPrice + ', Giảm giá: ' + discount + ', Tỷ lệ thuế: ' + taxRate + '%');
+            //  console.log('Row ' + rowId + ' - Tổng dòng: ' + lineTotal + ', Sau giảm giá: ' + afterDiscount + ', Số thuế: ' + taxAmount + ', Tổng cộng có thuế: ' + totalWithTax);
              
              // Trả về giá trị số nguyên để tính toán
              return {
@@ -885,7 +938,7 @@ function round_off($amount) {
              $('#total_after_tax_amt').html(formatNumber(totals.totalAfterTax));
              
              // Tính phụ phí với thuế
-             var otherChargesInput = parseCurrency($('#other_charges_input').val());
+             var otherChargesInput = parseDirectNumber($('#other_charges_input').val());
              var otherChargesTaxId = $('#other_charges_tax_id').val();
              var otherChargesWithTax = otherChargesInput;
              
@@ -908,7 +961,7 @@ function round_off($amount) {
              $('#other_charges_amt').html(formatNumber(otherChargesWithTax));
              
              // Tính chiết khấu
-             var discountInput = parseCurrency($('#discount_to_all_input').val());
+             var discountInput = parseDirectNumber($('#discount_to_all_input').val());
              var discountType = $('#discount_to_all_type').val();
              var discount = 0;
              
@@ -949,7 +1002,7 @@ function round_off($amount) {
          
          // Hàm enable_or_disable_item_discount
          function enable_or_disable_item_discount() {
-             var discountInput = parseCurrency($('#discount_to_all_input').val());
+             var discountInput = parseDirectNumber($('#discount_to_all_input').val());
              var rowcount = $('#hidden_rowcount').val();
              
              if (discountInput > 0) {
@@ -1035,6 +1088,16 @@ function round_off($amount) {
              }
          }
          
+         // Hàm format lại tất cả các cột tổng tiền
+         function formatAllTotalColumns() {
+             var rowcount = $('#hidden_rowcount').val();
+             for (var i = 1; i <= rowcount; i++) {
+                 if (document.getElementById('td_data_' + i + '_9')) {
+                     formatRowTotalColumn(i);
+                 }
+             }
+         }
+         
          // Hàm return_row_with_data (thêm dòng sản phẩm mới)
          function return_row_with_data(item_id) {
              $('#item_search').addClass('ui-autocomplete-loader-center');
@@ -1058,6 +1121,12 @@ function round_off($amount) {
                  if (typeof formatNewRowInputs !== 'undefined') {
                      formatNewRowInputs(rowcount);
                  }
+                 
+                 // Format cột tổng tiền cho dòng mới
+                 setTimeout(function() {
+                     formatRowTotalColumn(rowcount);
+                     formatAllTotalColumns(); // Format lại tất cả để đảm bảo nhất quán
+                 }, 200);
                  
                  $('#item_search').removeClass('ui-autocomplete-loader-center');
                  $('#td_data_' + rowcount + '_3').focus();

@@ -228,6 +228,7 @@
               $tot_tax_amt=0;
               $tot_discount_amt=0;
               $tot_total_cost=0;
+              $calculated_subtotal=0; // Tổng tạm tính được tính từ items
 
               $this->db->select("a.sales_qty,
                                  a.tax_type,
@@ -302,6 +303,10 @@
                   $tot_tax_amt +=$res2->tax_amt;
                   $tot_discount_amt +=$res2->discount_amt;
                   $tot_total_cost +=$res2->total_cost;
+                  
+                  // Tính tổng tạm tính = số lượng × đơn giá (trước chiết khấu và thuế)
+                  $line_subtotal = $res2->sales_qty * $res2->price_per_unit;
+                  $calculated_subtotal += $line_subtotal;
               }
               ?>
          
@@ -338,7 +343,7 @@
                     <div class="col-sm-8">
                        <label class="control-label  " style="font-size: 17px;">: <?php 
                         if($discount_to_all_input) {
-                            echo $discount_to_all_input;
+                            echo number_format($discount_to_all_input, 0, ',', '.');
                             if($discount_to_all_type == '%') {
                                 echo ' (%) = ' . number_format($tot_discount_to_all_amt, 0, ',', '.') . ' ₫';
                             } else {
@@ -394,7 +399,7 @@
                                   echo "</tr>";
                                   $total_paid +=$res3->payment;
                                 }
-                                echo "<tr class='text-right text-bold'><td colspan='4' >Tổng thanh toán </td><td>".number_format($total_paid, 0, ',', '.') . ' ₫'."</td></tr>";
+                                echo "<tr class='text-right text-bold'><td colspan='4' >Tổng thanh toán </td><td>" . number_format($total_paid, 0, ',', '.') . ' ₫'."</td></tr>";
                               }
                               else{
                                 echo "<tr><td colspan='5' class='text-center text-bold'>Chưa có thanh toán nào cho hóa đơn này!!</td></tr>";
@@ -425,7 +430,7 @@
                           </th>
                        </tr>
                        <tr>
-                          <th class="text-right" style="font-size: 17px;">Phụ phí khác
+                          <th class="text-right" style="font-size: 17px;">Phụ phí (chưa thuế)
                           <?php 
                           // Display tax info for other charges if applicable
                           if ($other_charges_tax_id > 0) {
@@ -444,7 +449,8 @@
                           <th class="text-right" style="font-size: 17px;">Tổng trước chiết khấu</th>
                           <th class="text-right" style="padding-left:10%;font-size: 17px;">
                              <h4><b><?php 
-                                $total_before_discount = $subtotal + $other_charges_amt;
+                                // Tổng trước chiết khấu = calculated_subtotal + phụ phí (chưa thuế)
+                                $total_before_discount = $calculated_subtotal + $other_charges_base;
                                 echo number_format($total_before_discount, 0, ',', '.') . ' ₫';
                              ?></b></h4>
                           </th>
@@ -517,7 +523,8 @@
                           <th class="text-right" style="font-size: 17px;">Tổng sau thuế</th>
                           <th class="text-right" style="padding-left:10%;font-size: 17px;">
                              <h4><b><?php 
-                                $total_after_tax = $total_after_discount + $tot_tax_amt;
+                                // Tổng sau thuế = Tổng sau chiết khấu + tổng tất cả thuế
+                                $total_after_tax = $total_after_discount + $total_all_tax;
                                 echo number_format($total_after_tax, 0, ',', '.') . ' ₫';
                              ?></b></h4>
                           </th>

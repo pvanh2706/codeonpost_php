@@ -434,7 +434,7 @@
                                                         $i++;
                                                       }
                                                       echo "<tr class='text-right text-bold'><td colspan='4' >Total</td><td data-rowcount='$i' id='paid_amt_tot'>".
-                                                      $CI->currency(number_format($total_paid,2,'.',''))."</td><td></td></tr>";
+                                                      $CI->currency(number_format($total_paid,0,'.',''))."</td><td></td></tr>";
                                                     }
                                                     else{
                                                       echo "<tr><td colspan='6' class='text-center text-bold'>No Previous Payments Found!!</td></tr>";

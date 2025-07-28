@@ -277,23 +277,23 @@ body{
     <td colspan="3" style="text-align: center;font-weight: bold;"><?= $this->lang->line('total'); ?></td>
     <td colspan="1" style="font-weight: bold;"><?=$tot_qty; ?></td>
     <td colspan="1" style="">-</td>
-    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(($tot_tax_amt),2,'.',''); ?></b></td>
+    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(($tot_tax_amt),0,'.',''); ?></b></td>
     <td colspan="1" style="">-</td>
-    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(($tot_discount_amt),2,'.',''); ?></b></td>
-    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(($tot_unit_total_cost),2,'.',''); ?></b></td>
-    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(($tot_total_cost),2,'.',''); ?></b></td>
+    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(($tot_discount_amt),0,'.',''); ?></b></td>
+    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(($tot_unit_total_cost),0,'.',''); ?></b></td>
+    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(($tot_total_cost),0,'.',''); ?></b></td>
   </tr>
   <tr>
     <td colspan="9" style="text-align: right;"><b><?= $this->lang->line('subtotal'); ?></b> <small>(trước thuế)</small></td>
-    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(round($calculated_subtotal),2,'.',''); ?></b></td>
+    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(round($calculated_subtotal),0,'.',''); ?></b></td>
   </tr>
   <tr>
     <td colspan="9" style="text-align: right;"><b>Tổng chiết khấu sản phẩm</b></td>
-    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(($tot_discount_amt),2,'.',''); ?></b></td>
+    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(($tot_discount_amt),0,'.',''); ?></b></td>
   </tr>
   <tr>
     <td colspan="9" style="text-align: right;"><b>Tổng trước thuế</b> <small>(Sau CK sản phẩm)</small></td>
-    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(round($calculated_subtotal - $tot_discount_amt),2,'.',''); ?></b></td>
+    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(round($calculated_subtotal - $tot_discount_amt),0,'.',''); ?></b></td>
   </tr>
   <?php
   // Collect tax details by type for breakdown display
@@ -321,18 +321,18 @@ body{
     <?php foreach ($tax_details as $tax_detail): ?>
     <tr>
       <td colspan="9" style="text-align: right;"><b><?php echo $tax_detail['name']; ?> (<?php echo $tax_detail['rate']; ?>%)</b></td>
-      <td colspan="1" style="text-align: right;"><b><?php echo number_format($tax_detail['amount'], 2, '.', ''); ?></b></td>
+      <td colspan="1" style="text-align: right;"><b><?php echo number_format($tax_detail['amount'], 0, '.', ''); ?></b></td>
     </tr>
     <?php endforeach; ?>
   <?php endif; ?>
   
   <tr>
     <td colspan="9" style="text-align: right;"><b>Tổng tiền thuế</b></td>
-    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(($tot_tax_amt),2,'.',''); ?></b></td>
+    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(($tot_tax_amt),0,'.',''); ?></b></td>
   </tr>
   <tr>
     <td colspan="9" style="text-align: right;"><b>Tổng sau thuế</b> <small>(Trước thuế + Thuế)</small></td>
-    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(round($calculated_subtotal - $tot_discount_amt + $tot_tax_amt),2,'.',''); ?></b></td>
+    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(round($calculated_subtotal - $tot_discount_amt + $tot_tax_amt),0,'.',''); ?></b></td>
   </tr>
   <tr>
     <td colspan="9" style="text-align: right;"><b><?= $this->lang->line('other_charges'); ?></b>
@@ -346,15 +346,15 @@ body{
     }
     ?>
     </td>
-    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(round($other_charges_amt),2,'.',''); ?></b></td>
+    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(round($other_charges_amt),0,'.',''); ?></b></td>
   </tr>
   <tr>
     <td colspan="9" style="text-align: right;"><b><?= $this->lang->line('discount_on_all'); ?>(<?= $discount_to_all_input." ".$discount_to_all_type; ?>)</b></td>
-    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(round($tot_discount_to_all_amt),2,'.',''); ?></b></td>
+    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(round($tot_discount_to_all_amt),0,'.',''); ?></b></td>
   </tr>
   <tr>
     <td colspan="9" style="text-align: right;"><b><?= $this->lang->line('grand_total'); ?></b> <small>(Sau thuế + Phụ phí - CK tổng)</small></td>
-    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(round($grand_total),2,'.',''); ?></b></td>
+    <td colspan="1" style="text-align: right;" ><b><?php echo number_format(round($grand_total),0,'.',''); ?></b></td>
   </tr>
   <tr>
     <td colspan="10">

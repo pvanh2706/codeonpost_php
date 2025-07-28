@@ -244,7 +244,7 @@ class CI_Profiler {
 		foreach ($dbs as $name => $db)
 		{
 			$hide_queries = (count($db->queries) > $this->_query_toggle_count) ? ' display:none' : '';
-			$total_time = number_format(array_sum($db->query_times), 4).' '.$this->CI->lang->line('profiler_seconds');
+			$total_time = number_format(array_sum($db->query_times), 0).' '.$this->CI->lang->line('profiler_seconds');
 
 			$show_hide_js = '(<span style="cursor: pointer;" onclick="var s=document.getElementById(\'ci_profiler_queries_db_'.$count.'\').style;s.display=s.display==\'none\'?\'\':\'none\';this.innerHTML=this.innerHTML==\''.$this->CI->lang->line('profiler_section_hide').'\'?\''.$this->CI->lang->line('profiler_section_show').'\':\''.$this->CI->lang->line('profiler_section_hide').'\';">'.$this->CI->lang->line('profiler_section_hide').'</span>)';
 
@@ -269,7 +269,7 @@ class CI_Profiler {
 			{
 				foreach ($db->queries as $key => $val)
 				{
-					$time = number_format($db->query_times[$key], 4);
+					$time = number_format($db->query_times[$key], 0);
 					$val = highlight_code($val);
 
 					foreach ($highlight as $bold)
