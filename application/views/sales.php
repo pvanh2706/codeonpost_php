@@ -492,7 +492,7 @@ function round_off($amount) {
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Số lượng | <span class="total_quantity text-danger" >0</span></span>
-                                                <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Tổng tạm tính | <span class="text-danger" id="subtotal_amt" name="subtotal_amt">0</span> ₫</span>
+                                                <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Tổng tạm tính <small>(trước thuế)</small> | <span class="text-danger" id="subtotal_amt" name="subtotal_amt">0</span> ₫</span>
                                                 <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Phụ phí (có thuế) | <span class="text-danger" id="other_charges_amt" name="other_charges_amt">0</span> ₫</span>
                                                 <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Chiết khấu | <span class="text-danger" id="discount_to_all_amt" name="discount_to_all_amt">0</span> ₫</span>
                                                 <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Tổng trước thuế | <span class="text-danger" id="total_before_tax_amt" name="total_before_tax_amt">0</span> ₫</span>
@@ -865,10 +865,6 @@ function round_off($amount) {
              // Cập nhật cột tổng tiền trong bảng chính (td_data_X_9)
              $('#td_data_' + rowId + '_9').html('<span class="text-right">' + formatNumber(totalWithTax) + '</span>');
              
-             // Debug log
-            //  console.log('Row ' + rowId + ' - Số lượng: ' + qty + ', Giá: ' + unitPrice + ', Giảm giá: ' + discount + ', Tỷ lệ thuế: ' + taxRate + '%');
-            //  console.log('Row ' + rowId + ' - Tổng dòng: ' + lineTotal + ', Sau giảm giá: ' + afterDiscount + ', Số thuế: ' + taxAmount + ', Tổng cộng có thuế: ' + totalWithTax);
-             
              // Trả về giá trị số nguyên để tính toán
              return {
                  lineTotal: lineTotal,
@@ -885,6 +881,13 @@ function round_off($amount) {
              
              // Cập nhật tổng cuối cùng (lưu dạng số)
              $('#td_data_' + i + '_9').val(result.totalWithTax);
+             
+             // *** FIX: Cập nhật hidden input cho thuế (td_data_X_11) ***
+             // Kiểm tra nếu hidden input td_data_X_11 chưa tồn tại thì tạo mới
+             if ($('#td_data_' + i + '_11').length === 0) {
+                 $('body').append('<input type="hidden" id="td_data_' + i + '_11" name="td_data_' + i + '_11" value="0">');
+             }
+             $('#td_data_' + i + '_11').val(result.taxAmount);
              
              final_total();
          }
@@ -913,6 +916,14 @@ function round_off($amount) {
                          var taxAmount = (afterDiscount * taxRate) / 100;
                          var totalWithTax = afterDiscount + taxAmount;
                          
+                         // *** FIX: Cập nhật hidden inputs để backend nhận đúng giá trị ***
+                         // Kiểm tra và tạo hidden input cho thuế nếu chưa có
+                         if ($('#td_data_' + i + '_11').length === 0) {
+                             $('body').append('<input type="hidden" id="td_data_' + i + '_11" name="td_data_' + i + '_11" value="0">');
+                         }
+                         $('#td_data_' + i + '_11').val(taxAmount);
+                         $('#td_data_' + i + '_9').val(totalWithTax);
+                         
                          totals.quantity += qty;
                          totals.subtotal += lineTotal;
                          totals.totalBeforeTax += afterDiscount;
@@ -922,7 +933,6 @@ function round_off($amount) {
                  }
              }
              
-             console.log('Totals:', totals);
              return totals;
          }
          
