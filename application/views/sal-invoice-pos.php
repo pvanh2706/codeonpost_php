@@ -513,7 +513,7 @@ $after_tax = $before_tax + $tax_amt; // Sau thuế = trước thuế + thuế
             <?php 
                 $bankcode = (get_site_settings_config("bank_name_qrcode")) ? get_site_settings_config("bank_name_qrcode") : '970436'; 
                 $bankno = (get_site_settings_config("bank_number_qrcode")) ? get_site_settings_config("bank_number_qrcode") : '0421000404796'; ?>
-            <img class="center-block" style="width: 150px;  opacity: 1.0" src="https://img.vietqr.io/image/<?= $bankcode . '-' . $bankno ?>-qr_only.png">
+            <img class="center-block" style="width: 150px;  opacity: 1.0" src="https://img.vietqr.io/image/<?= $bankcode . '-' . $bankno ?>-qr_only.png?amount=<?= $grand_total ?>&addInfo=Thanh toán hóa đơn <?= $sales_code ?>">
             <p>Mã QR thanh toán</p>       
         </div>
     </div>
