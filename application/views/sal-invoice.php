@@ -424,7 +424,7 @@
                      
                     <table  class="col-md-11">
                        <tr>
-                          <th class="text-right" style="font-size: 17px;">Tổng tạm tính</th>
+                          <th class="text-right" style="font-size: 17px;">Tổng tạm tính <small>(trước thuế)</small></th>
                           <th class="text-right" style="padding-left:10%;font-size: 17px;">
                              <h4><b id="subtotal_amt" name="subtotal_amt"><?=number_format($subtotal, 0, ',', '.') . ' ₫';?></b></h4>
                           </th>

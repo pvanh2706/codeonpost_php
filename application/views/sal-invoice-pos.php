@@ -261,6 +261,7 @@
     			              $tot_qty=0;
     			              $subtotal=0;
     			              $tax_amt=0;
+    			              $total_discount=0; // Khởi tạo biến tổng chiết khấu
     			              $calculated_subtotal=0; // Tổng tạm tính thực tế (qty × price)
     			              $tax_details = array(); // Mảng lưu chi tiết thuế theo từng loại
     			              
@@ -278,19 +279,49 @@ foreach ($q2->result() as $res2) {
         }
         echo "<td style='text-align:center; padding-left: 2px; padding-right: 2px; font-size: 0.8em;'>".number_format($res2->sales_qty)."</td>";
         echo "<td style='text-align:center; padding-right: 2px; font-size: 0.8em;'>".number_format($res2->price_per_unit)."₫</td>";
-        echo "<td style='text-align:right;padding-left: 2px; padding-right: 2px; font-size: 0.8em;' >".number_format($res2->total_cost)."₫</td>";
+        
+        // Debug: So sánh total_cost từ DB vs tính toán thực tế
+        $calculated_line_total = $res2->sales_qty * $res2->price_per_unit;
+        $db_total_cost = $res2->total_cost;
+        $discount = $res2->discount_amt;
+        $tax = $res2->tax_amt;
+        
+        // Hiển thị thành tiền (sử dụng total_cost từ database)
+        echo "<td style='text-align:right;padding-left: 2px; padding-right: 2px; font-size: 0.8em;' >".number_format($res2->total_cost)."₫";
+        echo "</td>";
     echo "</tr>";  
     
     // Tính tổng tạm tính = số lượng × đơn giá (trước chiết khấu và thuế)
     $line_subtotal = $res2->sales_qty * $res2->price_per_unit;
     $calculated_subtotal += $line_subtotal;
     
+    // Phân tích cách tính total_cost
+    $qty_x_price = $res2->sales_qty * $res2->price_per_unit;
+    $discount = $res2->discount_amt;
+    $tax = $res2->tax_amt;
+    $total_from_db = $res2->total_cost;
+    
+    // Kiểm tra và sửa lỗi thuế nếu cần thiết
+    $expected_tax = ($qty_x_price - $discount) * ($res2->tax / 100);
+    $corrected_tax = $tax;
+    
+    // Nếu thuế trong DB sai (chỉ tính cho 1 sản phẩm), tính lại
+    if (abs($expected_tax - $tax) > 0.01) {
+        $corrected_tax = $expected_tax;
+        // Có thể log lỗi ở đây
+    }
+    
+    // Có thể total_cost = (qty × price) - discount + tax
+    // hoặc total_cost = (qty × price) + tax - discount
+    $calculated_total_1 = $qty_x_price - $discount + $corrected_tax; // Công thức 1
+    $calculated_total_2 = $qty_x_price + $corrected_tax - $discount; // Công thức 2 (tương tự)
+    
     $subtotal+=($res2->total_cost);
-    $tax_amt+=$res2->tax_amt;
+    $tax_amt+=$corrected_tax; // Sử dụng thuế đã sửa
     $total_discount+=$res2->discount_amt;
     
-    // Thu thập chi tiết thuế theo từng loại
-    if ($res2->tax_amt > 0) {
+    // Thu thập chi tiết thuế theo từng loại - tính theo số lượng
+    if ($corrected_tax > 0) {
         $tax_key = $res2->tax . '%';
         $tax_name = $res2->tax_name ? $res2->tax_name : 'Thuế ' . $res2->tax . '%';
         
@@ -298,10 +329,17 @@ foreach ($q2->result() as $res2) {
             $tax_details[$tax_key] = array(
                 'name' => $tax_name,
                 'rate' => $res2->tax,
-                'amount' => 0
+                'amount' => 0,
+                'quantity' => 0, // Thêm theo dõi số lượng
+                'items' => array() // Thêm danh sách sản phẩm
             );
         }
-        $tax_details[$tax_key]['amount'] += $res2->tax_amt;
+        $tax_details[$tax_key]['amount'] += $corrected_tax;
+        $tax_details[$tax_key]['quantity'] += $res2->sales_qty;
+        
+        // Debug info - hiển thị chi tiết tính toán
+        $unit_tax = $corrected_tax / $res2->sales_qty; // Thuế trên 1 đơn vị
+        $tax_details[$tax_key]['items'][] = $res2->item_name . ' (SL: ' . $res2->sales_qty . ', Thuế/sp: ' . number_format($unit_tax) . '₫)';
     }
 }
 $before_tax = $calculated_subtotal - $total_discount; // Trước thuế = tạm tính - chiết khấu
@@ -330,14 +368,19 @@ $after_tax = $before_tax + $tax_amt; // Sau thuế = trước thuế + thuế
 <!-- Chi tiết thuế theo từng loại -->
 <?php foreach ($tax_details as $tax_key => $tax_info) { ?>
 <tr>
-    <td style=" padding-left: 2px; padding-right: 2px; font-size: 0.85em; font-style: italic;" colspan="3" align="left">- <?= $tax_info['name']; ?> (<?= $tax_info['rate']; ?>%)</td>
+    <td style=" padding-left: 2px; padding-right: 2px; font-size: 0.85em; font-style: italic;" colspan="3" align="left">
+        - <?= $tax_info['name']; ?> (<?= $tax_info['rate']; ?>%) - Tổng SL: <?= number_format($tax_info['quantity']); ?>
+        <br><small style="font-size: 0.75em; color: #666; line-height: 1.2;">
+            <?= implode('<br>', $tax_info['items']); ?>
+        </small>
+    </td>
     <td style=" padding-left: 2px; padding-right: 2px; font-size: 0.85em;" align="right"><?= number_format($tax_info['amount']);?>₫</td>
 </tr>
 <?php } ?>
 <?php } ?>
 
 <tr>
-    <td style=" padding-left: 2px; padding-right: 2px; font-weight: bold; border-top: 1px solid #ddd;" colspan="3" align="left">Tổng thuế</td>
+    <td style=" padding-left: 2px; padding-right: 2px; font-weight: bold; border-top: 1px solid #ddd;" colspan="3" align="left">Tổng thuế (Tất cả sản phẩm)</td>
     <td style=" padding-left: 2px; padding-right: 2px; font-weight: bold; border-top: 1px solid #ddd;" align="right"><?= number_format($tax_amt);?>₫</td>
 </tr>
 
