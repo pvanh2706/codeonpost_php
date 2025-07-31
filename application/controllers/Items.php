@@ -227,8 +227,8 @@ class Items extends MY_Controller {
 		$name = strtolower(trim($_GET['name']));
 		$name = str_replace(' ', '%', $name);
 		
-		// Tìm kiếm theo nhiều tiêu chí: tên sản phẩm, mã sản phẩm, từ khóa tìm kiếm, mã vạch tùy chỉnh
-		$sql =$this->db->query("SELECT id,item_name,item_code,stock,final_price,final_price0,final_price1,final_price2,final_price3,custom_barcode 
+		// Tìm kiếm theo nhiều tiêu chí: tên sản phẩm, mã sản phẩm, từ khóa tìm kiếm, mã vạch tùy chỉnh, SKU, HSN
+		$sql =$this->db->query("SELECT id,item_name,item_code,stock,final_price,final_price0,final_price1,final_price2,final_price3,custom_barcode,sku,hsn 
 			FROM db_items 
 			WHERE status=1 
 			AND (
@@ -236,15 +236,21 @@ class Items extends MY_Controller {
 				OR LOWER(item_code) LIKE '%$name%' 
 				OR LOWER(search_for) LIKE '%$name%'
 				OR LOWER(custom_barcode) LIKE '%$name%'
+				OR LOWER(sku) LIKE '%$name%'
+				OR LOWER(hsn) LIKE '%$name%'
 			)");
 			
 		foreach ($sql->result() as $res) {
 		      $json_arr["id"] = $res->id;
-			  $json_arr["value"] = $res->item_name;
-			  // Hiển thị tên sản phẩm + mã sản phẩm + mã vạch (nếu có) trong dropdown
-			  $json_arr["label"] = $res->item_name . " [" . $res->item_code . "]" . (!empty($res->custom_barcode) ? " - " . $res->custom_barcode : "");
-			  $json_arr["item_code"] = $res->item_code;
-			  $json_arr["custom_barcode"] = $res->custom_barcode;
+			  $json_arr["value"] = $res->item_name;		  // Hiển thị tên sản phẩm + mã sản phẩm + mã vạch + SKU + HSN (nếu có) trong dropdown
+		  $json_arr["label"] = $res->item_name . " [" . $res->item_code . "]" 
+		  	. (!empty($res->custom_barcode) ? " - " . $res->custom_barcode : "")
+		  	. (!empty($res->sku) ? " | SKU:" . $res->sku : "")
+		  	. (!empty($res->hsn) ? " | HSN:" . $res->hsn : "");
+		  $json_arr["item_code"] = $res->item_code;
+		  $json_arr["custom_barcode"] = $res->custom_barcode;
+		  $json_arr["sku"] = $res->sku;
+		  $json_arr["hsn"] = $res->hsn;
 			  $json_arr["stock"] = $res->stock;
 			  $json_arr["cansold"] = cansold($res->id);
 			  $json_arr["final_price"] = number_format($res->final_price);
@@ -268,8 +274,8 @@ class Items extends MY_Controller {
 		$display_json = array();
 		//if (!empty($_GET['name'])) {		$name = strtolower(trim($_GET['name']));
 		$name = str_replace(' ', '%', $name);
-		// Tìm kiếm theo nhiều tiêu chí cho stock
-		$sql =$this->db->query("SELECT id,item_name,item_code,stock,final_price,final_price0,final_price1,final_price2,final_price3,custom_barcode 
+		// Tìm kiếm theo nhiều tiêu chí cho stock: tên sản phẩm, mã sản phẩm, từ khóa tìm kiếm, mã vạch tùy chỉnh, SKU, HSN
+		$sql =$this->db->query("SELECT id,item_name,item_code,stock,final_price,final_price0,final_price1,final_price2,final_price3,custom_barcode,sku,hsn 
 			FROM db_items 
 			WHERE status=1 
 			AND (
@@ -277,14 +283,20 @@ class Items extends MY_Controller {
 				OR LOWER(item_code) LIKE '%$name%' 
 				OR LOWER(search_for) LIKE '%$name%'
 				OR LOWER(custom_barcode) LIKE '%$name%'
+				OR LOWER(sku) LIKE '%$name%'
+				OR LOWER(hsn) LIKE '%$name%'
 			)");
 		
 		foreach ($sql->result() as $res) {
 		      $json_arr["id"] = $res->id;
-			  $json_arr["value"] = $res->item_name;
-			  $json_arr["label"] = $res->item_name . " [" . $res->item_code . "]" . (!empty($res->custom_barcode) ? " - " . $res->custom_barcode : "");
-			  $json_arr["item_code"] = $res->item_code;
-			  $json_arr["custom_barcode"] = $res->custom_barcode;
+			  $json_arr["value"] = $res->item_name;		  $json_arr["label"] = $res->item_name . " [" . $res->item_code . "]" 
+		  	. (!empty($res->custom_barcode) ? " - " . $res->custom_barcode : "")
+		  	. (!empty($res->sku) ? " | SKU:" . $res->sku : "")
+		  	. (!empty($res->hsn) ? " | HSN:" . $res->hsn : "");
+		  $json_arr["item_code"] = $res->item_code;
+		  $json_arr["custom_barcode"] = $res->custom_barcode;
+		  $json_arr["sku"] = $res->sku;
+		  $json_arr["hsn"] = $res->hsn;
 			  $json_arr["stock"] = $res->stock;
 			  $json_arr["cansold"] = cansold($res->id);
 			  $json_arr["final_price"] = number_format($res->final_price);

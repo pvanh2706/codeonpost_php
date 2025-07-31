@@ -378,7 +378,7 @@
                 <div class="col-md-6">
                   <div class="input-group">
                     <span class="input-group-addon" title="Select Items"><i class="fa fa-barcode"></i></span>
-                     <input type="text" class="form-control" placeholder="Tên SP / Mã SP / Mã vạch / Từ khóa [Ctrl+Shift+S]" id="item_search">
+                     <input type="text" class="form-control" placeholder="Tên SP / Mã SP / Mã vạch / SKU / HSN / Từ khóa [Ctrl+Shift+S]" id="item_search">
                   </div>
                 </div>                
               </div><!-- row end -->
