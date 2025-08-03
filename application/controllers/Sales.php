@@ -1171,6 +1171,8 @@ class Sales extends MY_Controller {
 			);
 			// Update lại thông tin vào bảng
 			$this->update_invoice_data($invoice_data['order_id'], $invoice_data_einvoice);
+			$this->update_vat_invoice_data($invoice_data['order_id'], $invoice_data_einvoice);
+			
 			$result = array(
 				'success' => true,
 				'message' => 'Phát hành hóa đơn thành công',
@@ -1223,11 +1225,11 @@ class Sales extends MY_Controller {
 		$einvoice_data = $this->input->post('einvoice_data');
 		$einvoice_config = $this->input->post('einvoice_config');
 		// Get parameters from POST request
-		$ezInvoiceId = $einvoice_data['partner_invoice_id'];
-		$thirdPartyInvoiceNumber = $einvoice_data['partner_invoice_number'];
-		$thirdPartyInvoiceCode = $einvoice_data['thirdPartyInvoiceCode'];
-		$transactionId = $einvoice_data['partner_invoice_search_code'];
-		$searchCode = $einvoice_data['partner_invoice_search_code'];
+		$ezInvoiceId = $einvoice_data['id_hoa_don_dt'];
+		$thirdPartyInvoiceNumber = $einvoice_data['so_hoa_don_dt'];
+		$thirdPartyInvoiceCode = "";
+		$transactionId = $einvoice_data['ma_tra_cuu_hoa_don_dt'];
+		$searchCode = $einvoice_data['ma_tra_cuu_hoa_don_dt'];
 		$formNo = $einvoice_data['formNo']; // Mẫu số
 		$serial = $einvoice_data['serial']; // Ký hiệu
 
@@ -1400,6 +1402,59 @@ class Sales extends MY_Controller {
 			}
 		} else {
 			log_message('error', 'No existing invoice found for order_id: ' . $order_id);
+			return false;
+		}
+		
+		return true;
+	}
+	public function update_vat_invoice_data($order_id, $invoice_data_einvoice) {
+		// Lấy thông tin dòng dữ liệu trong bảng db_einvoice_header theo order_id
+		$existing_vat_invoice = $this->db->where('sales_id', $order_id)
+									->get('db_vat_invoice')
+									->row();
+		
+		// Nếu có thông tin thì cập nhật các trường liên quan đến hóa đơn điện tử
+		if ($existing_vat_invoice) {
+			$update_data = array();
+			
+			// Cập nhật các trường với tên đúng theo cấu trúc database
+			if (isset($invoice_data_einvoice['ezInvoiceId'])) {
+				$update_data['id_hoa_don_dt'] = $invoice_data_einvoice['ezInvoiceId'];
+			}
+			
+			if (isset($invoice_data_einvoice['ThirdPartyInvoiceNumber'])) {
+				$update_data['so_hoa_don_dt'] = $invoice_data_einvoice['ThirdPartyInvoiceNumber'];
+			}
+			
+			if (isset($invoice_data_einvoice['SearchCode'])) {
+				$update_data['ma_tra_cuu_hoa_don_dt'] = $invoice_data_einvoice['SearchCode'];
+			}
+			
+			if (isset($invoice_data_einvoice['MaCQT'])) {
+				$update_data['ma_so_thue_hoa_don_dt'] = $invoice_data_einvoice['MaCQT'];
+			}
+			$update_data['trang_thai_hoa_don_dt'] = 'original'; // Cập nhật trạng thái hóa đơn điện tử là bản gốc
+			
+			// Cập nhật thời gian modified
+			$update_data['updated_at'] = date('Y-m-d H:i:s');
+			$update_data['updated_by'] = $this->session->userdata('user_id');
+			
+			// Thực hiện cập nhật nếu có dữ liệu để update
+			if (!empty($update_data)) {
+				$this->db->where('id', $existing_vat_invoice->id);
+				$this->db->update('db_vat_invoice', $update_data);
+				
+				// Kiểm tra kết quả update
+				if ($this->db->affected_rows() > 0) {
+					log_message('info', 'Updated vat invoice data for order_id: ' . $order_id);
+					return true;
+				} else {
+					log_message('error', 'Failed to update vat invoice data for order_id: ' . $order_id);
+					return false;
+				}
+			}
+		} else {
+			log_message('error', 'No existing vat invoice found for order_id: ' . $order_id);
 			return false;
 		}
 		
@@ -1655,7 +1710,7 @@ class Sales extends MY_Controller {
 					'so_luong' => isset($item['so_luong']) ? $item['so_luong'] : 1.000, // Số lượng, mặc định là 1.000
 					'don_gia' => isset($item['don_gia']) ? $item['don_gia'] : 0.00, // Đơn giá, mặc định là 0.00
 					'thanh_tien' => isset($item['thanh_tien']) ? $item['thanh_tien'] : 0.00, // Thành tiền, mặc định là 0.00
-					'giam_gia' => isset($item['giam_gia']) ? $item['giam_gia'] : 0.00, // Giảm giá, mặc định là 0.00
+					'giam_gia' => isset($item['tong_giam_gia']) ? $item['tong_giam_gia'] : 0.00, // Giảm giá, mặc định là 0.00
 					'phan_tram_thue' => isset($item['phan_tram_thue']) ? $item['phan_tram_thue'] : 0.00, // Phần trăm thuế, mặc định là 0.00
 					'thue' => isset($item['thue']) ? $item['thue'] : 0.00, // Thuế, mặc định là 0.00
 					'tong_tien' => isset($item['tong_tien']) ? $item['tong_tien'] : 0.00, // Tổng tiền, mặc định là 0.00
@@ -1768,7 +1823,7 @@ class Sales extends MY_Controller {
 	function get_vatinvoice_data() {
 		$this->permission_check('sales_view');
 		
-		$order_id = $this->input->post('order_id');
+		$order_id = $this->input->post('order_ids')[0] ?? null;
 		
 		if (!$order_id) {
 			echo json_encode(array(
@@ -1780,7 +1835,7 @@ class Sales extends MY_Controller {
 		
 		try {
 			// Get invoice header
-			$vat_invoice = $this->db->where('order_id', $order_id)
+			$vat_invoice = $this->db->where('sales_id', $order_id)
 							   ->get('db_vat_invoice')
 							   ->row_array();
 			
@@ -1796,13 +1851,10 @@ class Sales extends MY_Controller {
 			$vat_invoice_items = $this->db->where('vat_invoice_id', $vat_invoice['id'])
 							  ->get('db_vat_invoice_item')
 							  ->result_array();
-			
+			$this->load->model('site_model', 'site');
 			// Lấy cấu hình hóa đơn điện tử
 			$einvoice_config = $this->site->get_einvoice_config();
-
-			// Lấy thông tin hóa đơn điện tử
-			$einvoice_data = $this->site->get_einvoice_data($order_ids);
-
+			
 			// Khởi tạo và lấy danh sách mẫu số và ký hiệu
 			$this->site->init_default_einvoice_templates();
 			$einvoice_templates = $this->site->get_einvoice_templates();
@@ -1817,7 +1869,6 @@ class Sales extends MY_Controller {
 					'vat_invoice' => $vat_invoice,
 					'vat_invoice_items' => $vat_invoice_items,
 					'einvoice_config' => $einvoice_config,
-					'einvoice_data' => $einvoice_data,
 					'einvoice_templates' => $einvoice_templates,
 					'einvoice_payments' => $einvoice_payments
 				)

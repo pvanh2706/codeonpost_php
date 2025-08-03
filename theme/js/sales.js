@@ -1235,13 +1235,15 @@ function processEInvoiceCalculation(useTestData = false, roundingMethod = 1) {
             ten_san_pham: item.item_name,
             so_luong: item.item_quantity,
             don_gia: item.item_price,
+            thanh_tien: item.item_amount * item.item_quantity,
             giam_gia: item.item_discount_item,
             giam_gia_phan_bo: item.item_discount_from_all,
+            tong_giam_gia: item.item_discount_item + item.item_discount_from_all,
             thanh_tien_truoc_thue: item.item_amount_before_tax_final,
-            thue_suat: item.item_tax_percent,
+            phan_tram_thue: item.item_tax_percent,
             thue: item.item_tax_amount,
-            thanh_tien: item.item_amount,
-            thanh_tien_goc: item.item_amount_original,
+            tong_tien: item.item_amount,
+            tong_tien_goc: item.item_amount_original,
             thanh_tien_truoc_thue_goc: item.item_amount_before_tax_original,
             price_adjustment: item.price_adjustment || 0, // Chỉ có trong phương án 1
             discount_adjustment: item.discount_adjustment || 0, // Chỉ có trong phương án 2
