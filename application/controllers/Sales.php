@@ -1580,6 +1580,216 @@ class Sales extends MY_Controller {
 		return $tables_created;
 	}
 	
+	public function save_info_einvoice_data() {
+		$invoice_info = $this->input->post('invoice_info');
+		$invoice_items = $this->input->post('invoice_items');
+		
+		$this->create_vat_invoice_tables_if_not_exist();
+		
+		// Validate and save invoice_info and data_items to the database
+		if ($invoice_info && is_array($invoice_info) && !empty($invoice_items) && is_array($invoice_items)) {
+			// Map data vs DB
+			$invoice_info_data = array(
+				'sales_id' => $invoice_info['sales_id'], // sales_id
+				'ten_khach_hang' => '', // Chưa có thông tin khách hàng
+				'dia_chi_khách_hang' => '', // Chưa có thông tin địa chỉ khách hàng
+				'so_dien_thoai_khach_hang' => '', // Chưa có thông tin
+				'email_khach_hang' => '', // Chưa có thông tin email khách hàng
+				'ma_so_thue' => '', // Chưa có thông tin mã số thuế
+				'ten_cong_ty' => '', // Chưa có thông tin tên công ty
+				'can_cuoc_cong_dan' => '', // Chưa có thông tin căn cước công dân
+				'so_ho_chieu' => '', // Chưa có thông tin số hộ chiếu
+				'ghi_chu' => '', // Chưa có thông tin ghi chú
+				'created_at' => date('Y-m-d H:i:s'),
+				'created_by' => $this->session->userdata('user_id'),
+				'updated_at' => null, // Chưa cập nhật
+				'updated_by' => null, // Chưa cập nhật
+				'id_hoa_don_dt' => $invoice_info['id_hoa_don_dt'], // ID hóa đơn điện tử
+				'so_hoa_don_dt' => $invoice_info['so_hoa_don_dt'], // Số hóa đơn điện tử
+				'ma_tra_cuu_hoa_don_dt' => $invoice_info['ma_tra_cuu_hoa_don_dt'], // Mã tra cứu hóa đơn điện tử
+				'ma_so_thue_hoa_don_dt' => $invoice_info['ma	_so_thue_hoa_don_dt'], // Mã số thuế hóa đơn điện tử
+				'trang_thai_hoa_don_dt' => 'draft', // Tr	ạng thái hóa đơn điện tử, mặc định là 'draft'
+				'ngay_hoa_don_dt' => $invoice_info['ngay_hoa_don_dt'], // Ngày hóa đơn điện tử
+				'mau_so' => $invoice_info['mau_so'], // Mẫu số hóa đơn điện tử
+				'ky_hieu' => $invoice_info['ky_hieu'] // Ký hiệu hóa đơn điện tử
+			);
+			// Nếu chưa có hóa đơn sales_id thì thêm mới
+			$this->db->insert('db_vat_invoice', $invoice_info_data);
+			$vat_invoice_id = $this->db->insert_id();
+
+
+			// Save data_items
+			// Map data với DB
+			foreach ($invoice_items as $item) {
+				$item_data = array(
+					'vat_invoice_id' => $vat_invoice_id, // ID hóa đơn điện tử
+					'ten_san_pham' => $item['ten_san_pham'], // Tên sản phẩm
+					'so_luong' => isset($item['so_luong']) ? $item['so_luong'] : 1.000, // Số lượng, mặc định là 1.000
+					'don_gia' => isset($item['don_gia']) ? $item['don_gia'] : 0.00, // Đơn giá, mặc định là 0.00
+					'thanh_tien' => isset($item['thanh_tien']) ? $item['thanh_tien'] : 0.00, // Thành tiền, mặc định là 0.00
+					'giam_gia' => isset($item['giam_gia']) ? $item['giam_gia'] : 0.00, // Giảm giá, mặc định là 0.00
+					'phan_tram_thue' => isset($item['phan_tram_thue']) ? $item['phan_tram_thue'] : 0.00, // Phần trăm thuế, mặc định là 0.00
+					'thue' => isset($item['thue']) ? $item['thue'] : 0.00, // Thuế, mặc định là 0.00
+					'tong_tien' => isset($item['tong_tien']) ? $item['tong_tien'] : 0.00, // Tổng tiền, mặc định là 0.00
+					'created_by' => $this->session->userdata('user_id'), // Người tạo
+					'created_at' => date('Y-m-d H:i:s') // Thời gian tạo
+				);
+				$this->db->insert('db_vat_invoice_item', $item_data);
+			}
+
+			echo json_encode(array(
+				'success' => true,
+				'message' => 'Lưu thông tin hóa đơn điện tử thành công',
+				'invoice_id' => $vat_invoice_id,
+				'invoice_info_data' => $invoice_info_data,
+				'invoice_items_data' => $invoice_items
+			));
+		} else {
+			echo json_encode(array(
+				'success' => false,
+				'message' => 'Có lỗi xảy ra khi lưu thông tin hóa đơn điện tử: '
+			));
+		}
+	}
+
+	private function create_vat_invoice_tables_if_not_exist() {
+		$tables_created = false;
+		// Check if the table db_vat_invoice exists
+		$table_exists = $this->db->query("SHOW TABLES LIKE 'db_vat_invoice'")->num_rows() > 0;
+		
+		if (!$table_exists) {
+			// Create the db_vat_invoice table
+			$sql = "
+				CREATE TABLE `db_vat_invoice` (
+					`id` int(11) NOT NULL AUTO_INCREMENT,
+					`sales_id` int(11) DEFAULT NULL,
+					`ten_khach_hang` varchar(255) NOT NULL,
+					`dia_chi_khach_hang` text DEFAULT NULL,
+					`so_dien_thoai_khach_hang` varchar(20) DEFAULT NULL,
+					`email_khach_hang` varchar(100) DEFAULT NULL,
+					`ma_so_thue` varchar(50) DEFAULT NULL,
+					`ten_cong_ty` varchar(255) DEFAULT NULL,
+					`can_cuoc_cong_dan` varchar(50) DEFAULT NULL,
+					`so_ho_chieu` varchar(50) DEFAULT NULL,
+					`ghi_chu` text DEFAULT NULL,
+					`created_at` datetime NOT NULL,
+					`created_by` int(11) DEFAULT NULL,
+					`updated_at` datetime DEFAULT NULL,
+					`updated_by` int(11) DEFAULT NULL,
+					`id_hoa_don_dt` varchar(150) DEFAULT NULL,
+					`so_hoa_don_dt` varchar(50) DEFAULT NULL,
+					`ma_tra_cuu_hoa_don_dt` varchar(150) DEFAULT NULL,
+					`ma_so_thue_hoa_don_dt` varchar(150) DEFAULT NULL,
+					`trang_thai_hoa_don_dt` varchar(20) DEFAULT 'draft',
+					`ngay_hoa_don_dt` date DEFAULT NULL,
+					`mau_so` varchar(10) DEFAULT '1',
+					`ky_hieu` varchar(10) DEFAULT 'C24',
+					PRIMARY KEY (`id`)
+				) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+			";
+			
+			$this->db->query($sql);
+			$tables_created = true;
+		}
+
+		// Check if the table db_vat_invoice_item exists
+		$item_table_exists = $this->db->query("SHOW TABLES LIKE 'db_vat_invoice_item'")->num_rows() > 0;
+
+		if (!$item_table_exists) {
+			// Create the db_vat_invoice_item table
+			$sql = "
+				CREATE TABLE `db_vat_invoice_item` (
+					`id` int(11) NOT NULL AUTO_INCREMENT,
+					`vat_invoice_id` int(11) NOT NULL,
+					`ten_san_pham` varchar(255) NOT NULL,
+					`so_luong` decimal(10,3) NOT NULL DEFAULT 1.000,
+					`don_gia` decimal(10,2) NOT NULL DEFAULT 0.00,
+					`thanh_tien` decimal(10,2) NOT NULL DEFAULT 0.00,
+					`giam_gia` decimal(10,2) DEFAULT 0.00,
+					`phan_tram_thue` decimal(5,2) DEFAULT 0.00,
+					`thue` decimal(10,2) DEFAULT 0.00,
+					`tong_tien` decimal(10,2) NOT NULL DEFAULT 0.00,
+					`created_by` int(11) DEFAULT NULL,
+					`created_at` datetime NOT NULL,
+					PRIMARY KEY (`id`),
+					KEY `vat_invoice_id` (`vat_invoice_id`),
+					CONSTRAINT `fk_vat_invoice_item` FOREIGN KEY (`vat_invoice_id`) REFERENCES `db_vat_invoice` (`id`) ON DELETE CASCADE
+				) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+			";
+
+			$this->db->query($sql);
+			$tables_created = true;
+		}
+
+		return $tables_created;
+	}
+
+	function get_vatinvoice_data() {
+		$this->permission_check('sales_view');
+		
+		$order_id = $this->input->post('order_id');
+		
+		if (!$order_id) {
+			echo json_encode(array(
+				'success' => false,
+				'message' => 'Không có ID đơn hàng'
+			));
+			return;
+		}
+		
+		try {
+			// Get invoice header
+			$vat_invoice = $this->db->where('order_id', $order_id)
+							   ->get('db_vat_invoice')
+							   ->row_array();
+			
+			if (!$vat_invoice) {
+				echo json_encode(array(
+					'success' => false,
+					'message' => 'Không tìm thấy hóa đơn VAT cho đơn hàng này'
+				));
+				return;
+			}
+			
+			// Get invoice items
+			$vat_invoice_items = $this->db->where('vat_invoice_id', $vat_invoice['id'])
+							  ->get('db_vat_invoice_item')
+							  ->result_array();
+			
+			// Lấy cấu hình hóa đơn điện tử
+			$einvoice_config = $this->site->get_einvoice_config();
+
+			// Lấy thông tin hóa đơn điện tử
+			$einvoice_data = $this->site->get_einvoice_data($order_ids);
+
+			// Khởi tạo và lấy danh sách mẫu số và ký hiệu
+			$this->site->init_default_einvoice_templates();
+			$einvoice_templates = $this->site->get_einvoice_templates();
+			
+			// Khởi tạo và lấy danh sách phương thức thanh toán
+			$this->site->init_default_einvoice_payments();
+			$einvoice_payments = $this->site->get_einvoice_payments();
+			
+			echo json_encode(array(
+				'success' => true,
+				'data' => array(
+					'vat_invoice' => $vat_invoice,
+					'vat_invoice_items' => $vat_invoice_items,
+					'einvoice_config' => $einvoice_config,
+					'einvoice_data' => $einvoice_data,
+					'einvoice_templates' => $einvoice_templates,
+					'einvoice_payments' => $einvoice_payments
+				)
+			));
+			
+		} catch (Exception $e) {
+			echo json_encode(array(
+				'success' => false,
+				'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
+			));
+		}
+	}
+
 	public function get_einvoice_json() {
 		$this->permission_check('sales_view');
 		

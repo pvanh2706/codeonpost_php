@@ -232,8 +232,11 @@ class Items extends MY_Controller {
 			
 			//$this->db->where('MATCH (table_name.title) AGAINST("'.$slug.'")');
 			
-			$sql =$this->db->query("SELECT id,item_name,item_code,stock,final_price,final_price0,final_price1,final_price2,final_price3 FROM db_items where  status=1 and  (LOWER(item_name) LIKE '%$name%' or LOWER(search_for) LIKE '%$name%')");// or LOWER(custom_barcode) LIKE '%$name%')");
+			// $sql =$this->db->query("SELECT id,item_name,item_code,stock,final_price,final_price0,final_price1,final_price2,final_price3 FROM db_items where  status=1 and  (LOWER(item_name) LIKE '%$name%' or LOWER(search_for) LIKE '%$name%')");// or LOWER(custom_barcode) LIKE '%$name%')");
 			
+			$sql = $this->db->query("SELECT db_items.id, db_items.item_name, db_items.item_code, db_items.stock, db_items.final_price, db_items.final_price0, db_items.final_price1, db_items.final_price2, db_items.final_price3, db_units.unit_name FROM db_items LEFT JOIN db_units ON db_items.unit_id = db_units.id WHERE db_items.status = 1 AND (LOWER(db_items.item_name) LIKE '%$name%' OR LOWER(db_items.search_for) LIKE '%$name%')");
+
+
 			foreach ($sql->result() as $res) {
 			      $json_arr["id"] = $res->id;
 				  $json_arr["value"] = $res->item_name;
@@ -246,6 +249,7 @@ class Items extends MY_Controller {
 				  $json_arr["final_price1"] = number_format($res->final_price1);
 				  $json_arr["final_price2"] = number_format($res->final_price2);
 				  $json_arr["final_price3"] = number_format($res->final_price3);
+				  $json_arr["unit_name"] = $res->unit_name;
 				  array_push($display_json, $json_arr);
 				 /* $display_json[] =$res->id;
 				  $display_json[] =$res->item_name;

@@ -599,7 +599,7 @@ function show_order_info() {
     
     // AJAX call to get order details
     $.ajax({
-        url: "<?php echo site_url('sales/get_vatinvoice_data'); ?>",
+        url: "<?php echo site_url('sales/get_order_details'); ?>",
         type: "POST",
         data: {
             order_ids: selectedIds
@@ -607,7 +607,7 @@ function show_order_info() {
         dataType: "json",
         success: function(response) {
             if (response.success) {
-                originalOrderData = response.data; // Store original data
+                originalOrderData = response.data[0]; // Store original data
                 var html = buildOrderInfoHTML(response.data);
                 $('#orderInfoContent').html(html);
                 $('#editOrderBtn').show();
