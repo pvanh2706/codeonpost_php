@@ -1584,6 +1584,10 @@ class Sales extends MY_Controller {
 		$invoice_info = $this->input->post('invoice_info');
 		$invoice_items = $this->input->post('invoice_items');
 		
+		// Debug: Log dữ liệu đầu vào
+		log_message('debug', 'E-Invoice Data - invoice_info: ' . json_encode($invoice_info));
+		log_message('debug', 'E-Invoice Data - invoice_items: ' . json_encode($invoice_items));
+		
 		$this->create_vat_invoice_tables_if_not_exist();
 		
 		// Validate and save invoice_info and data_items to the database
@@ -1592,7 +1596,7 @@ class Sales extends MY_Controller {
 			$invoice_info_data = array(
 				'sales_id' => $invoice_info['sales_id'], // sales_id
 				'ten_khach_hang' => '', // Chưa có thông tin khách hàng
-				'dia_chi_khách_hang' => '', // Chưa có thông tin địa chỉ khách hàng
+				'dia_chi_khach_hang' => '', // Chưa có thông tin địa chỉ khách hàng
 				'so_dien_thoai_khach_hang' => '', // Chưa có thông tin
 				'email_khach_hang' => '', // Chưa có thông tin email khách hàng
 				'ma_so_thue' => '', // Chưa có thông tin mã số thuế
@@ -1607,15 +1611,39 @@ class Sales extends MY_Controller {
 				'id_hoa_don_dt' => $invoice_info['id_hoa_don_dt'], // ID hóa đơn điện tử
 				'so_hoa_don_dt' => $invoice_info['so_hoa_don_dt'], // Số hóa đơn điện tử
 				'ma_tra_cuu_hoa_don_dt' => $invoice_info['ma_tra_cuu_hoa_don_dt'], // Mã tra cứu hóa đơn điện tử
-				'ma_so_thue_hoa_don_dt' => $invoice_info['ma	_so_thue_hoa_don_dt'], // Mã số thuế hóa đơn điện tử
-				'trang_thai_hoa_don_dt' => 'draft', // Tr	ạng thái hóa đơn điện tử, mặc định là 'draft'
+				'ma_so_thue_hoa_don_dt' => $invoice_info['ma_so_thue_hoa_don_dt'], // Mã số thuế hóa đơn điện tử
+				'trang_thai_hoa_don_dt' => 'draft', // Trạng thái hóa đơn điện tử, mặc định là 'draft'
 				'ngay_hoa_don_dt' => $invoice_info['ngay_hoa_don_dt'], // Ngày hóa đơn điện tử
 				'mau_so' => $invoice_info['mau_so'], // Mẫu số hóa đơn điện tử
 				'ky_hieu' => $invoice_info['ky_hieu'] // Ký hiệu hóa đơn điện tử
 			);
 			// Nếu chưa có hóa đơn sales_id thì thêm mới
-			$this->db->insert('db_vat_invoice', $invoice_info_data);
+			$insert_result = $this->db->insert('db_vat_invoice', $invoice_info_data);
+			
+			// Kiểm tra lỗi khi insert
+			if (!$insert_result) {
+				$db_error = $this->db->error();
+				echo json_encode(array(
+					'success' => false,
+					'message' => 'Lỗi khi lưu vào db_vat_invoice: ' . $db_error['message'],
+					'db_error' => $db_error,
+					'data_attempted' => $invoice_info_data
+				));
+				return;
+			}
+			
 			$vat_invoice_id = $this->db->insert_id();
+			
+			// Kiểm tra insert_id có hợp lệ không
+			if (!$vat_invoice_id || $vat_invoice_id <= 0) {
+				echo json_encode(array(
+					'success' => false,
+					'message' => 'Không thể lấy ID sau khi insert vào db_vat_invoice',
+					'insert_id' => $vat_invoice_id,
+					'data_attempted' => $invoice_info_data
+				));
+				return;
+			}
 
 
 			// Save data_items
@@ -1634,7 +1662,20 @@ class Sales extends MY_Controller {
 					'created_by' => $this->session->userdata('user_id'), // Người tạo
 					'created_at' => date('Y-m-d H:i:s') // Thời gian tạo
 				);
-				$this->db->insert('db_vat_invoice_item', $item_data);
+				
+				$item_insert_result = $this->db->insert('db_vat_invoice_item', $item_data);
+				
+				// Kiểm tra lỗi khi insert item
+				if (!$item_insert_result) {
+					$db_error = $this->db->error();
+					echo json_encode(array(
+						'success' => false,
+						'message' => 'Lỗi khi lưu item vào db_vat_invoice_item: ' . $db_error['message'],
+						'db_error' => $db_error,
+						'item_data' => $item_data
+					));
+					return;
+				}
 			}
 
 			echo json_encode(array(
