@@ -71,7 +71,7 @@
           <!-- small box -->
           <div class="small-box bg-green">
             <div class="inner">
-              <h3><?= $CI->currency(number_format($sal_total));?></h3>
+              <h3><?= number_format($sal_total, 0, ',', '.') . ' ₫';?></h3>
               <p>Tổng doanh số</p>
             </div>
             <div class="icon">
@@ -85,7 +85,7 @@
           <!-- small box -->
           <div class="small-box bg-yellow">
             <div class="inner">
-              <h3><?= $CI->currency(number_format($paid_amount));?></h3>
+              <h3><?= number_format($paid_amount, 0, ',', '.') . ' ₫';?></h3>
              <p>Tổng giá trị trả hàng</p>
             </div>
             <div class="icon">
@@ -99,7 +99,7 @@
           <!-- small box -->
           <div class="small-box bg-red">
             <div class="inner">
-              <h3><?= $CI->currency(number_format($sales_due_total));?></h3>
+              <h3><?= number_format($sales_due_total, 0, ',', '.') . ' ₫';?></h3>
               <p>Tổng công nợ trả hàng</p>
             </div>
             <div class="icon">
@@ -192,6 +192,23 @@
 <!-- bootstrap datepicker -->
 <script src="<?php echo $theme_link; ?>plugins/datepicker/bootstrap-datepicker.js"></script>
 <script type="text/javascript">
+  // Fallback function for app_number_format if not loaded
+  if (typeof app_number_format === 'undefined') {
+    function app_number_format(num=0, currency='VND'){
+      if(currency === 'VND') {
+        return new Intl.NumberFormat('vi-VN', {
+          style: 'currency',
+          currency: 'VND',
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 0
+        }).format(num);
+      }
+      
+      // Default formatting with ₫ symbol
+      return new Intl.NumberFormat('vi-VN').format(num) + ' ₫';
+    }
+  }
+  
   //Date picker
     $('.datepicker').datepicker({
       autoclose: true,
@@ -266,38 +283,40 @@ $(document).ready(function() {
         ],
         /*Start Footer Total*/
         "footerCallback": function ( row, data, start, end, display ) {
-            var api = this.api(), data;
+            var api = this.api();
+            
             // Remove the formatting to get integer data for summation
             var intVal = function ( i ) {
-                return typeof i === 'string' ?
-                    i.replace(/[\$,]/g, '')*1 :
-                    typeof i === 'number' ?
-                        i : 0;
+                if (typeof i === 'string') {
+                    // Remove currency symbol, spaces, and thousand separators
+                    var cleanStr = i.replace(/[\₫\s]/g, '').replace(/\./g, '').replace(/,/g, '.');
+                    return parseFloat(cleanStr) || 0;
+                }
+                return typeof i === 'number' ? i : 0;
             };
-            var totol = api
-                .column( 7, { page: 'none'} )
-                .data()
-                .reduce( function (a, b) {
-                    return intVal(a) + intVal(b);
-                }, 0 );
-            var paid = api
-                .column( 8, { page: 'none'} )
-                .data()
-                .reduce( function (a, b) {
-                    return intVal(a) + intVal(b);
-                }, 0 );
-          var due = api
-                .column( 9, { page: 'none'} )
-                .data()
-                .reduce( function (a, b) {
-                    return intVal(a) + intVal(b);
-                }, 0 );
+            
+            // Calculate total for column 7 (Giá trị)
+            var total_grand = 0;
+            api.column( 7 ).data().each( function ( value, index ) {
+                total_grand += intVal(value);
+            });
+                
+            // Calculate total for column 8 (Đã thanh toán)
+            var total_paid = 0;
+            api.column( 8 ).data().each( function ( value, index ) {
+                total_paid += intVal(value);
+            });
+                
+            // Calculate total for column 9 (Công nợ)
+            var total_due = 0;
+            api.column( 9 ).data().each( function ( value, index ) {
+                total_due += intVal(value);
+            });
           
-           
-            //$( api.column( 0 ).footer() ).html('Total');
-            $( api.column( 7 ).footer() ).html(app_number_format(totol));
-            $( api.column( 8 ).footer() ).html(app_number_format(paid));
-            $( api.column( 9 ).footer() ).html(app_number_format(due));
+            // Update footer with formatted values
+            $( api.column( 7 ).footer() ).html(app_number_format(total_grand));
+            $( api.column( 8 ).footer() ).html(app_number_format(total_paid));
+            $( api.column( 9 ).footer() ).html(app_number_format(total_due));
             
         },
         /*End Footer Total*/

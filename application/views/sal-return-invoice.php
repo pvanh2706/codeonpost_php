@@ -250,6 +250,7 @@
               $tot_tax_amt=0;
               $tot_discount_amt=0;
               $tot_total_cost=0;
+              $tot_subtotal=0; // Thêm biến tổng tạm tính
 
               $q2=$this->db->query("SELECT c.item_name, a.return_qty,a.tax_type,
                                   a.price_per_unit, b.tax,b.tax_name,a.tax_amt,
@@ -270,29 +271,33 @@
               foreach ($q2->result() as $res2) {
                   $str = ($res2->tax_type=='Inclusive')? 'Inc.' : 'Exc.';
                   $discount = (empty($res2->discount_input)||$res2->discount_input==0)? '-':$res2->discount_input."%";
-                  $discount_amt = (empty($res2->discount_amt)||$res2->discount_input==0)? '-':$res2->discount_amt."";
+                  $discount_amt = (empty($res2->discount_amt)||$res2->discount_input==0)? '-':number_format($res2->discount_amt, 0, ',', '.');
+                  
+                  // Tính tạm tính = đơn giá * số lượng (trước thuế và chiết khấu)
+                  $subtotal_item = $res2->price_per_unit * $res2->return_qty;
+                  
                   echo "<tr>";  
                   echo "<td>".++$i."</td>";
                   echo "<td>".$res2->item_name."</td>";
-                  echo "<td class='text-right'>".$CI->currency(number_format($res2->price_per_unit))."</td>";
-                  echo "<td class='text-center'>".number_format($res2->return_qty)."</td>";
-                  echo "<td class='text-right'>".$CI->currency(number_format($discount))."</td>";
-                  echo "<td class='text-right'>".$CI->currency(number_format(($res2->price_per_unit * $res2->return_qty)))."</td>";
+                  echo "<td class='text-right'>".number_format($res2->price_per_unit, 0, ',', '.')." ₫"."</td>";
+                  echo "<td class='text-center'>".number_format($res2->return_qty, 0, ',', '.')."</td>";
+                  echo "<td class='text-right'>".(($res2->discount_input > 0) ? number_format($res2->discount_input, 0, ',', '.')."%" : '-')."</td>";
+                  echo "<td class='text-right'>".number_format($subtotal_item, 0, ',', '.')." ₫"."</td>";
                   
                   echo "<td class='".tax_disable_class()."'>".$res2->tax."%<br>".$res2->tax_name."[".$str."]</td>";
-                  echo "<td class='text-right ".tax_disable_class()."'>".$CI->currency(number_format($res2->tax_amt))."</td>";
+                  echo "<td class='text-right ".tax_disable_class()."'>".number_format($res2->tax_amt, 0, ',', '.')." ₫"."</td>";
 
-                  //echo "<td class='text-right'>".$CI->currency($discount_amt)."</td>";
-                  //echo "<td class='text-right'>".$CI->currency(number_format($res2->unit_total_cost,0,'.',''))."</td>";
-                  //echo "<td class='text-right'>".$CI->currency(number_format($res2->total_cost,0,'.',''))."</td>";
                   echo "</tr>";  
                   $tot_qty +=$res2->return_qty;
                   $tot_sales_price +=$res2->price_per_unit;
                   $tot_tax_amt +=$res2->tax_amt;
                   $tot_discount_amt +=$res2->discount_amt;
                   $tot_total_cost +=$res2->total_cost;
-                  echo "total_cost: ".$res2->total_cost."<br>";
-                  echo "price_per_unit: ".$res2->price_per_unit."<br>";
+                  $tot_subtotal += $subtotal_item; // Thêm biến này để tính tổng tạm tính
+                  $tot_tax_amt +=$res2->tax_amt;
+                  $tot_discount_amt +=$res2->discount_amt;
+                  $tot_total_cost +=$res2->total_cost;
+                  $tot_subtotal += $subtotal_item; // Thêm biến này để tính tổng tạm tính
               }
               ?>
          
@@ -301,12 +306,12 @@
             <tfoot class="text-right text-bold bg-gray">
               <tr>
                 <td colspan="2" class="text-center"><?= $this->lang->line('total_amount'); ?></td>
-                <td class="text-right"><?= $CI->currency(number_format($tot_sales_price)) ;?></td>
-                <td class="text-center"><?=number_format($tot_qty);?></td>
-                <td class="text-right"><?= $CI->currency(number_format($tot_discount_amt)) ;?></td>
-                <td class="text-right"><?= $CI->currency(number_format($tot_total_cost)) ;?></td>
+                <td class="text-right"><?= number_format($tot_sales_price, 0, ',', '.') . ' ₫' ;?></td>
+                <td class="text-center"><?=number_format($tot_qty, 0, ',', '.');?></td>
+                <td class="text-right"><?= ($tot_discount_amt > 0) ? number_format($tot_discount_amt, 0, ',', '.') . ' ₫' : '-' ;?></td>
+                <td class="text-right"><?= number_format($tot_subtotal, 0, ',', '.') . ' ₫' ;?></td>
                 <td class="<?=tax_disable_class()?>">-</td>
-                <td class="text-right <?=tax_disable_class()?>"><?= $CI->currency(number_format($tot_tax_amt));?></td>
+                <td class="text-right <?=tax_disable_class()?>"><?= number_format($tot_tax_amt, 0, ',', '.') . ' ₫';?></td>
               </tr>
             </tfoot>
           </table>
@@ -323,7 +328,7 @@
                     <label for="discount_to_all_input" class="col-sm-4 control-label" style="font-size: 17px;">Tổng chiết khấu</label>    
                     <div class="col-sm-8">
                        <!--label class="control-label  " style="font-size: 17px;">: <?=$discount_to_all_input; ?> (<?= $discount_to_all_type ?>)</label-->
-                       <label class="control-label  " style="font-size: 17px;">: <?=($discount_to_all_input) ? number_format($discount_to_all_input) . ' ('.$discount_to_all_type.')' : 'Không áp dụng'; ?></label>
+                       <label class="control-label  " style="font-size: 17px;">: <?=($discount_to_all_input) ? number_format($discount_to_all_input, 0, ',', '.') . ' ('.$discount_to_all_type.')' : 'Không áp dụng'; ?></label>
                     </div>
                  </div>
               </div>
@@ -364,11 +369,11 @@
                                   echo "<td>".show_date($res3->payment_date)."</td>";
                                   echo "<td>".$res3->payment_type."</td>";
                                   echo "<td>".$res3->payment_note."</td>";
-                                  echo "<td class='text-right'>".$CI->currency(number_format($res3->payment))."</td>";
+                                  echo "<td class='text-right'>".number_format($res3->payment, 0, ',', '.')." ₫"."</td>";
                                   echo "</tr>";
                                   $total_paid +=$res3->payment;
                                 }
-                                echo "<tr class='text-right text-bold'><td colspan='4' >Tổng thanh toán</td><td>".$CI->currency(number_format($total_paid))."</td></tr>";
+                                echo "<tr class='text-right text-bold'><td colspan='4' >Tổng thanh toán</td><td>".number_format($total_paid, 0, ',', '.')." ₫"."</td></tr>";
                               }
                               else{
                                 echo "<tr><td colspan='5' class='text-center text-bold'>Không có dữ liệu thanh toán!!</td></tr>";
@@ -391,30 +396,42 @@
               <div class="col-md-12">
                  <div class="form-group">
                      
-                    <table  class="col-md-11">
+                    <table class="col-md-12" style="width: 100%; table-layout: fixed;">
                        <tr>
-                          <th class="text-right" style="font-size: 17px;">Tổng tạm tính</th>
-                          <th class="text-right" style="padding-left:10%;font-size: 17px;">
+                          <th class="text-left" style="font-size: 17px; width: 60%; padding-right: 30px;">Tổng tạm tính</th>
+                          <th class="text-left" style="font-size: 17px; width: 40%; padding-left: 20px;">
                              <h4><b id="subtotal_amt" name="subtotal_amt"><?= number_format($subtotal, 0, ',', '.') . ' ₫';?></b></h4>
                           </th>
                        </tr>
                        <tr>
-                          <th class="text-right" style="font-size: 17px;">Chiết khấu sản phẩm</th>
-                          <th class="text-right" style="padding-left:10%;font-size: 17px;">
+                          <th class="text-left" style="font-size: 17px; width: 60%; padding-right: 30px;">Chiết khấu sản phẩm</th>
+                          <th class="text-left" style="font-size: 17px; width: 40%; padding-left: 20px;">
                              <h4><b><?php echo number_format($tot_discount_amt, 0, ',', '.') . ' ₫'; ?></b></h4>
                           </th>
                        </tr>
                        <tr>
-                          <th class="text-right" style="font-size: 17px;">Chiết khấu hóa đơn</th>
-                          <th class="text-right" style="padding-left:10%;font-size: 17px;">
+                          <th class="text-left" style="font-size: 17px; width: 60%; padding-right: 30px;">Chiết khấu hóa đơn</th>
+                          <th class="text-left" style="font-size: 17px; width: 40%; padding-left: 20px;">
                              <h4><b id="discount_to_all_amt" name="discount_to_all_amt"><?= number_format($tot_discount_to_all_amt, 0, ',', '.') . ' ₫';?></b></h4>
                           </th>
                        </tr>
+                       <?php if ($other_charges_input > 0): ?>
+                       <tr>
+                          <th class="text-left" style="font-size: 17px; width: 60%; padding-right: 30px;">Phụ phí</th>
+                          <th class="text-left" style="font-size: 17px; width: 40%; padding-left: 20px;">
+                             <h4><b><?= number_format($other_charges_input, 0, ',', '.') . ' ₫';?></b></h4>
+                          </th>
+                       </tr>
+                       <?php endif; ?>
                        <tr style="border-top: 1px solid #ddd;">
-                          <th class="text-right" style="font-size: 17px;">Tổng trước thuế <small>(Sau CK)</small></th>
-                          <th class="text-right" style="padding-left:10%;font-size: 17px;">
+                          <th class="text-left" style="font-size: 17px; width: 60%; padding-right: 30px;">Tổng trước thuế <small>(Sau CK)</small></th>
+                          <th class="text-left" style="font-size: 17px; width: 40%; padding-left: 20px;">
                              <h4><b><?php 
                                 // Tổng trước thuế = subtotal + phụ phí (chưa thuế) - chiết khấu
+                                $calculated_subtotal = $subtotal; // Sử dụng $subtotal từ database
+                                $other_charges_base = $other_charges_input; // Phụ phí chưa thuế
+                                $other_charges_tax_amt = $other_charges_amt - $other_charges_input; // Tính thuế phụ phí
+                                
                                 $total_before_tax = $calculated_subtotal + $other_charges_base - $tot_discount_amt - $tot_discount_to_all_amt;
                                 echo number_format($total_before_tax, 0, ',', '.') . ' ₫';
                              ?></b></h4>
@@ -446,8 +463,8 @@
                        <?php if (!empty($tax_details)): ?>
                          <?php foreach ($tax_details as $tax_detail): ?>
                          <tr>
-                            <th class="text-right" style="font-size: 15px;"><?php echo $tax_detail['name']; ?> (<?php echo $tax_detail['rate']; ?>%)</th>
-                            <th class="text-right" style="padding-left:10%;font-size: 15px;">
+                            <th class="text-left" style="font-size: 15px; width: 60%; padding-right: 30px;"><?php echo $tax_detail['name']; ?> (<?php echo $tax_detail['rate']; ?>%)</th>
+                            <th class="text-left" style="font-size: 15px; width: 40%; padding-left: 20px;">
                                <h5><b><?php echo number_format($tax_detail['amount'], 0, ',', '.') . ' ₫'; ?></b></h5>
                             </th>
                          </tr>
@@ -455,8 +472,8 @@
                        <?php endif; ?>
                        
                        <tr>
-                          <th class="text-right" style="font-size: 17px;">Tổng tiền thuế <small>(Sản phẩm + Phụ phí)</small></th>
-                          <th class="text-right" style="padding-left:10%;font-size: 17px;">
+                          <th class="text-left" style="font-size: 17px; width: 60%; padding-right: 30px;">Tổng tiền thuế <small>(Sản phẩm + Phụ phí)</small></th>
+                          <th class="text-left" style="font-size: 17px; width: 40%; padding-left: 20px;">
                              <h4><b><?php 
                                 $total_all_tax = $tot_tax_amt + $other_charges_tax_amt;
                                 echo "<!-- DEBUG TAX: tot_tax_amt = " . $tot_tax_amt . ", other_charges_tax_amt = " . $other_charges_tax_amt . ", total_all_tax = " . $total_all_tax . " -->";
@@ -466,8 +483,8 @@
                        </tr>
                        
                        <tr>
-                          <th class="text-right" style="font-size: 17px;">Tổng sau thuế</th>
-                          <th class="text-right" style="padding-left:10%;font-size: 17px;">
+                          <th class="text-left" style="font-size: 17px; width: 60%; padding-right: 30px;">Tổng sau thuế</th>
+                          <th class="text-left" style="font-size: 17px; width: 40%; padding-left: 20px;">
                              <h4><b><?php 
                                 // Tổng sau thuế = Tổng trước thuế + tổng tất cả thuế
                                 // Note: total_before_tax đã bao gồm phụ phí chưa thuế, total_all_tax đã bao gồm thuế phụ phí
@@ -478,15 +495,15 @@
                           </th>
                        </tr>
                        <!--tr>
-                          <th class="text-right" style="font-size: 17px;"><?= $this->lang->line('round_off'); ?></th>
-                          <th class="text-right" style="padding-left:10%;font-size: 17px;">
+                          <th class="text-left" style="font-size: 17px;"><?= $this->lang->line('round_off'); ?></th>
+                          <th class="text-left" style="padding-left:10%;font-size: 17px;">
                              <h4><b id="round_off_amt" name="tot_round_off_amt"><?=$round_off;?></b></h4>
                           </th>
                        </tr-->
                        <tr>
-                          <th class="text-right" style="font-size: 17px;">Tổng thanh toán</th>
-                          <th class="text-right" style="padding-left:10%;font-size: 17px;">
-                             <h4><b id="total_amt" name="total_amt"><?=$CI->currency(number_format($grand_total));?></b></h4>
+                          <th class="text-left" style="font-size: 17px; width: 60%; padding-right: 30px;">Tổng thanh toán</th>
+                          <th class="text-left" style="font-size: 17px; width: 40%; padding-left: 20px;">
+                             <h4><b id="total_amt" name="total_amt"><?=number_format($grand_total, 0, ',', '.') . ' ₫';?></b></h4>
                           </th>
                        </tr>
                     </table>

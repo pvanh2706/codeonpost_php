@@ -105,9 +105,9 @@ class Sales_return extends MY_Controller {
 			$row[] = $sales->reference_no;
 			$row[] = $sales->customer_name;
 			//$row[] = $sales->warehouse_name;
-			$row[] = app_number_format($sales->grand_total);
-			$row[] = app_number_format($sales->paid_amount);
-			$row[] = app_number_format($sales->return_due);
+			$row[] = number_format($sales->grand_total, 0, ',', '.') . ' ₫';
+			$row[] = number_format($sales->paid_amount, 0, ',', '.') . ' ₫';
+			$row[] = number_format($sales->return_due, 0, ',', '.') . ' ₫';
 					$str='';
 					if($sales->payment_status=='Unpaid')
 			          $str= "<span class='label label-danger' style='cursor:pointer'>Unpaid </span>";

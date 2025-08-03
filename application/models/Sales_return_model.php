@@ -101,6 +101,30 @@ class Sales_return_model extends CI_Model {
 		return $this->security->xss_clean(html_escape($input));
 	}
 
+	// Helper function to parse money string to number
+	private function parse_money($value) {
+		if (empty($value) || $value === '' || $value === null) {
+			return 0;
+		}
+		
+		// Convert to string for processing
+		$str = trim(strval($value));
+		
+		// Remove currency symbol and spaces
+		$str = str_replace(['₫', ' '], '', $str);
+		
+		// Remove thousand separators (dots)
+		$str = str_replace('.', '', $str);
+		
+		// Convert comma to dot for decimal (if any)
+		$str = str_replace(',', '.', $str);
+		
+		// Convert to float
+		$num = floatval($str);
+		
+		return $num;
+	}
+
 	//Save Sales
 	public function verify_save_and_update(){
 		//Filtering XSS and html escape from user inputs 
@@ -109,6 +133,16 @@ class Sales_return_model extends CI_Model {
 		
 		$this->db->trans_begin();
 		$return_date=date('Y-m-d',strtotime($return_date));
+
+		// Parse money values to ensure they are numbers
+		$other_charges_input = $this->parse_money($other_charges_input);
+		$other_charges_amt = $this->parse_money($other_charges_amt);
+		$discount_to_all_input = $this->parse_money($discount_to_all_input);
+		$tot_discount_to_all_amt = $this->parse_money($tot_discount_to_all_amt);
+		$tot_round_off_amt = $this->parse_money($tot_round_off_amt);
+		$tot_subtotal_amt = $this->parse_money($tot_subtotal_amt);
+		$tot_total_amt = $this->parse_money($tot_total_amt);
+		$amount = $this->parse_money($amount); // Parse payment amount
 
 		if($other_charges_input=='' || $other_charges_input==0){$other_charges_input=null;}
 	    if($other_charges_tax_id=='' || $other_charges_tax_id==0){$other_charges_tax_id=null;}
@@ -216,19 +250,19 @@ class Sales_return_model extends CI_Model {
 
 				$item_id 			=$this->xss_html_filter(trim($_REQUEST['tr_item_id_'.$i]));
 				$return_qty			=$this->xss_html_filter(trim($_REQUEST['td_data_'.$i.'_3']));
-				$price_per_unit 	=$this->xss_html_filter(trim($_REQUEST['td_data_'.$i.'_4']));
+				$price_per_unit 	=$this->parse_money($this->xss_html_filter(trim($_REQUEST['td_data_'.$i.'_4'])));
 				$tax_id 			=$this->xss_html_filter(trim($_REQUEST['tr_tax_id_'.$i]));
-				$tax_amt 			=$this->xss_html_filter(trim($_REQUEST['td_data_'.$i.'_11']));
-				$unit_total_cost	=$this->xss_html_filter(trim($_REQUEST['td_data_'.$i.'_10']));
-				$total_cost			=$this->xss_html_filter(trim($_REQUEST['td_data_'.$i.'_9']));
+				$tax_amt 			=$this->parse_money($this->xss_html_filter(trim($_REQUEST['td_data_'.$i.'_11'])));
+				$unit_total_cost	=$this->parse_money($this->xss_html_filter(trim($_REQUEST['td_data_'.$i.'_10'])));
+				$total_cost			=$this->parse_money($this->xss_html_filter(trim($_REQUEST['td_data_'.$i.'_9'])));
 				$tax_type			=$this->xss_html_filter(trim($_REQUEST['tr_tax_type_'.$i]));
 				$unit_tax			=$this->xss_html_filter(trim($_REQUEST['tr_tax_value_'.$i]));
 				$description		=$this->xss_html_filter(trim($_REQUEST['description_'.$i]));
-				$purchase_price		=$this->xss_html_filter(trim($_REQUEST['purchase_price_'.$i]));
+				$purchase_price		=$this->parse_money($this->xss_html_filter(trim($_REQUEST['purchase_price_'.$i])));
 				
 				$discount_type 		=$this->xss_html_filter(trim($_REQUEST['item_discount_type_'.$i]));
 				$discount_input 	=$this->xss_html_filter(trim($_REQUEST['item_discount_input_'.$i]));
-				$discount_amt	    =$this->xss_html_filter(trim($_REQUEST['td_data_'.$i.'_8']));//Amount
+				$discount_amt	    =$this->parse_money($this->xss_html_filter(trim($_REQUEST['td_data_'.$i.'_8'])));//Amount
 				
 				$discount_amt_per_unit = $discount_amt/$return_qty;
 				if($tax_type=='Exclusive'){
