@@ -349,6 +349,27 @@ function formatNumber(num, decimals = 0) {
     }).format(roundedNum);
 }
 
+// Loading overlay functions
+function showLoadingOverlay(title, subtitle) {
+    title = title || 'Đang xử lý...';
+    subtitle = subtitle || 'Vui lòng đợi trong giây lát';
+    
+    var loadingOverlay = '<div id="globalLoadingOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; justify-content: center; align-items: center;">' +
+                         '<div style="background: white; padding: 30px; border-radius: 10px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">' +
+                         '<i class="fa fa-spinner fa-spin fa-3x" style="color: #007bff; margin-bottom: 15px;"></i>' +
+                         '<h4 style="margin: 0; color: #333;">' + title + '</h4>' +
+                         '<p style="margin: 5px 0 0 0; color: #666;">' + subtitle + '</p>' +
+                         '</div></div>';
+    
+    // Remove existing overlay if any
+    $('#globalLoadingOverlay').remove();
+    $('body').append(loadingOverlay);
+}
+
+function hideLoadingOverlay() {
+    $('#globalLoadingOverlay').remove();
+}
+
 function formatCurrency(amount) {
     if (isNaN(amount) || amount === null || amount === undefined) {
         return '0 đ';
@@ -1750,9 +1771,8 @@ function buildOrderInfoHTML(dataVATInvoice) {
         });
     });
 function createAndPublishInvoice(invoiceData, einvoiceConfig) {
-    var btn = $(this);
-       // Thêm loading 
-       
+    // Hiển thị loading overlay với nội dung tùy chỉnh
+    showLoadingOverlay('Đang tạo hóa đơn điện tử...', 'Đang gửi dữ liệu đến cơ quan thuế');
             
         var formData = {
             // api_url: $('#api_url').val().trim(),
@@ -1800,8 +1820,8 @@ function createAndPublishInvoice(invoiceData, einvoiceConfig) {
                 showAlert('danger', '<i class="fa fa-exclamation-circle"></i> Có lỗi xảy ra khi kiểm tra kết nối: ' + error);
             },
             complete: function() {
-                btn.prop('disabled', false);
-                spinner.hide();
+                // Ẩn loading overlay
+                hideLoadingOverlay();
             }
         });
 }
@@ -1813,6 +1833,9 @@ function saveEInvoiceData() {
         alert("Không có dữ liệu đơn hàng để lưu!");
         return;
     }
+    
+    // Hiển thị loading overlay
+    showLoadingOverlay('Đang lưu thông tin hóa đơn...', 'Đang xử lý dữ liệu hóa đơn điện tử');
     
     // Collect invoice data from form
     var invoiceData = {
@@ -1900,7 +1923,8 @@ function viewEInvoicePdf() {
         alert("Không có dữ liệu đơn hàng!");
         return;
     }
-
+    // Hiển thị loading overlay với nội dung tùy chỉnh
+    showLoadingOverlay('Đang lấy thông tin PDF...', 'Đang tải hóa đơn điện tử');
     $.ajax({
         url: "<?php echo site_url('sales/view_pdf_invoice'); ?>", 
         type: "POST",
@@ -1935,6 +1959,9 @@ function viewEInvoicePdf() {
             } else {
                 alert("Không thể xem PDF: " + response.message);
             }
+        },
+        complete: function() {
+            hideLoadingOverlay();
         },
         error: function(xhr, status, error) {
             alert("Có lỗi xảy ra khi xem PDF: " + error);
