@@ -228,16 +228,18 @@ class Items extends MY_Controller {
 		$name = str_replace(' ', '%', $name);
 		
 		// Tìm kiếm theo nhiều tiêu chí: tên sản phẩm, mã sản phẩm, từ khóa tìm kiếm, mã vạch tùy chỉnh, SKU, HSN
-		$sql =$this->db->query("SELECT id,item_name,item_code,stock,final_price,final_price0,final_price1,final_price2,final_price3,custom_barcode,sku,hsn 
+		$sql = $this->db->query("SELECT db_items.id, db_items.item_name, db_items.item_code, db_items.stock, db_items.final_price, db_items.final_price0,
+			db_items.final_price1, db_items.final_price2, db_items.final_price3, db_items.custom_barcode, db_items.sku, db_items.hsn, db_units.unit_name
 			FROM db_items 
-			WHERE status=1 
+			LEFT JOIN db_units ON db_items.unit_id = db_units.id
+			WHERE db_items.status = 1 
 			AND (
-				LOWER(item_name) LIKE '%$name%' 
-				OR LOWER(item_code) LIKE '%$name%' 
-				OR LOWER(search_for) LIKE '%$name%'
-				OR LOWER(custom_barcode) LIKE '%$name%'
-				OR LOWER(sku) LIKE '%$name%'
-				OR LOWER(hsn) LIKE '%$name%'
+				LOWER(db_items.item_name) LIKE '%$name%' 
+				OR LOWER(db_items.item_code) LIKE '%$name%' 
+				OR LOWER(db_items.search_for) LIKE '%$name%'
+				OR LOWER(db_items.custom_barcode) LIKE '%$name%'
+				OR LOWER(db_items.sku) LIKE '%$name%'
+				OR LOWER(db_items.hsn) LIKE '%$name%'
 			)");
 			
 		foreach ($sql->result() as $res) {

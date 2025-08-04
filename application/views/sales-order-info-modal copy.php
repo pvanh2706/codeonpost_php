@@ -334,40 +334,15 @@ $(document).ready(function() {
 });
 
 // Utility functions
-function formatNumber(num, decimals = 0) {
+function formatNumber(num) {
     if (isNaN(num) || num === null || num === undefined) {
         return '0';
     }
-    
-    // Round the number to specified decimal places
-    var roundedNum = Math.round(num * Math.pow(10, decimals)) / Math.pow(10, decimals);
-    
-    // Format with comma for thousands separator
+    // Format với dấu phẩy cho hàng nghìn và dấu chấm cho phần thập phân
     return new Intl.NumberFormat('en-US', {
         minimumFractionDigits: 0,
-        maximumFractionDigits: decimals
-    }).format(roundedNum);
-}
-
-// Loading overlay functions
-function showLoadingOverlay(title, subtitle) {
-    title = title || 'Đang xử lý...';
-    subtitle = subtitle || 'Vui lòng đợi trong giây lát';
-    
-    var loadingOverlay = '<div id="globalLoadingOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; justify-content: center; align-items: center;">' +
-                         '<div style="background: white; padding: 30px; border-radius: 10px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">' +
-                         '<i class="fa fa-spinner fa-spin fa-3x" style="color: #007bff; margin-bottom: 15px;"></i>' +
-                         '<h4 style="margin: 0; color: #333;">' + title + '</h4>' +
-                         '<p style="margin: 5px 0 0 0; color: #666;">' + subtitle + '</p>' +
-                         '</div></div>';
-    
-    // Remove existing overlay if any
-    $('#globalLoadingOverlay').remove();
-    $('body').append(loadingOverlay);
-}
-
-function hideLoadingOverlay() {
-    $('#globalLoadingOverlay').remove();
+        maximumFractionDigits: 2
+    }).format(num);
 }
 
 function formatCurrency(amount) {
@@ -619,12 +594,12 @@ function show_order_info() {
     $('#orderInfoModal').modal('show');
     
     // Reset modal content and buttons
-    
+    $('#orderInfoContent').html('<div class="text-center"><i class="fa fa-spinner fa-spin fa-2x"></i><p>Đang tải dữ liệu...</p></div>');
     resetEditMode();
     
     // AJAX call to get order details
     $.ajax({
-        url: "<?php echo site_url('sales/get_vatinvoice_data'); ?>",
+        url: "<?php echo site_url('sales/get_order_details'); ?>",
         type: "POST",
         data: {
             order_ids: selectedIds
@@ -632,7 +607,7 @@ function show_order_info() {
         dataType: "json",
         success: function(response) {
             if (response.success) {
-                originalOrderData = response.data; // Store original data
+                originalOrderData = response.data[0]; // Store original data
                 var html = buildOrderInfoHTML(response.data);
                 $('#orderInfoContent').html(html);
                 $('#editOrderBtn').show();
@@ -989,7 +964,7 @@ $(document).ready(function() {
         
         // AJAX call to get order details
         $.ajax({
-            url: "<?php echo site_url('sales/get_vatinvoice_data'); ?>",
+            url: "<?php echo site_url('sales/get_order_details'); ?>",
             type: "POST",
             data: {
                 order_ids: selectedIds
@@ -997,7 +972,7 @@ $(document).ready(function() {
             dataType: "json",
             success: function(response) {
                 if (response.success) {
-                    originalOrderData = response.data; // Store original data
+                    originalOrderData = response.data[0]; // Store original data
                     console.log('Original Order Data:', originalOrderData);
                     console.log('Response Data:', response.data);
                     var html = buildOrderInfoHTML(response.data);
@@ -1460,269 +1435,275 @@ function saveEInvoiceConfig() {
 }
 
 // Function to build HTML from JSON data
-function buildOrderInfoHTML(dataVATInvoice) {
-    var vat_invoice = dataVATInvoice.vat_invoice;
-    var vat_invoice_items = dataVATInvoice.vat_invoice_items;
-    var einvoice_templates = dataVATInvoice.einvoice_templates || [];
-    var einvoice_payments = dataVATInvoice.einvoice_payments || [];
-    var einvoice_config = dataVATInvoice.einvoice_config || {};
-    var order = {};
-
-    var so_hoa_don = vat_invoice.so_hoa_don_dt;
-    if (so_hoa_don) {
-        $('#saveEInvoiceBtn').hide();
-    }
+function buildOrderInfoHTML(orders) {
     var html = '<div class="order-info-modal view-mode">';
-    // Build status label
-    var statusLabel = ""
-    var paymentStatus = "";
     
-    html += '<div class="panel panel-default">';
-    html += '<div class="panel-heading">';
-    html += '<h4 class="panel-title">';
-    if (so_hoa_don) {
-        html += '<strong>Số hóa đơn điện tử: ' + so_hoa_don + '</strong>';
-    }
-    html += '<span class="pull-right">' + statusLabel + '</span>';
-    html += '</h4>';
-    html += '</div>';
-    html += '<div class="panel-body">';
-    
-    // Basic info row
-    html += '<div class="row">';
-    html += '<div class="col-md-6">';
-    html += '<div class="panel panel-info">';
-    html += '<div class="panel-heading"><h5 class="panel-title"><i class="fa fa-user"></i> Thông tin khách hàng</h5></div>';
-    html += '<div class="panel-body">';
-    html += '<table class="table table-condensed">';
-    html += '<tr><td style="width: 35%; font-weight: bold;"><i class="fa fa-calendar"></i> Ngày hóa đơn:</td><td>';
-    var salesDateValue = new Date().toISOString().slice(0, 10);
-    html += '<input type="date" class="form-control editable-field" id="edit_sales_date" value="' + salesDateValue + '" style="width: 160px; height: 32px;">';
-    html += '</td></tr>';
-    
-    // Customer name - editable
-    html += '<tr><td style="font-weight: bold;"><i class="fa fa-user"></i> Tên khách hàng:</td><td>';
-    html += '<input type="text" class="form-control editable-field" id="edit_customer_name" value="' + (vat_invoice.ten_khach_hang || '') + '" style="height: 32px;">';
-    html += '</td></tr>';
-    
-    // Mobile - editable
-    html += '<tr><td style="font-weight: bold;"><i class="fa fa-phone"></i> Điện thoại:</td><td>';
-    html += '<input type="text" class="form-control editable-field" id="edit_mobile" value="' + (vat_invoice.so_dien_thoai_khach_hang || '') + '" style="height: 32px;">';
-    html += '</td></tr>';
-    
-    // Address - always editable
-    html += '<tr><td style="font-weight: bold;"><i class="fa fa-map-marker"></i> Địa chỉ:</td><td>';
-    html += '<textarea class="form-control editable-field" id="edit_address" rows="3" style="resize: vertical;">' + (vat_invoice.dia_chi_khach_hang || '') + '</textarea>';
-    html += '</td></tr>';
-    
-    html += '</table>';
-    html += '</div>';
-    html += '</div>';
-    html += '</div>';
-    
-    // Financial info
-    html += '<div class="col-md-6">';
-    html += '<div class="panel panel-warning">';
-    html += '<div class="panel-heading"><h5 class="panel-title"><i class="fa fa-file-invoice"></i> Thông tin hóa đơn điện tử</h5></div>';
-    html += '<div class="panel-body">';
-    html += '<table class="table table-condensed">';
-    
-    html += '<tr><td style="width: 30%; font-weight: bold; vertical-align: middle;"><i class="fa fa-list-ol"></i> Mẫu số:</td>';
-    html += '<td style="width: 20%; vertical-align: middle;">';
-    html += '<select class="form-control editable-field" id="edit_template_number" style="height: 32px;">';
-    // Sử dụng dữ liệu động từ API
-    if (einvoice_templates && einvoice_templates.length > 0) {
-        var templateNumbers = [];
-        einvoice_templates.forEach(function(template) {
-        if (templateNumbers.indexOf(template.template_number) === -1) {
-            templateNumbers.push(template.template_number);
-        }
-        });
-        templateNumbers.forEach(function(templateNum) {
-        html += '<option value="' + templateNum + '"' + (vat_invoice.mau_so == templateNum ? ' selected' : '') + '>' + templateNum + '</option>';
-        });
-    } else {
-        // Fallback nếu không có dữ liệu
-        html += '<option value="1"' + (vat_invoice.mau_so == '1' ? ' selected' : '') + '>1</option>';
-        html += '<option value="2"' + (vat_invoice.mau_so == '2' ? ' selected' : '') + '>2</option>';
-    }
-    html += '</select>';
-    html += '</td>';
-    html += '<td style="width: 25%; font-weight: bold; vertical-align: middle;"><i class="fa fa-tag"></i> Ký hiệu:</td>';
-    html += '<td style="vertical-align: middle;">';
-    html += '<select class="form-control editable-field" id="edit_symbol" style="height: 32px;">';
-    // Sử dụng dữ liệu động từ API
-    if (einvoice_templates && einvoice_templates.length > 0) {
-        var symbols = [];
-        einvoice_templates.forEach(function(template) {
-        if (symbols.indexOf(template.symbol) === -1) {
-            symbols.push(template.symbol);
-        }
-        });
-        symbols.forEach(function(symbol) {
-        html += '<option value="' + symbol + '"' + (vat_invoice.ky_hieu == symbol ? ' selected' : '') + '>' + symbol + '</option>';
-        });
-    } else {
-        // Fallback nếu không có dữ liệu
-        html += '<option value="C24"' + (vat_invoice.ky_hieu == 'C24' ? ' selected' : '') + '>C24</option>';
-        html += '<option value="C25"' + (vat_invoice.ky_hieu == 'C25' ? ' selected' : '') + '>C25</option>';
-    }
-    html += '</select>';
-    html += '</td></tr>';
-    
-    html += '<tr><td style="font-weight: bold;"><i class="fa fa-barcode"></i> Mã số thuế:</td><td colspan="3">';
-    html += '<input type="text" class="form-control editable-field" id="customer_tax_code" value="' + (vat_invoice.ma_so_thue || '') + '" style="height: 32px;" placeholder="Nhập mã số thuế khách hàng">';
-    html += '</td></tr>';
-    
-    // Thêm 1 dòng phương thức thanh toán
-    html += '<tr><td style="font-weight: bold;"><i class="fa fa-credit-card"></i> Phương thức TT:</td><td colspan="3">';
-    html += '<select class="form-control editable-field" id="edit_payment_method" style="height: 32px;">';
-    // Sử dụng dữ liệu động từ API
-    if (einvoice_payments && einvoice_payments.length > 0) {
-        einvoice_payments.forEach(function(payment) {
-        html += '<option value="' + payment.payment_code + '"' + (vat_invoice.payment_method == payment.payment_code ? ' selected' : '') + '>' + payment.payment_name + '</option>';
-        });
-    } else {
-        // Fallback nếu không có dữ liệu
-        html += '<option value="TM"' + (vat_invoice.payment_method == 'TM' ? ' selected' : '') + '>Tiền mặt</option>';
-        html += '<option value="CK"' + (vat_invoice.payment_method == 'CK' ? ' selected' : '') + '>Chuyển khoản</option>';
-    }
-    html += '</select>';
-    html += '</td></tr>';
-    // Thêm 1 dòng ghi chú
-    html += '<tr><td style="font-weight: bold;"><i class="fa fa-comment"></i> Ghi chú:</td><td colspan="3">';
-    html += '<textarea class="form-control editable-field" id="customer_note" rows="3" style="width: 100%;">' + (vat_invoice.ghi_chu || '') + '</textarea>';
-    html += '</td></tr>';
-    html += '</table>';
-    html += '</div>';
-    html += '</div>';
-    html += '</div>';
-    html += '</div>';
-
-
-    // Items details - editable
-    if (vat_invoice_items && vat_invoice_items.length > 0) {
-        html += '<div class="row">';
-        html += '<div class="col-md-12">';
-        html += '<h5><strong>Chi tiết sản phẩm:</strong></h5>';
-        html += '<table class="table table-bordered table-condensed">';
-        html += '<thead>';
-        html += '<tr>';
-        html += '<th>Tên sản phẩm</th>';
-        html += '<th>Số lượng</th>';
-        html += '<th>Đơn giá</th>';
-        html += '<th>Giảm giá</th>';
-        html += '<th>% Thuế</th>';
-        html += '<th>Tiền thuế</th>';
-        html += '<th>Thành tiền</th>';
-        html += '</tr>';
-        html += '</thead>';
-        html += '<tbody>';
-
-        vat_invoice_items.forEach(function(item, index) {
-            html += '<tr class="item-row" data-item-id="' + (item.id || index) + '">';
-            
-            // Product name - editable
-            html += '<td>';
-            html += '<input type="text" class="editable-field item-name-input" value="' + (item.ten_san_pham || '') + '" style="width: 150px;">';
-            html += '</td>';
-            
-            // Quantity - always editable
-            html += '<td>';
-            html += '<input type="number" class="editable-field item-qty-input" value="' + formatNumber(item.so_luong) + '" min="0" step="0.01">';
-            html += '</td>';
-            
-            // Price - always editable
-            html += '<td>';
-            html += '<input type="text" class="editable-field item-price-input" value="' + formatNumber(item.don_gia) + '" min="0">';
-            html += '</td>';
-            
-            
-            // Discount amount - calculated
-            html += '<td>';
-            // html += '<span class="item-discount-amount">' + item.giam_gia + '</span>';
-            html += '<input type="text" class="editable-field item-discount-amount" value="' + formatNumber(item.giam_gia) + '" min="0">';
-            html += '</td>';
-            
-            // Tax percentage - editable
-            html += '<td>';
-            html += '<input type="number" class="editable-field item-tax-percent-input" value="' + formatNumber(item.phan_tram_thue || 0) + '" min="0" max="100" step="0.01" style="width: 60px;">';
-            html += '</td>';
-            
-            // Tax amount - calculated
-            html += '<td>';
-            // html += '<span class="item-tax-amount">' + formatNumber(item.thue || 0) + '</span>';
-            html += '<input type="text" class="editable-field item-tax-amount" value="' + formatNumber(item.thue || 0) + '" min="0">';
-            html += '</td>';
-            
-            // Total
-            html += '<td>';
-            // html += '<span class="item-total">' + formatNumber(item.tong_tien) + '</span>';
-            html += '<input type="text" class="editable-field item-total" value="' + formatNumber(item.tong_tien) + '" min="0">';
-            html += '</td>';
-            
-            html += '</tr>';
-        });
+    orders.forEach(function(order) {
+        // Build status label
+        var statusLabel = getStatusLabel(order.sales_status);
+        var paymentStatus = getPaymentStatus(order.due_amount);
         
-        html += '</tbody>';
+        html += '<div class="panel panel-default">';
+        html += '<div class="panel-heading">';
+        html += '<h4 class="panel-title">';
+        html += '<strong>Đơn hàng: ' + order.sales_code + '</strong>';
+        html += '<span class="pull-right">' + statusLabel + '</span>';
+        html += '</h4>';
+        html += '</div>';
+        html += '<div class="panel-body">';
+        
+        // Basic info row
+        html += '<div class="row">';
+        html += '<div class="col-md-6">';
+        html += '<div class="panel panel-info">';
+        html += '<div class="panel-heading"><h5 class="panel-title"><i class="fa fa-user"></i> Thông tin khách hàng</h5></div>';
+        html += '<div class="panel-body">';
+        html += '<table class="table table-condensed">';
+        html += '<tr><td style="width: 35%; font-weight: bold;"><i class="fa fa-calendar"></i> Ngày hóa đơn:</td><td>';
+        var salesDateValue = new Date().toISOString().slice(0, 10);
+        html += '<input type="date" class="form-control editable-field" id="edit_sales_date" value="' + salesDateValue + '" style="width: 160px; height: 32px;">';
+        html += '</td></tr>';
+        
+        // Customer name - editable
+        html += '<tr><td style="font-weight: bold;"><i class="fa fa-user"></i> Tên khách hàng:</td><td>';
+        html += '<input type="text" class="form-control editable-field" id="edit_customer_name" value="' + (order.customer_name || '') + '" style="height: 32px;">';
+        html += '</td></tr>';
+        
+        // Mobile - editable
+        html += '<tr><td style="font-weight: bold;"><i class="fa fa-phone"></i> Điện thoại:</td><td>';
+        html += '<input type="text" class="form-control editable-field" id="edit_mobile" value="' + (order.mobile || '') + '" style="height: 32px;">';
+        html += '</td></tr>';
+        
+        // Address - always editable
+        html += '<tr><td style="font-weight: bold;"><i class="fa fa-map-marker"></i> Địa chỉ:</td><td>';
+        html += '<textarea class="form-control editable-field" id="edit_address" rows="3" style="resize: vertical;">' + (order.address || '') + '</textarea>';
+        html += '</td></tr>';
+        
         html += '</table>';
         html += '</div>';
         html += '</div>';
+        html += '</div>';
         
-        // // Bill discount section
-        // html += '<div class="row" style="margin-top: 20px;">';
-        // html += '<div class="col-md-8">';
-        // html += '<div class="bill-discount-section">';
-        // html += '<h5><i class="fa fa-percent"></i> Giảm giá hóa đơn</h5>';
-        // html += '<div class="row">';
-        // html += '<div class="col-md-6">';
-        // html += '<div class="form-group">';
-        // html += '<label>Giảm giá theo %:</label>';
-        // html += '<div class="input-group">';
-        // html += '<input type="number" class="form-control editable-field" id="bill_discount_percent" value="' + (order.discount_all_bill_percent || 0) + '" min="0" max="100" step="0.01">';
-        // html += '<span class="input-group-addon">%</span>';
-        // html += '</div>';
-        // html += '</div>';
-        // html += '</div>';
-        // html += '<div class="col-md-6">';
-        // html += '<div class="form-group">';
-        // html += '<label>Giảm giá theo tiền:</label>';
-        // html += '<div class="input-group">';
-        // html += '<input type="text" class="form-control editable-field" id="bill_discount_amount" value="' + formatNumber(order.discount_all_bill_amount || 0) + '" min="0">';
-        // html += '<span class="input-group-addon">VNĐ</span>';
-        // html += '</div>';
-        // html += '</div>';
-        // html += '</div>';
-        // html += '</div>';
-        // html += '</div>';
-        // html += '</div>';
+        // Financial info
+        html += '<div class="col-md-6">';
+        html += '<div class="panel panel-warning">';
+        html += '<div class="panel-heading"><h5 class="panel-title"><i class="fa fa-file-invoice"></i> Thông tin hóa đơn điện tử</h5></div>';
+        html += '<div class="panel-body">';
+        html += '<table class="table table-condensed">';
         
-        // // Summary section
-        // html += '<div class="col-md-4">';
-        // html += '<div class="summary-section">';
-        // html += '<h5><i class="fa fa-calculator"></i> Tổng kết hóa đơn</h5>';
-        // html += '<table class="table table-condensed">';
-        // html += '<tr>';
-        // html += '<td><strong>Tổng tiền SP:</strong></td>';
-        // html += '<td class="text-right"><span id="subtotal_amount">' + formatCurrency(order.subtotal_amount || 0) + '</span></td>';
-        // html += '</tr>';
-        // html += '<tr>';
-        // html += '<td><strong>Giảm giá HĐ:</strong></td>';
-        // html += '<td class="text-right"><span id="total_bill_discount">' + formatCurrency(order.bill_discount_amount || 0) + '</span></td>';
-        // html += '</tr>';
-        // html += '<tr style="font-weight: bold; background-color: #e8f5e8; border-top: 2px solid #28a745;">';
-        // html += '<td><strong>Tổng thanh toán:</strong></td>';
-        // html += '<td class="text-right"><span id="final_total">' + formatCurrency(order.grand_total || 0) + '</span></td>';
-        // html += '</tr>';
-        // html += '</table>';
-        // html += '</div>';
-        // html += '</div>';
-        // html += '</div>';
-    }
-    
-    html += '</div>'; // Close panel-body
-    html += '</div>'; // Close panel
+        html += '<tr><td style="width: 30%; font-weight: bold; vertical-align: middle;"><i class="fa fa-list-ol"></i> Mẫu số:</td>';
+        html += '<td style="width: 20%; vertical-align: middle;">';
+        html += '<select class="form-control editable-field" id="edit_template_number" style="height: 32px;">';
+        // Sử dụng dữ liệu động từ API
+        if (order.einvoice_templates && order.einvoice_templates.length > 0) {
+            var templateNumbers = [];
+            order.einvoice_templates.forEach(function(template) {
+            if (templateNumbers.indexOf(template.template_number) === -1) {
+                templateNumbers.push(template.template_number);
+            }
+            });
+            templateNumbers.forEach(function(templateNum) {
+            html += '<option value="' + templateNum + '"' + (order.template_number == templateNum ? ' selected' : '') + '>' + templateNum + '</option>';
+            });
+        } else {
+            // Fallback nếu không có dữ liệu
+            html += '<option value="1"' + (order.template_number == '1' ? ' selected' : '') + '>1</option>';
+            html += '<option value="2"' + (order.template_number == '2' ? ' selected' : '') + '>2</option>';
+        }
+        html += '</select>';
+        html += '</td>';
+        html += '<td style="width: 25%; font-weight: bold; vertical-align: middle;"><i class="fa fa-tag"></i> Ký hiệu:</td>';
+        html += '<td style="vertical-align: middle;">';
+        html += '<select class="form-control editable-field" id="edit_symbol" style="height: 32px;">';
+        // Sử dụng dữ liệu động từ API
+        if (order.einvoice_templates && order.einvoice_templates.length > 0) {
+            var symbols = [];
+            order.einvoice_templates.forEach(function(template) {
+            if (symbols.indexOf(template.symbol) === -1) {
+                symbols.push(template.symbol);
+            }
+            });
+            symbols.forEach(function(symbol) {
+            html += '<option value="' + symbol + '"' + (order.symbol == symbol ? ' selected' : '') + '>' + symbol + '</option>';
+            });
+        } else {
+            // Fallback nếu không có dữ liệu
+            html += '<option value="C24"' + (order.symbol == 'C24' ? ' selected' : '') + '>C24</option>';
+            html += '<option value="C25"' + (order.symbol == 'C25' ? ' selected' : '') + '>C25</option>';
+        }
+        html += '</select>';
+        html += '</td></tr>';
+        
+        html += '<tr><td style="font-weight: bold;"><i class="fa fa-barcode"></i> Mã số thuế:</td><td colspan="3">';
+        html += '<input type="text" class="form-control editable-field" id="customer_tax_code" value="' + (order.tax_code || '') + '" style="height: 32px;" placeholder="Nhập mã số thuế khách hàng">';
+        html += '</td></tr>';
+        
+        // Thêm 1 dòng phương thức thanh toán
+        html += '<tr><td style="font-weight: bold;"><i class="fa fa-credit-card"></i> Phương thức TT:</td><td colspan="3">';
+        html += '<select class="form-control editable-field" id="edit_payment_method" style="height: 32px;">';
+        // Sử dụng dữ liệu động từ API
+        if (order.einvoice_payments && order.einvoice_payments.length > 0) {
+            order.einvoice_payments.forEach(function(payment) {
+            html += '<option value="' + payment.payment_code + '"' + (order.payment_method == payment.payment_code ? ' selected' : '') + '>' + payment.payment_name + '</option>';
+            });
+        } else {
+            // Fallback nếu không có dữ liệu
+            html += '<option value="TM"' + (order.payment_method == 'TM' ? ' selected' : '') + '>Tiền mặt</option>';
+            html += '<option value="CK"' + (order.payment_method == 'CK' ? ' selected' : '') + '>Chuyển khoản</option>';
+        }
+        html += '</select>';
+        html += '</td></tr>';
+        // Thêm 1 dòng ghi chú
+        html += '<tr><td style="font-weight: bold;"><i class="fa fa-comment"></i> Ghi chú:</td><td colspan="3">';
+        html += '<textarea class="form-control editable-field" id="customer_note" rows="3" style="width: 100%;">' + (order.sales_note || '') + '</textarea>';
+        html += '</td></tr>';
+        html += '</table>';
+        html += '</div>';
+        html += '</div>';
+        html += '</div>';
+        html += '</div>';
 
+
+        // Items details - editable
+        if (order.items && order.items.length > 0) {
+            html += '<div class="row">';
+            html += '<div class="col-md-12">';
+            html += '<h5><strong>Chi tiết sản phẩm:</strong></h5>';
+            html += '<table class="table table-bordered table-condensed">';
+            html += '<thead>';
+            html += '<tr>';
+            html += '<th>Mã SP</th>';
+            html += '<th>Tên sản phẩm</th>';
+            html += '<th>Số lượng</th>';
+            html += '<th>Đơn giá</th>';
+            html += '<th>% Giảm giá SP</th>';
+            html += '<th>Tiền giảm SP</th>';
+            html += '<th>% Giảm giá HĐ</th>';
+            html += '<th>Tiền giảm HĐ</th>';
+            html += '<th>% Thuế</th>';
+            html += '<th>Tiền thuế</th>';
+            html += '<th>Thành tiền</th>';
+            html += '</tr>';
+            html += '</thead>';
+            html += '<tbody>';
+            
+            order.items.forEach(function(item, index) {
+                html += '<tr class="item-row" data-item-id="' + (item.item_id || index) + '">';
+                html += '<td>' + (item.item_code || 'N/A') + '</td>';
+                
+                // Product name - editable
+                html += '<td>';
+                html += '<input type="text" class="editable-field item-name-input" value="' + (item.item_name || '') + '" style="width: 150px;">';
+                html += '</td>';
+                
+                // Quantity - always editable
+                html += '<td>';
+                html += '<input type="number" class="editable-field item-qty-input" value="' + item.sales_qty + '" min="0" step="0.01">';
+                html += '</td>';
+                
+                // Price - always editable
+                html += '<td>';
+                html += '<input type="text" class="editable-field item-price-input" value="' + formatNumber(item.price_per_unit) + '" min="0">';
+                html += '</td>';
+                
+                // Discount percentage - editable
+                html += '<td>';
+                html += '<input type="number" class="editable-field item-discount-percent-input" value="' + (item.discount_percent || 0) + '" min="0" max="100" step="0.01" style="width: 60px;">';
+                html += '</td>';
+                
+                // Discount amount - calculated
+                html += '<td>';
+                html += '<span class="item-discount-amount">' + formatCurrency(item.discount_amount || 0) + '</span>';
+                html += '</td>';
+                
+                // Bill discount percentage for this item - calculated
+                html += '<td>';
+                html += '<span class="item-bill-discount-percent">0%</span>';
+                html += '</td>';
+                
+                // Bill discount amount for this item - calculated
+                html += '<td>';
+                html += '<span class="item-bill-discount-amount">' + formatCurrency(0) + '</span>';
+                html += '</td>';
+                
+                // Tax percentage - editable
+                html += '<td>';
+                html += '<input type="number" class="editable-field item-tax-percent-input" value="' + (item.tax_percent || 0) + '" min="0" max="100" step="0.01" style="width: 60px;">';
+                html += '</td>';
+                
+                // Tax amount - calculated
+                html += '<td>';
+                html += '<span class="item-tax-amount">' + formatCurrency(item.tax_amount || 0) + '</span>';
+                html += '</td>';
+                
+                // Total
+                html += '<td>';
+                html += '<span class="item-total">' + formatCurrency(item.total_cost) + '</span>';
+                html += '</td>';
+                
+                html += '</tr>';
+            });
+            
+            html += '</tbody>';
+            html += '</table>';
+            html += '</div>';
+            html += '</div>';
+            
+            // Bill discount section
+            html += '<div class="row" style="margin-top: 20px;">';
+            html += '<div class="col-md-8">';
+            html += '<div class="bill-discount-section">';
+            html += '<h5><i class="fa fa-percent"></i> Giảm giá hóa đơn</h5>';
+            html += '<div class="row">';
+            html += '<div class="col-md-6">';
+            html += '<div class="form-group">';
+            html += '<label>Giảm giá theo %:</label>';
+            html += '<div class="input-group">';
+            html += '<input type="number" class="form-control editable-field" id="bill_discount_percent" value="' + (order.discount_all_bill_percent || 0) + '" min="0" max="100" step="0.01">';
+            html += '<span class="input-group-addon">%</span>';
+            html += '</div>';
+            html += '</div>';
+            html += '</div>';
+            html += '<div class="col-md-6">';
+            html += '<div class="form-group">';
+            html += '<label>Giảm giá theo tiền:</label>';
+            html += '<div class="input-group">';
+            html += '<input type="text" class="form-control editable-field" id="bill_discount_amount" value="' + formatNumber(order.discount_all_bill_amount || 0) + '" min="0">';
+            html += '<span class="input-group-addon">VNĐ</span>';
+            html += '</div>';
+            html += '</div>';
+            html += '</div>';
+            html += '</div>';
+            html += '</div>';
+            html += '</div>';
+            
+            // Summary section
+            html += '<div class="col-md-4">';
+            html += '<div class="summary-section">';
+            html += '<h5><i class="fa fa-calculator"></i> Tổng kết hóa đơn</h5>';
+            html += '<table class="table table-condensed">';
+            html += '<tr>';
+            html += '<td><strong>Tổng tiền SP:</strong></td>';
+            html += '<td class="text-right"><span id="subtotal_amount">' + formatCurrency(order.subtotal_amount || 0) + '</span></td>';
+            html += '</tr>';
+            html += '<tr>';
+            html += '<td><strong>Giảm giá HĐ:</strong></td>';
+            html += '<td class="text-right"><span id="total_bill_discount">' + formatCurrency(order.bill_discount_amount || 0) + '</span></td>';
+            html += '</tr>';
+            html += '<tr style="font-weight: bold; background-color: #e8f5e8; border-top: 2px solid #28a745;">';
+            html += '<td><strong>Tổng thanh toán:</strong></td>';
+            html += '<td class="text-right"><span id="final_total">' + formatCurrency(order.grand_total || 0) + '</span></td>';
+            html += '</tr>';
+            html += '</table>';
+            html += '</div>';
+            html += '</div>';
+            html += '</div>';
+        }
+        
+        html += '</div>'; // Close panel-body
+        html += '</div>'; // Close panel
+    });
+    
     html += '</div>'; // Close order-info-modal
     return html;
 }
@@ -1778,9 +1759,12 @@ function buildOrderInfoHTML(dataVATInvoice) {
         });
     });
 function createAndPublishInvoice(invoiceData, einvoiceConfig) {
-    // Hiển thị loading overlay với nội dung tùy chỉnh
-    showLoadingOverlay('Đang tạo hóa đơn điện tử...', 'Đang gửi dữ liệu đến cơ quan thuế');
-            
+    var btn = $(this);
+        var spinner = btn.find('.loading-spinner');
+        
+        btn.prop('disabled', true);
+        spinner.show();
+        
         var formData = {
             // api_url: $('#api_url').val().trim(),
             // username: $('#username').val().trim(),
@@ -1803,15 +1787,11 @@ function createAndPublishInvoice(invoiceData, einvoiceConfig) {
                     } else {
                         showAlert('danger', 'No Data in response: ' + response.response.Status + ' - Nội dung lỗi: ' + response.response.Message);
                     }
-                    var message = '<i class="fa fa-check-circle"></i> ' + response.message + ' Số hóa đơn: ' + response.response.Data?.ThirdPartyInvoiceNumber;
-                    
+                    var message = '<i class="fa fa-check-circle"></i> ' + response.message + ' Số hóa đơn: ' + response.response.Data.ThirdPartyInvoiceNumber;
                     if (response.response && response.response.data) {
                         message += '<br><small>Response Data: ' + JSON.stringify(response.response.data) + '</small>';
                     }
                     showAlert('success', message);
-                    setTimeout(() => {
-                        show_order_info(); // Refresh order info after creating invoice
-                    }, 1500);
                 } else {
                     var errorMessage = '<i class="fa fa-exclamation-circle"></i> ' + response.message;
                     if (response.http_code) {
@@ -1827,8 +1807,8 @@ function createAndPublishInvoice(invoiceData, einvoiceConfig) {
                 showAlert('danger', '<i class="fa fa-exclamation-circle"></i> Có lỗi xảy ra khi kiểm tra kết nối: ' + error);
             },
             complete: function() {
-                // Ẩn loading overlay
-                hideLoadingOverlay();
+                btn.prop('disabled', false);
+                spinner.hide();
             }
         });
 }
@@ -1841,12 +1821,9 @@ function saveEInvoiceData() {
         return;
     }
     
-    // Hiển thị loading overlay
-    showLoadingOverlay('Đang lưu thông tin hóa đơn...', 'Đang xử lý dữ liệu hóa đơn điện tử');
-    
     // Collect invoice data from form
     var invoiceData = {
-        order_id: originalOrderData.vat_invoice.sales_id,
+        order_id: originalOrderData.id,
         sales_code: originalOrderData.sales_code,
         invoice_date: $('#edit_sales_date').val(),
         template_number: $('#edit_template_number').val(),
@@ -1857,19 +1834,18 @@ function saveEInvoiceData() {
         customer_tax_code: $('#customer_tax_code').val(),
         payment_method: $('#edit_payment_method').val(),
         sales_note: $('#customer_note').val(),
-        subtotal_amount: 0,
-        bill_discount_amount: 0,
-        grand_total: 0,
+        subtotal_amount: parseFloat($('#subtotal_amount').text().replace(/[^\d.,]/g, '').replace(/,/g, '')) || 0,
+        bill_discount_amount: parseFloat($('#bill_discount_amount').val().replace(/,/g, '')) || 0,
+        grand_total: parseFloat($('#final_total').text().replace(/[^\d.,]/g, '').replace(/,/g, '')) || 0,
         items: [],
         formNo: $('#edit_template_number').val(),
         serial: $('#edit_symbol').val(),
-        tax_group_summary: [],
     };
     
     // Collect items data
     $('.item-row').each(function() {
         var itemId = $(this).data('item-id');
-        var itemName = $(this).find('.item-name-input').val() || 'sp1';
+        var itemName = $(this).find('.item-name-input').val();
         var qty = parseFloat($(this).find('.item-qty-input').val()) || 0;
         var unitPrice = parseFloat($(this).find('.item-price-input').val().replace(/,/g, '')) || 0;
         var discountPercent = parseFloat($(this).find('.item-discount-percent-input').val()) || 0;
@@ -1877,12 +1853,11 @@ function saveEInvoiceData() {
         
         // Calculate amounts
         var subtotal = qty * unitPrice;
-        var discountAmount = parseFloat($(this).find('.item-discount-amount').val().replace(/,/g, '')) || 0;
+        var discountAmount = (subtotal * discountPercent) / 100;
         var afterDiscount = subtotal - discountAmount;
-        var taxAmount = parseFloat($(this).find('.item-tax-amount').val().replace(/,/g, '')) || 0;
-        var totalAmount = parseFloat($(this).find('.item-total').val().replace(/,/g, '')) || 0;
-        console.log('discountAmount:', discountAmount, 'taxAmount:', taxAmount, 'totalAmount:', totalAmount);
-
+        var taxAmount = (afterDiscount * taxPercent) / 100;
+        var totalAmount = afterDiscount + taxAmount;
+        
         invoiceData.items.push({
             item_id: itemId,
             item_name: itemName,
@@ -1894,28 +1869,13 @@ function saveEInvoiceData() {
             tax_amount: taxAmount,
             total_amount: totalAmount
         });
-        invoiceData.subtotal_amount += subtotal;
-        invoiceData.bill_discount_amount += discountAmount;
-        invoiceData.grand_total += totalAmount;
-        // Update tax group summary
-        var taxGroup = invoiceData.tax_group_summary.find(tg => tg.tax_percent === taxPercent);
-        if (!taxGroup) {
-            taxGroup = {
-                tax_percent: taxPercent,
-                total_tax_amount: taxAmount,
-                total_amount: totalAmount,
-                before_tax_amount: afterDiscount
-            };
-            invoiceData.tax_group_summary.push(taxGroup);
-        } else {
-            taxGroup.total_amount += totalAmount;
-            taxGroup.total_tax_amount += taxAmount;
-            taxGroup.before_tax_amount += afterDiscount;
-        }
     });
     
+    // Show loading
+    $('#saveEInvoiceBtn').html('<i class="fa fa-spinner fa-spin"></i> Đang lưu...').prop('disabled', true);
+    
     console.log('Invoice data to save:', invoiceData);
-    // return;
+
     // AJAX call to save e-invoice data
     $.ajax({
         url: "<?php echo site_url('sales/save_einvoice_data'); ?>",
@@ -1928,7 +1888,7 @@ function saveEInvoiceData() {
             if (response.success) {
                 alert("Lưu thông tin hóa đơn điện tử thành công!");
                 if (response.tables_created) {
-                   // alert("Đã tạo bảng dữ liệu hóa đơn điện tử thành công!");
+                    alert("Đã tạo bảng dữ liệu hóa đơn điện tử thành công!");
                 }
             } else {
                 alert("Có lỗi xảy ra: " + response.message);
@@ -1946,18 +1906,19 @@ function saveEInvoiceData() {
 
 // Function to view E-Invoice PDF
 function viewEInvoicePdf() {
+     // gọi hàm show_order_info để cập nhật thông tin đơn hàng
+                    show_order_info();
     if (!originalOrderData) {
         alert("Không có dữ liệu đơn hàng!");
         return;
     }
-    // Hiển thị loading overlay với nội dung tùy chỉnh
-    showLoadingOverlay('Đang lấy thông tin PDF...', 'Đang tải hóa đơn điện tử');
+
     $.ajax({
         url: "<?php echo site_url('sales/view_pdf_invoice'); ?>", 
         type: "POST",
         data: {
             order_id: originalOrderData.id,
-            einvoice_data: originalOrderData.vat_invoice || null,
+            einvoice_data: originalOrderData.einvoice_data || null,
             einvoice_config: originalOrderData.einvoice_config || null
         },
         dataType: "json",
@@ -1986,9 +1947,6 @@ function viewEInvoicePdf() {
             } else {
                 alert("Không thể xem PDF: " + response.message);
             }
-        },
-        complete: function() {
-            hideLoadingOverlay();
         },
         error: function(xhr, status, error) {
             alert("Có lỗi xảy ra khi xem PDF: " + error);
