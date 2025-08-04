@@ -294,7 +294,7 @@
                 <select id="provider_code" name="provider_code" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; transition: border-color 0.3s ease;">
                     <option value="">-- Chọn nhà cung cấp --</option>
                     <option value="2" <?php echo (isset($einvoice_config['provider_code']) && $einvoice_config['provider_code'] == '2') ? 'selected' : ''; ?>>MInvoice</option>
-                    <option value="3" <?php echo (isset($einvoice_config['provider_code']) && $einvoice_config['provider_code'] == '3') ? 'selected' : ''; ?>>Viettel</option>
+                    <option value="4" <?php echo (isset($einvoice_config['provider_code']) && $einvoice_config['provider_code'] == '4') ? 'selected' : ''; ?>>Viettel</option>
                     <option value="6" <?php echo (isset($einvoice_config['provider_code']) && $einvoice_config['provider_code'] == '6') ? 'selected' : ''; ?>>Misa</option>
                 </select>
             </div>

@@ -1468,6 +1468,10 @@ function buildOrderInfoHTML(dataVATInvoice) {
     var einvoice_config = dataVATInvoice.einvoice_config || {};
     var order = {};
 
+    var so_hoa_don = vat_invoice.so_hoa_don_dt;
+    if (so_hoa_don) {
+        $('#saveEInvoiceBtn').hide();
+    }
     var html = '<div class="order-info-modal view-mode">';
     // Build status label
     var statusLabel = ""
@@ -1476,7 +1480,9 @@ function buildOrderInfoHTML(dataVATInvoice) {
     html += '<div class="panel panel-default">';
     html += '<div class="panel-heading">';
     html += '<h4 class="panel-title">';
-    // html += '<strong>Đơn hàng: ' + order.sales_code + '</strong>';
+    if (so_hoa_don) {
+        html += '<strong>Số hóa đơn điện tử: ' + so_hoa_don + '</strong>';
+    }
     html += '<span class="pull-right">' + statusLabel + '</span>';
     html += '</h4>';
     html += '</div>';
@@ -1651,7 +1657,8 @@ function buildOrderInfoHTML(dataVATInvoice) {
             
             // Total
             html += '<td>';
-            html += '<span class="item-total">' + formatNumber(item.tong_tien) + '</span>';
+            // html += '<span class="item-total">' + formatNumber(item.tong_tien) + '</span>';
+            html += '<input type="text" class="editable-field item-total" value="' + formatNumber(item.tong_tien) + '" min="0">';
             html += '</td>';
             
             html += '</tr>';
@@ -1796,7 +1803,7 @@ function createAndPublishInvoice(invoiceData, einvoiceConfig) {
                     } else {
                         showAlert('danger', 'No Data in response: ' + response.response.Status + ' - Nội dung lỗi: ' + response.response.Message);
                     }
-                    var message = '<i class="fa fa-check-circle"></i> ' + response.message + ' Số hóa đơn: ' + response.response.Data.ThirdPartyInvoiceNumber;
+                    var message = '<i class="fa fa-check-circle"></i> ' + response.message + ' Số hóa đơn: ' + response.response.Data?.ThirdPartyInvoiceNumber;
                     
                     if (response.response && response.response.data) {
                         message += '<br><small>Response Data: ' + JSON.stringify(response.response.data) + '</small>';
@@ -1856,6 +1863,7 @@ function saveEInvoiceData() {
         items: [],
         formNo: $('#edit_template_number').val(),
         serial: $('#edit_symbol').val(),
+        tax_group_summary: [],
     };
     
     // Collect items data
@@ -1869,11 +1877,12 @@ function saveEInvoiceData() {
         
         // Calculate amounts
         var subtotal = qty * unitPrice;
-        var discountAmount = (subtotal * discountPercent) / 100;
+        var discountAmount = parseFloat($(this).find('.item-discount-amount').val().replace(/,/g, '')) || 0;
         var afterDiscount = subtotal - discountAmount;
-        var taxAmount = (afterDiscount * taxPercent) / 100;
-        var totalAmount = afterDiscount + taxAmount;
-        
+        var taxAmount = parseFloat($(this).find('.item-tax-amount').val().replace(/,/g, '')) || 0;
+        var totalAmount = parseFloat($(this).find('.item-total').val().replace(/,/g, '')) || 0;
+        console.log('discountAmount:', discountAmount, 'taxAmount:', taxAmount, 'totalAmount:', totalAmount);
+
         invoiceData.items.push({
             item_id: itemId,
             item_name: itemName,
@@ -1885,10 +1894,28 @@ function saveEInvoiceData() {
             tax_amount: taxAmount,
             total_amount: totalAmount
         });
+        invoiceData.subtotal_amount += subtotal;
+        invoiceData.bill_discount_amount += discountAmount;
+        invoiceData.grand_total += totalAmount;
+        // Update tax group summary
+        var taxGroup = invoiceData.tax_group_summary.find(tg => tg.tax_percent === taxPercent);
+        if (!taxGroup) {
+            taxGroup = {
+                tax_percent: taxPercent,
+                total_tax_amount: taxAmount,
+                total_amount: totalAmount,
+                before_tax_amount: afterDiscount
+            };
+            invoiceData.tax_group_summary.push(taxGroup);
+        } else {
+            taxGroup.total_amount += totalAmount;
+            taxGroup.total_tax_amount += taxAmount;
+            taxGroup.before_tax_amount += afterDiscount;
+        }
     });
     
     console.log('Invoice data to save:', invoiceData);
-
+    // return;
     // AJAX call to save e-invoice data
     $.ajax({
         url: "<?php echo site_url('sales/save_einvoice_data'); ?>",
@@ -1901,7 +1928,7 @@ function saveEInvoiceData() {
             if (response.success) {
                 alert("Lưu thông tin hóa đơn điện tử thành công!");
                 if (response.tables_created) {
-                    alert("Đã tạo bảng dữ liệu hóa đơn điện tử thành công!");
+                   // alert("Đã tạo bảng dữ liệu hóa đơn điện tử thành công!");
                 }
             } else {
                 alert("Có lỗi xảy ra: " + response.message);

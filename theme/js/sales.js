@@ -157,7 +157,9 @@ $("#save,#update").on("click", function (e) {
                     einvoice_result.invoice_info.sales_id = sales_id_create; // Cập nhật sales_id vào invoice_info
                     save_info_data_einvoice(einvoice_result);
                 }
-                // location.href = base_url + "sales/invoice/" + result[1];
+                setTimeout(() => {
+                     location.href = base_url + "sales/invoice/" + result[1];
+                }, 1000);
             } else if (result[0] == "failed") {
                 toastr["error"]("Chưa thể tạo đơn hàng mới!");
             } else if (result[0] == "unvalidate") {
@@ -860,14 +862,14 @@ function getItemsDataFromUI(rowcount) {
     var total_before_tax_value = 0;
     
     for (var i = 1; i <= rowcount; i++) {   
-        var item_name = $("#td_data_1_" + i).text().trim();
+        var item_name = $("#td_data_" + i + "_1").text().trim();
         var item_quantity = parseFloat($("#td_data_" + i + "_3").val().trim()) || 0;
         var item_price = parseFloat($("#td_data_" + i + "_10").val().trim()) || 0;
         var item_discount_item = parseFloat($("#td_data_" + i + "_8").val().trim()) || 0;
         var item_tax_percent = parseFloat($("#tr_tax_value_" + i).val().trim()) || 0;
         var item_tax_amount = parseFloat($("#td_data_" + i + "_11").val().trim()) || 0;
         var item_amount = parseFloat($("#td_data_" + i + "_9").val().trim()) || 0;
-        
+        console.log('Sản phẩm ' + i + ': ' + item_name);
         // Tính tiền trước thuế ban đầu (sau giảm giá sản phẩm)
         var item_amount_before_tax = (item_quantity * item_price) - item_discount_item;
         total_before_tax_value += item_amount_before_tax;
@@ -884,7 +886,6 @@ function getItemsDataFromUI(rowcount) {
             item_amount_before_tax: item_amount_before_tax
         });
     }
-    
     return {
         items: items_data,
         total_before_tax_value: total_before_tax_value
