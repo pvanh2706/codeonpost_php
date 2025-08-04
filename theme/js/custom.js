@@ -28,9 +28,24 @@ function calculate_exclusive(amount,tax){
 	tax = parseFloat(tax);
 	return ((amount*tax)/parseFloat(100)).toFixed(0);
 }
-function app_number_format(num=0){
-	//return num.toLocaleString('en-US', {minimumFractionDigits: 1, maximumFractionDigits: 1});
-	return Intl.NumberFormat().format(num);
+function app_number_format(num=0, currency='VND'){
+	// Format as currency with proper locale
+	if(currency === 'VND') {
+		return new Intl.NumberFormat('vi-VN', {
+			style: 'currency',
+			currency: 'VND',
+			minimumFractionDigits: 0,
+			maximumFractionDigits: 0
+		}).format(num);
+	}
+	
+	// Default currency formatting
+	return new Intl.NumberFormat('en-US', {
+		style: 'currency',
+		currency: 'USD',
+		minimumFractionDigits: 2,
+		maximumFractionDigits: 2
+	}).format(num);
 }
 function get_float_type_data(location=''){
   var res = $(location).val();

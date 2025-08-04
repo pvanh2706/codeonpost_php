@@ -1,4 +1,3 @@
-
 //On Enter Move the cursor to desigtation Id
 function shift_cursor(kevent,target){
 
@@ -71,16 +70,27 @@ $('#save,#update,#create').on("click",function (e) {
        }
    }
 
-    var tot_subtotal_amt=$("#subtotal_amt").text();
-    var other_charges_amt=$("#other_charges_amt").text();//other_charges include tax calcualated amount
-    var tot_discount_to_all_amt=$("#discount_to_all_amt").text();
-    var tot_round_off_amt=$("#round_off_amt").text();
-    var tot_total_amt=$("#total_amt").text();
+    // Lấy giá trị số thô từ các hidden field hoặc parse từ text đã format
+    var tot_subtotal_amt = parseAmount($("#subtotal_amt").text()) || 0;
+    var other_charges_amt = parseAmount($("#other_charges_amt").text()) || 0; //other_charges include tax calculated amount
+    var tot_discount_to_all_amt = parseAmount($("#discount_to_all_amt").text()) || 0;
+    var tot_round_off_amt = parseAmount($("#round_off_amt").text()) || 0;
+    var tot_total_amt = parseAmount($("#total_amt").text()) || 0;
 
     var this_id=this.id;
     
 			if(confirm("Bạn có chắc chắn muốn lưu không ?")){
 				e.preventDefault();
+				
+				// Chuyển các trường only_currency về giá trị số thô trước khi gửi
+				$('.only_currency').each(function() {
+					var currentVal = $(this).val();
+					if (currentVal) {
+						var rawValue = parseAmount(currentVal);
+						$(this).val(rawValue);
+					}
+				});
+				
 				data = new FormData($('#sales-form')[0]);//form name
         /*Check XSS Code*/
         if(!xss_validation(data)){ return false; }
@@ -103,10 +113,26 @@ $('#save,#update,#create').on("click",function (e) {
 					}
 					else if(result[0]=="failed")
 					{
+					   // Format lại các trường only_currency sau khi thất bại
+					   $('.only_currency').each(function() {
+					   	var currentVal = $(this).val();
+					   	if (currentVal && !isNaN(currentVal)) {
+					   		var formatted = new Intl.NumberFormat('vi-VN').format(currentVal);
+					   		$(this).val(formatted);
+					   	}
+					   });
 					   toastr['error']("Sorry! Failed to save Record.Try again");
 					}
 					else
 					{
+						// Format lại các trường only_currency sau khi có lỗi
+						$('.only_currency').each(function() {
+							var currentVal = $(this).val();
+							if (currentVal && !isNaN(currentVal)) {
+								var formatted = new Intl.NumberFormat('vi-VN').format(currentVal);
+								$(this).val(formatted);
+							}
+						});
 						alert(result);
 					}
 					$("#"+this_id).attr('disabled',false);  //Enable Save or Update button
@@ -567,3 +593,34 @@ function delete_sales_payment(payment_id){
      $("#item_search").attr({ disabled: true,}); 
     }
   });*/
+
+// Hàm chuyển đổi string có format tiền tệ thành số
+function parseAmount(value) {
+  if (!value || value === '' || value === null || value === undefined) {
+    return 0;
+  }
+  
+  // Chuyển về string để xử lý
+  var str = value.toString().trim();
+  
+  // Loại bỏ ký hiệu tiền tệ và khoảng trắng
+  str = str.replace(/₫/g, '').replace(/\s/g, '');
+  
+  // Loại bỏ dấu phân cách hàng nghìn (dấu chấm)
+  str = str.replace(/\./g, '');
+  
+  // Chuyển dấu phay thành dấu chấm cho decimal (nếu có)
+  str = str.replace(/,/g, '.');
+  
+  // Chuyển thành số
+  var num = parseFloat(str);
+  
+  // Debug log để kiểm tra
+  if (isNaN(num)) {
+    console.log("parseAmount failed: '" + value + "' -> '" + str + "' -> NaN");
+    return 0;
+  }
+  
+  // Trả về 0 nếu không parse được
+  return num;
+}

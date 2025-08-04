@@ -382,36 +382,36 @@
                                     <div class="col-md-12">
                                        <div class="form-group">
                                            
-                                          <table  class="col-md-9">
+                                          <table class="col-md-12" style="width: 100%; margin: 0 auto; table-layout: fixed;">
                                               <tr>
-                                                <th class="text-right" style="font-size: 17px;">Số lượng</th>
-                                                <th class="text-right" style="padding-left:10%;font-size: 17px;">
+                                                <th class="text-left" style="font-size: 17px; width: 65%; padding-right: 30px;">Số lượng</th>
+                                                <th class="text-left" style="font-size: 17px; width: 35%; padding-left: 20px;">
                                                    <h4><b class="total_quantity">0</b></h4>
                                                 </th>
                                              </tr>
                                              <tr>
-                                                <th class="text-right" style="font-size: 17px;">Tổng tạm tính</th>
-                                                <th class="text-right" style="padding-left:10%;font-size: 17px;">
+                                                <th class="text-left" style="font-size: 17px; width: 65%; padding-right: 30px;">Tổng tạm tính(trước thuế)</th>
+                                                <th class="text-left" style="font-size: 17px; width: 35%; padding-left: 20px;">
                                                    <h4><b id="subtotal_amt" name="subtotal_amt">0 ₫</b></h4>
                                                 </th>
                                              </tr>
                                              <tr>
-                                                <th class="text-right" style="font-size: 17px;">Phụ phí khác
-                                                <span id="other_charges_tax_info" style="font-size: 14px; color: #666;"></span>
+                                                <th class="text-left" style="font-size: 17px; width: 65%; padding-right: 30px;">Phụ phí khác
+                                                <span id="other_charges_tax_info" style="font-size: 14px; color: #666; display: block;"></span>
                                                 </th>
-                                                <th class="text-right" style="padding-left:10%;font-size: 17px;">
+                                                <th class="text-left" style="font-size: 17px; width: 35%; padding-left: 20px;">
                                                    <h4><b id="other_charges_amt" name="other_charges_amt">0 ₫</b></h4>
                                                 </th>
                                              </tr>
                                              <tr>
-                                                <th class="text-right" style="font-size: 17px;">Tổng chiết khấu</th>
-                                                <th class="text-right" style="padding-left:10%;font-size: 17px;">
+                                                <th class="text-left" style="font-size: 17px; width: 65%; padding-right: 30px;">Tổng chiết khấu</th>
+                                                <th class="text-left" style="font-size: 17px; width: 35%; padding-left: 20px;">
                                                    <h4><b id="discount_to_all_amt" name="discount_to_all_amt">0 ₫</b></h4>
                                                 </th>
                                              </tr>
                                              <tr>
-                                                <th class="text-right" style="font-size: 17px;">Tổng trước thuế</th>
-                                                <th class="text-right" style="padding-left:10%;font-size: 17px;">
+                                                <th class="text-left" style="font-size: 17px; width: 65%; padding-right: 30px;">Tổng trước thuế</th>
+                                                <th class="text-left" style="font-size: 17px; width: 35%; padding-left: 20px;">
                                                    <h4><b id="total_before_tax_amt" name="total_before_tax_amt">0 ₫</b></h4>
                                                 </th>
                                              </tr>
@@ -419,32 +419,40 @@
                                              <tbody id="tax_breakdown_section">
                                                 <!-- Tax details will be populated here by JavaScript -->
                                              </tbody>
+                                             <tr id="tax_info_header" style="display: none;">
+                                                <th class="text-left" colspan="2" style="font-size: 15px; font-weight: normal; color: #666; padding-top: 10px;">
+                                                   <i class="fa fa-info-circle"></i> Chi tiết thuế:
+                                                </th>
+                                             </tr>
+                                             <tbody id="tax_details_section">
+                                                <!-- Individual tax details will be populated here -->
+                                             </tbody>
                                              <tr>
-                                                <th class="text-right" style="font-size: 17px;">Tổng tiền thuế</th>
-                                                <th class="text-right" style="padding-left:10%;font-size: 17px;">
+                                                <th class="text-left" style="font-size: 17px; width: 65%; padding-right: 30px;">Tổng tiền thuế</th>
+                                                <th class="text-left" style="font-size: 17px; width: 35%; padding-left: 20px;">
                                                    <h4><b id="total_tax_amt" name="total_tax_amt">0 ₫</b></h4>
                                                 </th>
                                              </tr>
                                              <tr>
-                                                <th class="text-right" style="font-size: 17px;">Tổng sau thuế</th>
-                                                <th class="text-right" style="padding-left:10%;font-size: 17px;">
+                                                <th class="text-left" style="font-size: 17px; width: 65%; padding-right: 30px;">Tổng sau thuế</th>
+                                                <th class="text-left" style="font-size: 17px; width: 35%; padding-left: 20px;">
                                                    <h4><b id="total_after_tax_amt" name="total_after_tax_amt">0 ₫</b></h4>
                                                 </th>
                                              </tr>
                                              <!--tr style="<?= (!is_enabled_round_off()) ? 'display: none;' : '';?>">
-                                                <th class="text-right" style="font-size: 17px;"><?= $this->lang->line('round_off'); ?>
+                                                <th class="text-left" style="font-size: 17px; padding-right: 20px;"><?= $this->lang->line('round_off'); ?>
                                                   <i class="hover-q " data-container="body" data-toggle="popover" data-placement="top" data-content="Go to Site Settings-> Site -> Disable the Round Off(Checkbox)." data-html="true" data-trigger="hover" data-original-title="" title="Do you wants to Disable Round Off ?">
                                                       <i class="fa fa-info-circle text-maroon text-black hover-q"></i>
                                                     </i>
                                                 </th>
-                                                <th class="text-right" style="padding-left:10%;font-size: 17px;">
+                                                <th class="text-left" style="font-size: 17px;">
                                                    <h4><b id="round_off_amt" name="tot_round_off_amt">0.00</b></h4>
                                                 </th>
                                              </tr-->
                                              <tr>
-                                                <th class="text-right" style="font-size: 17px;">Tổng thanh toán</th>
-                                                <th class="text-right" style="padding-left:10%;font-size: 17px;">
-                                                   <h4><b id="total_amt" name="total_amt">0 ₫</b></h4>
+                                                <th class="text-left" style="font-size: 17px; font-weight: bold; color: #d9534f; width: 65%; padding-right: 30px;">Tổng thanh toán</th>
+                                                <th class="text-left" style="font-size: 17px; width: 35%; padding-left: 20px;">
+                                                   <h4><b id="total_amt" name="total_amt" style="color: #d9534f;">0 ₫</b></h4>
                                                 </th>
                                              </tr>
                                           </table>
@@ -487,7 +495,7 @@
                                                         $total_paid +=$res3->payment;
                                                         $i++;
                                                       }
-                                                      echo "<tr class='text-right text-bold'><td colspan='4' >Total</td><td data-rowcount='$i' id='paid_amt_tot'>".number_format($total_paid,0,'.','')."</td><td></td></tr>";
+                                                      echo "<tr class='text-right text-bold'><td colspan='4' >Total</td><td data-rowcount='$i' id='paid_amt_tot'>".number_format($total_paid, 0, ',', '.')." ₫"."</td><td></td></tr>";
                                                     }
                                                     else{
                                                       echo "<tr><td colspan='6' class='text-center text-bold'>Chưa có dữ liệu thanh toán!!</td></tr>";
@@ -751,25 +759,39 @@
          
          /* ---------- CALCULATE TAX -------------*/
          function calculate_tax(i){ //i=Row
-            set_tax_value(i);
-
-           //Find the Tax type and Tax amount
-           var tax_type = $("#tr_tax_type_"+i).val();
-           var tax_amount = parseAmount($("#td_data_"+i+"_11").val());
-
-           var qty=$("#td_data_"+i+"_3").val().trim();
-           var sales_price = parseAmount($("#td_data_"+i+"_10").val());
-           $("#td_data_"+i+"_4").val(sales_price);
-           /*Discounr*/
-           var discount_amt = parseAmount($("#td_data_"+i+"_8").val());
-
-           var amt=parseFloat(qty) * sales_price;//Taxable
-
-           var total_amt=amt-discount_amt;
-           total_amt = (tax_type=='Inclusive') ? total_amt : parseFloat(total_amt) + parseFloat(tax_amount);
+           var qty = parseFloat($("#td_data_"+i+"_3").val().trim()) || 0;
            
-           //Set Unit cost - format tiền tệ
-           $("#td_data_"+i+"_9").val(formatCurrency(total_amt));
+           // Lấy đơn giá gốc (unit price) từ field _4 hoặc _10
+           var unit_price = parseAmount($("#td_data_"+i+"_4").val()) || parseAmount($("#td_data_"+i+"_10").val());
+           
+           // Tính thuế dựa trên đơn giá gốc
+           set_tax_value_with_unit_price(i, unit_price, qty);
+
+           //Find the Tax type and Tax amount  
+           var tax_type = $("#tr_tax_type_"+i).val();
+           var tax_amount = parseFloat($("#td_data_"+i+"_5").val()) || 0;  // Sử dụng field _5 thay vì _7
+           var discount_amt = parseFloat($("#td_data_"+i+"_8").val()) || 0;  // Chiết khấu
+
+           // Tính "Tạm tính" - luôn là tổng tiền TRƯỚC thuế
+           var subtotal_before_tax;
+           
+           if (tax_type == 'Inclusive') {
+             // Với Inclusive: unit_price đã bao gồm thuế, cần tính ngược để có base amount
+             var tax_rate = parseFloat($("#tr_tax_value_"+i).val()) || 0;
+             var unit_price_without_tax = unit_price / (1 + tax_rate / 100);
+             subtotal_before_tax = (unit_price_without_tax * qty) - discount_amt;
+           } else {
+             // Với Exclusive: unit_price chưa bao gồm thuế
+             subtotal_before_tax = (unit_price * qty) - discount_amt;
+           }
+           
+           // Lưu "Tạm tính" (số tiền trước thuế) vào td_data_${i}_9 dưới dạng số thô
+           $("#td_data_"+i+"_9").val(subtotal_before_tax);
+           
+           // Debug log
+           console.log("Row " + i + " calculate_tax: qty=" + qty + ", unit_price=" + unit_price + 
+                      ", tax_amount=" + tax_amount + ", tax_type=" + tax_type + 
+                      ", discount=" + discount_amt + ", subtotal_before_tax=" + subtotal_before_tax);
         
            final_total();
          }
@@ -810,15 +832,24 @@
              if(document.getElementById("td_data_"+i+"_3")){
                //customer_id must exist
                if($("#td_data_"+i+"_3").val()!=null && $("#td_data_"+i+"_3").val()!=''){
-                    var unit_cost = parseAmount($("#td_data_"+i+"_13").val());
-                    var total_cost = parseAmount($("#td_data_"+i+"_9").val());
-                    var tax_amt_item = parseAmount($("#td_data_"+i+"_7").val());
+                    var unit_cost = parseFloat($("#td_data_"+i+"_13").val()) || 0;
+                    var qty = parseFloat($("#td_data_"+i+"_3").val().trim()) || 0;
+                    var item_subtotal = parseFloat($("#td_data_"+i+"_9").val()) || 0; // Lấy trực tiếp từ "Tạm tính" đã tính (dạng số thô)
+                    var tax_amt_item = parseFloat($("#td_data_"+i+"_5").val()) || 0;  // Đọc từ field _5 thay vì _7
+                    var tax_type = $("#tr_tax_type_"+i).val();
                     var tax_id = $("#tr_tax_id_"+i).val();
                     var tax_name = $("#td_data_"+i+"_12").html();
                     var tax_rate = $("#tr_tax_value_"+i).val();
                     
-                    actual_taxable=actual_taxable + (unit_cost * parseFloat($("#td_data_"+i+"_3").val()));
-                    subtotal=subtotal + total_cost;
+                    // Debug log
+                    console.log("Row " + i + ": qty=" + qty + ", item_subtotal=" + item_subtotal + 
+                               ", tax_amt_item=" + tax_amt_item + ", tax_type=" + tax_type);
+                    
+                    actual_taxable=actual_taxable + (unit_cost * qty);
+                    
+                    // Cộng vào subtotal tổng (đã được tính đúng trong calculate_tax)
+                    subtotal = subtotal + item_subtotal;
+                    
                     if(tax_amt_item >= 0){
                       tax_amt=tax_amt + tax_amt_item;
                       
@@ -834,7 +865,7 @@
                         tax_breakdown[tax_id].amount += tax_amt_item;
                       }
                     }   
-                    total_quantity +=parseInt($("#td_data_"+i+"_3").val().trim());
+                    total_quantity += qty;
                 }
                    
              }//if end
@@ -843,6 +874,13 @@
           
           //Show total Sales Quantitys
            $(".total_quantity").html(total_quantity);
+
+           // Debug log tổng hợp
+           console.log("=== FINAL TOTAL CALCULATION ===");
+           console.log("Total rows processed: " + (parseInt(rowcount)));
+           console.log("Total tax amount: " + tax_amt);
+           console.log("Total subtotal: " + subtotal);
+           console.log("================================");
 
            //Apply Output on screen
            //subtotal
@@ -899,16 +937,31 @@
              
              // Display tax breakdown
              var tax_breakdown_html = '';
+             var tax_details_html = '';
+             var has_tax = false;
+             
              for(var tax_id in tax_breakdown) {
                if(tax_breakdown[tax_id].amount > 0) {
-                 tax_breakdown_html += '<tr>' +
-                   '<th class="text-right" style="font-size: 15px;">' + tax_breakdown[tax_id].name + ' (' + tax_breakdown[tax_id].rate + '%)</th>' +
-                   '<th class="text-right" style="padding-left:10%;font-size: 15px;">' +
-                   '<h5><b>' + formatCurrency(tax_breakdown[tax_id].amount) + '</b></h5>' +
+                 has_tax = true;
+                 tax_details_html += '<tr>' +
+                   '<th class="text-left" style="font-size: 14px; width: 65%; padding-left: 20px; padding-right: 30px; color: #555;">• ' + 
+                   tax_breakdown[tax_id].name + ' (' + tax_breakdown[tax_id].rate + '%)</th>' +
+                   '<th class="text-left" style="font-size: 14px; width: 35%; padding-left: 20px; color: #555;">' +
+                   formatCurrency(tax_breakdown[tax_id].amount) +
                    '</th>' +
                    '</tr>';
                }
              }
+             
+             // Show/hide tax details section
+             if(has_tax) {
+               $("#tax_info_header").show();
+               $("#tax_details_section").html(tax_details_html);
+             } else {
+               $("#tax_info_header").hide();
+               $("#tax_details_section").html('');
+             }
+             
              $("#tax_breakdown_section").html(tax_breakdown_html);
              
              subtotal_round=round_off(total_after_tax);//round_off() method custom defined
@@ -917,7 +970,8 @@
              $("#round_off_amt").html(formatCurrency(subtotal_diff)); 
              $("#total_amt").html(formatCurrency(subtotal_round)); 
              if(save_operation()){
-               $("#amount").val(formatCurrency(subtotal_round));
+               // Lưu giá trị số thô vào data attribute và hiển thị format
+               $("#amount").val(formatCurrency(subtotal_round)).attr('data-raw-value', subtotal_round);
              }
              $("#hidden_total_amt").val(subtotal_round); 
            }
@@ -927,8 +981,7 @@
              $("#total_tax_amt").html(formatCurrency(0));
              $("#total_after_tax_amt").html(formatCurrency(0));
              $("#tax_breakdown_section").html('');
-             $("#tax_amt").html('0.00'); 
-             $("#amount").val('0.00');  
+             $("#amount").val('0');  // Sửa format
            }
            
           // adjust_payments();
@@ -1028,8 +1081,7 @@
       //get the sales price of the item
       var tax_type = $("#tr_tax_type_"+row_id).val();
       var tax = $("#tr_tax_value_"+row_id).val(); //%
-      var qty=$("#td_data_"+row_id+"_3").val();
-          qty = (isNaN(qty)) ? 0 :qty;
+      var qty = parseFloat($("#td_data_"+row_id+"_3").val()) || 0;
       // Parse số tiền từ input đã format
       var sales_price = parseAmount($("#td_data_"+row_id+"_10").val());
           sales_price = sales_price * qty;
@@ -1045,10 +1097,58 @@
 
       var tax_amount = (tax_type=='Inclusive') ? calculate_inclusive(sales_price,tax) : calculate_exclusive(sales_price,tax);
       
-      $("#td_data_"+row_id+"_8").val(formatNumber(discount_amt));
+      // Debug log
+      console.log("Tax calculation for row " + row_id + ": sales_price=" + sales_price + ", tax=" + tax + ", tax_amount=" + tax_amount);
+      
+      $("#td_data_"+row_id+"_8").val(discount_amt);  // Lưu discount dưới dạng số thô
 
-      $("#td_data_"+row_id+"_11").val(formatNumber(tax_amount));
+      // Lưu thuế dưới dạng số thô (không format) để tránh lỗi parse
+      $("#td_data_"+row_id+"_5").val(tax_amount);  // Lưu vào field _5 thay vì _7
+      $("#td_data_"+row_id+"_11").val(formatNumberDisplay(tax_amount));  // Hiển thị format
 
+    }
+    
+    // Hàm tính thuế với đơn giá và số lượng cụ thể
+    function set_tax_value_with_unit_price(row_id, unit_price, qty) {
+      var tax_type = $("#tr_tax_type_"+row_id).val();
+      var tax_rate = $("#tr_tax_value_"+row_id).val(); //%
+      
+      /*Discount*/
+      var item_discount_type = $("#item_discount_type_"+row_id).val();
+      var item_discount_input = parseFloat($("#item_discount_input_"+row_id).val());
+          item_discount_input = (isNaN(item_discount_input)) ? 0 : item_discount_input;
+
+      // Tính tổng tiền trước chiết khấu
+      var total_price = unit_price * qty;
+      
+      //Calculate discount      
+      var discount_amt = (item_discount_type=='Percentage') ? 
+        ((total_price) * item_discount_input)/100 : 
+        (item_discount_input * qty);
+        
+      var price_after_discount = total_price - discount_amt;
+
+      // Tính thuế dựa trên loại thuế
+      var tax_amount;
+      if (tax_type == 'Inclusive') {
+        // Với Inclusive: unit_price đã bao gồm thuế
+        // Tax = price_after_discount - (price_after_discount / (1 + tax_rate/100))
+        tax_amount = price_after_discount - (price_after_discount / (1 + parseFloat(tax_rate) / 100));
+      } else {
+        // Với Exclusive: unit_price chưa bao gồm thuế
+        // Tax = price_after_discount * (tax_rate/100)
+        tax_amount = (price_after_discount * parseFloat(tax_rate)) / 100;
+      }
+      
+      // Debug log
+      console.log("set_tax_value_with_unit_price - Row " + row_id + ": unit_price=" + unit_price + 
+                 ", qty=" + qty + ", total_price=" + total_price + ", discount=" + discount_amt + 
+                 ", price_after_discount=" + price_after_discount + ", tax_rate=" + tax_rate + 
+                 ", tax_type=" + tax_type + ", tax_amount=" + tax_amount);
+      
+      $("#td_data_"+row_id+"_8").val(discount_amt);  // Lưu discount dưới dạng số thô
+      $("#td_data_"+row_id+"_5").val(tax_amount);  // Lưu thuế vào field _5 (hidden)
+      $("#td_data_"+row_id+"_11").val(formatNumberDisplay(tax_amount));  // Hiển thị format vào field _11
     }
     //Sale Items Modal Operations End
 
@@ -1067,13 +1167,27 @@
       if (value) {
         var formatted = new Intl.NumberFormat('vi-VN').format(value);
         $(this).val(formatted);
+        // Lưu giá trị số thô vào data attribute để gửi về backend
+        $(this).attr('data-raw-value', value);
       }
+    });
+
+    // Trước khi submit form, chuyển các input only_currency về giá trị số thô
+    $(document).on('submit', '#sales-form', function() {
+      $('.only_currency').each(function() {
+        var rawValue = $(this).attr('data-raw-value');
+        if (rawValue) {
+          $(this).val(rawValue);
+        }
+      });
     });
 
     // Hàm chuyển đổi string có format tiền tệ thành số
     function parseAmount(value) {
       if (typeof value === 'string') {
-        return parseFloat(value.replace(/[^\d]/g, '')) || 0;
+        // Loại bỏ ký hiệu tiền tệ và dấu phân cách hàng nghìn, giữ lại dấu thập phân
+        var cleanValue = value.replace(/[₫\s]/g, '').replace(/\./g, '').replace(/,/g, '.');
+        return parseFloat(cleanValue) || 0;
       }
       return parseFloat(value) || 0;
     }
@@ -1109,10 +1223,23 @@
       // Chuyển về số
       var num = parseFloat(amount);
       
+      // Format đơn giản để tránh conflict với parseAmount
+      return num.toFixed(2);
+    }
+    
+    // Hàm format số cho hiển thị (dùng cho input display)
+    function formatNumberDisplay(amount) {
+      if (isNaN(amount) || amount === null || amount === undefined) {
+        return '0';
+      }
+      
+      // Chuyển về số
+      var num = parseFloat(amount);
+      
       // Format theo chuẩn Việt Nam (dấu . phân cách hàng nghìn)
       return num.toLocaleString('vi-VN', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
       });
     }
     
@@ -1174,6 +1301,20 @@
         var pdf_url = base_url + "sales_return/pdf/" + return_id;
         
         window.open(pdf_url, "_blank");
+      }
+
+      // Hàm tính thuế exclusive (thuế ngoài giá)
+      function calculate_exclusive(price, tax_rate) {
+        if (!price || !tax_rate) return 0;
+        return (parseFloat(price) * parseFloat(tax_rate)) / 100;
+      }
+
+      // Hàm tính thuế inclusive (thuế đã bao gồm trong giá)  
+      function calculate_inclusive(price, tax_rate) {
+        if (!price || !tax_rate) return 0;
+        var price_with_tax = parseFloat(price);
+        var tax_amount = price_with_tax - (price_with_tax / (1 + parseFloat(tax_rate) / 100));
+        return tax_amount;
       }
 
       </script>
