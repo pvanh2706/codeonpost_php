@@ -305,7 +305,7 @@
                                        </div>
                                     </div>
                                  </div-->
-                                 <div class="row">
+                                 <div class="row" style="display: none;">
                                     <div class="col-md-12">
                                        <div class="form-group">
                                           <label for="other_charges_input" class="col-sm-4 control-label">Phụ phí khác</label>    
@@ -394,15 +394,14 @@
                                                 <th class="text-left" style="font-size: 17px; width: 35%; padding-left: 20px;">
                                                    <h4><b id="subtotal_amt" name="subtotal_amt">0 ₫</b></h4>
                                                 </th>
-                                             </tr>
-                                             <tr>
-                                                <th class="text-left" style="font-size: 17px; width: 65%; padding-right: 30px;">Phụ phí khác
-                                                <span id="other_charges_tax_info" style="font-size: 14px; color: #666; display: block;"></span>
-                                                </th>
-                                                <th class="text-left" style="font-size: 17px; width: 35%; padding-left: 20px;">
-                                                   <h4><b id="other_charges_amt" name="other_charges_amt">0 ₫</b></h4>
-                                                </th>
-                                             </tr>
+                                             </tr>                             <tr style="display: none;">
+                                <th class="text-left" style="font-size: 17px; width: 65%; padding-right: 30px;">Phụ phí khác
+                                <span id="other_charges_tax_info" style="font-size: 14px; color: #666; display: block;"></span>
+                                </th>
+                                <th class="text-left" style="font-size: 17px; width: 35%; padding-left: 20px;">
+                                   <h4><b id="other_charges_amt" name="other_charges_amt">0 ₫</b></h4>
+                                </th>
+                             </tr>
                                              <tr>
                                                 <th class="text-left" style="font-size: 17px; width: 65%; padding-right: 30px;">Tổng chiết khấu</th>
                                                 <th class="text-left" style="font-size: 17px; width: 35%; padding-left: 20px;">

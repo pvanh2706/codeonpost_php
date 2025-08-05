@@ -452,7 +452,7 @@ function round_off($amount) {
                                     
                                     <div class="col-md-12 d-flex justify-content">
                                         <div class="col-md-6">
-                                            <div class="form-group">
+                                            <div class="form-group" style="display: none;">
                                               <label for="other_charges_input" class="col-md-4 control-label">Phụ phí khác</label>    
                                               <div class="col-md-8">
                                                  <input onclick="this.select();" type="text" class="form-control text-right only_currency" id="other_charges_input" name="other_charges_input" onkeyup="final_total();" value="<?php echo formatNumber($other_charges_input); ?>">
@@ -483,7 +483,7 @@ function round_off($amount) {
                                        
                                         <div class="form-group">
                                           <label for="sales_note" class="col-md-4 control-label">Ghi chú đơn hàng (F8)</label>    
-                                          <div class="col-md-8>
+                                          <div class="col-md-8">
                                              <textarea rows="3" class="form-control text-left" id='sales_note' name="sales_note"><?= $sales_note; ?></textarea>
                                             <span id="sales_note_msg" style="display:none" class="text-danger"></span>
                                           </div>
@@ -493,7 +493,7 @@ function round_off($amount) {
                                             <div class="form-group">
                                                 <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Số lượng | <span class="total_quantity text-danger" >0</span></span>
                                                 <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Tổng tạm tính <small>(trước thuế)</small> | <span class="text-danger" id="subtotal_amt" name="subtotal_amt">0</span> ₫</span>
-                                                <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Phụ phí (có thuế) | <span class="text-danger" id="other_charges_amt" name="other_charges_amt">0</span> ₫</span>
+                                                <span style="text-align: left; font-weight: bold; display: none;" class="form-control btn btn-file" >Phụ phí (có thuế) | <span class="text-danger" id="other_charges_amt" name="other_charges_amt">0</span> ₫</span>
                                                 <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Chiết khấu | <span class="text-danger" id="discount_to_all_amt" name="discount_to_all_amt">0</span> ₫</span>
                                                 <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Tổng trước thuế | <span class="text-danger" id="total_before_tax_amt" name="total_before_tax_amt">0</span> ₫</span>
                                                 <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Tổng tiền thuế | <span class="text-danger" id="total_tax_amt" name="total_tax_amt">0</span> ₫</span>

@@ -220,7 +220,7 @@
                 <?php if(isset($sales_id)): ?>
                   <?php if($CI->permissions('sales_add')) { ?>
                   <div class="col-md-4 pull-right">
-                    <a href='<?= $base_url;?>pos' class="btn btn-primary pull-right">New Invoice</a>
+                    <a href='<?= $base_url;?>pos' class="btn btn-primary pull-right">Tạo hóa đơn mới</a>
                   </div>
                   <?php } ?>
                 <?php endif; ?>
@@ -423,7 +423,7 @@
                     <div class="col-sm-12" style="overflow-y:auto; border:1px solid #337ab7; height:auto;" >
                       <table id="print_area" class="table table-condensed table-bordered table-striped table-responsive items_table" style="">
                         <thead class="bg-primary">
-                          <!--th width="40%">Sản phẩm</th-->
+                          <th width="40%">Sản phẩm</th>
                           <!--th width="5%">Kho</th-->
                           <th width="5%">S.Lượng</th>
                           <!--th width="20%">Phân loại</th-->
@@ -450,7 +450,15 @@
                           <!-- body code -->
                         </tbody>        
                         <tfoot>
-                          <!-- footer code -->
+                          <tr class="bg-gray">
+                            <td><b>Tổng cộng:</b></td>
+                            <td class="text-center"><b><span class="tot_qty">0</span></b></td>
+                            <td></td>
+                            <td class="text-right"><b><span class="tot_disc">0</span></b></td>
+                            <td class="<?=tax_disable_class()?>"></td>
+                            <td class="text-right"><b><span class="tot_grand">0</span></b></td>
+                            <td></td>
+                          </tr>
                         </tfoot>              
                       </table>
                     </div>
@@ -477,14 +485,25 @@
                           
                     <table id="print_area" class="table table-condensed table-bordered table-striped table-responsive items_table" style="">
                                     <thead class="bg-primary">
+                                      <th width="40%">Sản phẩm</th>
                                       <th width="5%">S.Lượng</th>
                                       <th width="15%">Đ.Giá</th>
+                                      <th width="10%">C.Khấu</th>
+                                      <th width="10%" class='<?=tax_disable_class()?>'><?= $this->lang->line('tax'); ?></th>
                                       <th width="20%">T.Tính</th>
                                     </thead>
                                     <tbody id="pos-form-tbody-modal" class="itemcartrows" style="font-size: 1em;font-weight: bold;overflow: scroll;">
-                                        Dữ liệu có cái méo gì đâu mà in
+                                        <!-- Dữ liệu sản phẩm sẽ được thêm vào đây -->
                                     </tbody>        
                                     <tfoot>
+                                      <tr class="bg-gray">
+                                        <td><b>Tổng cộng:</b></td>
+                                        <td class="text-center"><b><span class="tot_qty">0</span></b></td>
+                                        <td></td>
+                                        <td class="text-right"><b><span class="tot_disc">0</span></b></td>
+                                        <td class="<?=tax_disable_class()?>"></td>
+                                        <td class="text-right"><b><span class="tot_grand">0</span> VNĐ</b></td>
+                                      </tr>
                                     </tfoot>              
                                   </table>
                         </div>
@@ -524,7 +543,7 @@
                               </label>
                           </div>
                         </div-->
-                        <div class="col-md-12">
+                        <div class="col-md-12" style="display: none;">
                             <div class="form-group">
                                 <label for="other_charges" class="col-sm-4 control-label">Thêm phụ phí khác <label class="text-danger">*</label></label>
 
@@ -599,7 +618,7 @@
                                 <span class="col-md-5 text-right text-bold  custom-font-sizes " ><span class="sales_div_tot_discount">0</span>₫</span>
                               </div>
                             </div>
-                            <div class="row ">
+                            <div class="row" style="display: none;">
                               <div class="col-md-12 border-custom-bottom">
                                 <span class="col-md-7 text-right text-bold " >Phụ phí:</span>
                                 <span class="col-md-5 text-right text-bold  custom-font-sizes " ><span class="sales_div_other_charges">0</span>₫</span>
@@ -1280,59 +1299,27 @@ function addrow(id='',item_obj=''){
         
         //var doubleItem = (!itemhidden) ? '<span id="plus_'+rowcount+'" onclick="addrow_gift('+ item_id +');"><i class="fa fa-plus-square" aria-hidden="true"></i></span> <span id="td_data_'+rowcount+'_0" style="white-space: break-spaces; text-overflow: ellipsis; overflow: hidden;">'+ item_name     +'</span>' : item_name + ' <input id="td_data_'+rowcount+'_0" style="width: 80%; white-space: break-spaces; text-overflow: ellipsis; overflow: hidden;" value="">';
         var doubleItem = (!itemhidden) ? '<span id="plus_'+rowcount+'" onclick="addrow_gift('+ item_id +');"><i class="fa fa-plus-square" aria-hidden="true"></i></span> <span id="td_data_'+rowcount+'_0" style="white-space: break-spaces; text-overflow: ellipsis; overflow: hidden;">'+ item_name     +'</span>' : item_name ;
-        var str='<tr id="tr_items_name_'+rowcount+'"><td colspan="5" id="td_'+rowcount+'_0">' + doubleItem + ' </td></tr>';
-            str+='<tr id="tr_items_desc_'+rowcount+'"><td colspan="5" ><input type="text" class="form-control" name="td_description_'+rowcount+'" id="td_description_'+rowcount+'" placeholder="Ghi chú thêm cho sản phẩm '+ item_name +' (Nếu có)" /></td></tr>';
+        var str='<tr id="tr_items_desc_'+rowcount+'"><td colspan="7" ><input type="text" class="form-control" name="td_description_'+rowcount+'" id="td_description_'+rowcount+'" placeholder="Ghi chú thêm cho sản phẩm '+ item_name +' (Nếu có)" /></td></tr>';
             str+='<tr  class="itemrows" data-rowcount="'+rowcount+'" id="row_'+rowcount+'" data-price-lv="" data-row="0" data-item-id='+item_id+'>';/*item id*/
-            //str+='<td id="td_'+rowcount+'_0"><span id="plus_'+rowcount+'" onclick="addrow_gift('+ item_id +');"><i class="fa fa-plus-square" aria-hidden="true"></i></span> <span id="td_data_'+rowcount+'_0" style="white-space: break-spaces; text-overflow: ellipsis; overflow: hidden;">'+ item_name     +'</span></td>';/* td_0_0 item name*/ 
-            //str+='<td id="td_'+rowcount+'_0"><a data-toggle="tooltip" title="Click to Change Tax" class="pointer" id="td_data_'+rowcount+'_0" onclick="show_sales_item_modal('+rowcount+')">'+ item_name     +'</a> <i onclick="show_sales_item_modal('+rowcount+')" class="fa fa-edit pointer"></i></td>';/* td_0_0 item name*/ 
-            //str+='<td id="td_'+rowcount+'_1">'+ valstock +'</td>';/* td_0_1 item available qty*/
-            str+='<td id="td_'+rowcount+'_2">'+quantity+'</td>';/* td_0_2 item available qty*/
-            //str+='<td ><select class="form-control" id="setPrices_'+rowcount+'" onchange="getPrices('+rowcount+','+item_id+')"><option value="'+sales_price+'" data-price="'+sales_price+'">Giá bán lẻ</option><option value="'+sales_price0+'" data-price="'+sales_price0+'">Giá Đại lý Cấp 0</option><option value="'+sales_price1+'" data-price="'+sales_price1+'">Giá Đại lý Cấp 1</option><option value="'+sales_price2+'" data-price="'+sales_price2+'">Giá Đại lý Cấp 2</option><option value="'+sales_price3+'" data-price="'+sales_price3+'">Giá Đại lý Cấp 3</option></select></td>';
+            str+='<td id="td_'+rowcount+'_0">' + doubleItem + '</td>';/* Cột 1: Tên sản phẩm */ 
+            str+='<td id="td_'+rowcount+'_1">'+quantity+'</td>';/* Cột 2: Số lượng */
             
-    
-            //info='<input id="sales_price_'+rowcount+'" onblur="set_to_original('+rowcount+','+item_cost+')" onkeyup="update_price('+rowcount+','+item_cost+')" name="sales_price_'+rowcount+'" type="text" class="form-control no-padding min_width priceset" value="'+sales_price+'">';
-            
-            //console.log("Check-data-level: " + $("#customerLVP")[0].getAttribute('data-lv'));
-            //switch ($("#customerLVP")[0].getAttribute('data-lv')) {
-            /*switch (priceLevels) {
-                case '0':
-                    info='<input  id="sales_price_'+rowcount+'" onblur="set_to_original('+rowcount+','+item_cost+')" onkeyup="update_price('+rowcount+','+item_cost+')" name="sales_price_'+rowcount+'" type="text" class="form-control no-padding min_width priceset" value="'+sales_price0+'">';
-                    
-                    break;
-                case '1':
-                    info='<input  id="sales_price_'+rowcount+'" onblur="set_to_original('+rowcount+','+item_cost+')" onkeyup="update_price('+rowcount+','+item_cost+')" name="sales_price_'+rowcount+'" type="text" class="form-control no-padding min_width priceset" value="'+sales_price1+'">';
-                    
-                    break;
-                case '2':
-                    info='<input  id="sales_price_'+rowcount+'" onblur="set_to_original('+rowcount+','+item_cost+')" onkeyup="update_price('+rowcount+','+item_cost+')" name="sales_price_'+rowcount+'" type="text" class="form-control no-padding min_width priceset" value="'+sales_price2+'">';
-                   
-                    break
-                case '3':
-                    info='<input  id="sales_price_'+rowcount+'" onblur="set_to_original('+rowcount+','+item_cost+')" onkeyup="update_price('+rowcount+','+item_cost+')" name="sales_price_'+rowcount+'" type="text" class="form-control no-padding min_width priceset" value="'+sales_price3+'">';
-                    
-                    break;
-                default:
-                    info='<input  id="sales_price_'+rowcount+'" onblur="set_to_original('+rowcount+','+item_cost+')" onkeyup="update_price('+rowcount+','+item_cost+')" name="sales_price_'+rowcount+'" type="text" class="form-control no-padding min_width priceset" value="'+sales_price+'">';
-                    
-                
-                
-            }*/
-            
+            // Cột 3: Đơn giá
             info='<input  id="sales_price_'+rowcount+'" onblur="set_to_original('+rowcount+','+item_cost+')" onkeyup="update_price('+rowcount+','+item_cost+')" name="sales_price_'+rowcount+'" type="text" class="form-control no-padding min_width priceset" value="'+sales_price+'">';
-            
-            
-            str+='<td id="td_'+rowcount+'_3" class="text-right">'+ info   +'</td>';/* td_0_3 item sales price*/
+            str+='<td id="td_'+rowcount+'_2" class="text-right">'+ info   +'</td>';/* Cột 3: Đơn giá */
     
-            /*Discount*/
+            // Cột 4: Chiết khấu
              info='<input data-toggle="tooltip" title="Giá trị chiết khấu" onclick="show_sales_item_modal('+rowcount+')" id="item_discount_'+rowcount+'" readonly name="item_discount_'+rowcount+'" type="text" class="form-control no-padding min_width pointer" value="0">';
-             
-            str+='<td id="td_'+rowcount+'_6" class="text-right">'+ info   +'</td>';
+            str+='<td id="td_'+rowcount+'_3" class="text-right">'+ info   +'</td>';/* Cột 4: Chiết khấu */
     
-            /*Tax amt*/
-            str+='<td id="td_'+rowcount+'_11" class="<?=tax_disable_class()?>"><input data-toggle="tooltip" title="Click to Change" id="td_data_'+rowcount+'_11" onclick="show_sales_item_modal('+rowcount+')" name="td_data_'+rowcount+'_11" type="text" class="form-control no-padding pointer min_width" readonly value="'+tax_amt+'"></td>';
+            // Cột 5: Thuế
+            str+='<td id="td_'+rowcount+'_4" class="<?=tax_disable_class()?>"><input data-toggle="tooltip" title="Click to Change" id="td_data_'+rowcount+'_4" onclick="show_sales_item_modal('+rowcount+')" name="td_data_'+rowcount+'_4" type="text" class="form-control no-padding pointer min_width" readonly value="'+tax_amt+'"></td>';/* Cột 5: Thuế */
     
-            str+='<td id="td_'+rowcount+'_4" class="text-right"><input data-toggle="tooltip" title="Total" id="td_data_'+rowcount+'_4" name="td_data_'+rowcount+'_4" type="text" class="form-control no-padding pointer" readonly value="'+sub_total+'"></td>';/* td_0_4 item sub_total */
-            str+='<td id="td_'+rowcount+'_5">'+ remove_btn    +'</td>';/* td_0_5 item gst_amt */
+            // Cột 6: Thành tiền
+            str+='<td id="td_'+rowcount+'_5" class="text-right"><input data-toggle="tooltip" title="Total" id="td_data_'+rowcount+'_5" name="td_data_'+rowcount+'_5" type="text" class="form-control no-padding pointer" readonly value="'+sub_total+'"></td>';/* Cột 6: Thành tiền */
+            
+            // Cột 7: Nút xóa
+            str+='<td id="td_'+rowcount+'_6">'+ remove_btn    +'</td>';/* Cột 7: Nút xóa */
     
             str+='<input type="hidden" name="tr_item_id_'+rowcount+'" id="tr_item_id_'+rowcount+'" value="'+item_id+'">';
            // str+='<input type="hidden" id="tr_item_per_'+rowcount+'" name="tr_item_per_'+rowcount+'" value="'+gst_per+'">';
@@ -1432,35 +1419,27 @@ function addrow_gift(id='',item_obj=''){
         var sub_total       =(parseFloat(1)*parseFloat(sales_price)).toFixed(0);//Initial
         var remove_btn      ='<a class="fa fa-fw fa-trash-o text-red" style="cursor: pointer;font-size: 20px;" onclick="removerow('+rowcount+')" title="Delete Item?"></a>';
         
-        var str='<tr id="tr_items_name_'+rowcount+'"><td colspan="5" id="td_'+rowcount+'_0"><span id="td_data_'+rowcount+'_0" style="white-space: break-spaces; text-overflow: ellipsis; overflow: hidden;"><i class="fa fa-arrow-right"></i> '+ item_name     +'</span></td></tr>';
-        str+='<tr id="tr_items_desc_'+rowcount+'"><td colspan="5" ><input type="text" class="form-control" name="td_description_'+rowcount+'" id="td_description_'+rowcount+'" placeholder="Ghi chú thêm cho sản phẩm '+ item_name +' (Nếu có)" /></td></tr>';
+        var str='<tr id="tr_items_desc_'+rowcount+'"><td colspan="7" ><input type="text" class="form-control" name="td_description_'+rowcount+'" id="td_description_'+rowcount+'" placeholder="Ghi chú thêm cho sản phẩm '+ item_name +' (Nếu có)" /></td></tr>';
          str+='<tr class="itemrows" data-rowcount="'+rowcount+'" id="row_'+rowcount+'" data-price-lv="" data-row="0" data-item-id='+item_id+'>';/*item id*/
-            //str+='<td id="td_'+rowcount+'_0"><span id="td_data_'+rowcount+'_0" style="white-space: break-spaces; text-overflow: ellipsis; overflow: hidden;">'+ item_name     +'</span></td>';/* td_0_0 item name*/ 
-            //str+='<td id="td_'+rowcount+'_0"><a data-toggle="tooltip" title="Click to Change Tax" class="pointer" id="td_data_'+rowcount+'_0" onclick="show_sales_item_modal('+rowcount+')">'+ item_name     +'</a> <i onclick="show_sales_item_modal('+rowcount+')" class="fa fa-edit pointer"></i></td>';/* td_0_0 item name*/ 
-            //str+='<td id="td_'+rowcount+'_1">'+ valstock +'</td>';/* td_0_1 item available qty*/
-            str+='<td id="td_'+rowcount+'_2">'+quantity+'</td>';/* td_0_2 item available qty*/
-            //str+='<td ><select class="form-control" id="setPrices_'+rowcount+'" onchange="getPrices('+rowcount+','+item_id+')"><option value="'+sales_price+'" data-price="'+sales_price+'">Giá bán lẻ</option><option value="'+sales_price0+'" data-price="'+sales_price0+'">Giá Đại lý Cấp 0</option><option value="'+sales_price1+'" data-price="'+sales_price1+'">Giá Đại lý Cấp 1</option><option value="'+sales_price2+'" data-price="'+sales_price2+'">Giá Đại lý Cấp 2</option><option value="'+sales_price3+'" data-price="'+sales_price3+'">Giá Đại lý Cấp 3</option></select></td>';
+            str+='<td id="td_'+rowcount+'_0"><span id="td_data_'+rowcount+'_0" style="white-space: break-spaces; text-overflow: ellipsis; overflow: hidden;"><i class="fa fa-gift"></i> '+ item_name     +'</span></td>';/* Cột 1: Tên sản phẩm */ 
+            str+='<td id="td_'+rowcount+'_1">'+quantity+'</td>';/* Cột 2: Số lượng */
             
-    
+            // Cột 3: Đơn giá
             info='<input id="sales_price_'+rowcount+'" onblur="set_to_original('+rowcount+','+item_cost+')" onkeyup="update_price('+rowcount+','+item_cost+')" name="sales_price_'+rowcount+'" type="text" class="form-control no-padding min_width priceset" value="'+sales_price+'">';
-            
-            
-            
-            
-            
-            
-            str+='<td id="td_'+rowcount+'_3" class="text-right">'+ info   +'</td>';/* td_0_3 item sales price*/
+            str+='<td id="td_'+rowcount+'_2" class="text-right">'+ info   +'</td>';/* Cột 3: Đơn giá */
     
-            /*Discount*/
-             info='<input data-toggle="tooltip" title="" id="item_discount_'+rowcount+'" readonly name="item_discount_'+rowcount+'" type="text" class="form-control no-padding min_width pointer" value="0">';
-             
-            str+='<td id="td_'+rowcount+'_6" class="text-right">'+ info   +'</td>';
+            // Cột 4: Chiết khấu
+            info='<input data-toggle="tooltip" title="" id="item_discount_'+rowcount+'" readonly name="item_discount_'+rowcount+'" type="text" class="form-control no-padding min_width pointer" value="0">';
+            str+='<td id="td_'+rowcount+'_3" class="text-right">'+ info   +'</td>';/* Cột 4: Chiết khấu */
     
-            /*Tax amt*/
-            str+='<td id="td_'+rowcount+'_11" class="<?=tax_disable_class()?>"><input data-toggle="tooltip" title="Click to Change" id="td_data_'+rowcount+'_11" onclick="show_sales_item_modal('+rowcount+')" name="td_data_'+rowcount+'_11" type="text" class="form-control no-padding pointer min_width" readonly value="'+tax_amt+'"></td>';
+            // Cột 5: Thuế
+            str+='<td id="td_'+rowcount+'_4" class="<?=tax_disable_class()?>"><input data-toggle="tooltip" title="Click to Change" id="td_data_'+rowcount+'_4" onclick="show_sales_item_modal('+rowcount+')" name="td_data_'+rowcount+'_4" type="text" class="form-control no-padding pointer min_width" readonly value="'+tax_amt+'"></td>';/* Cột 5: Thuế */
     
-            str+='<td id="td_'+rowcount+'_4" class="text-right"><input data-toggle="tooltip" title="" id="td_data_'+rowcount+'_4" name="td_data_'+rowcount+'_4" type="text" class="form-control no-padding pointer" readonly value="'+sub_total+'"></td>';/* td_0_4 item sub_total */
-            str+='<td id="td_'+rowcount+'_5">'+ remove_btn    +'</td>';/* td_0_5 item gst_amt */
+            // Cột 6: Thành tiền
+            str+='<td id="td_'+rowcount+'_5" class="text-right"><input data-toggle="tooltip" title="" id="td_data_'+rowcount+'_5" name="td_data_'+rowcount+'_5" type="text" class="form-control no-padding pointer" readonly value="'+sub_total+'"></td>';/* Cột 6: Thành tiền */
+            
+            // Cột 7: Nút xóa
+            str+='<td id="td_'+rowcount+'_6">'+ remove_btn    +'</td>';/* Cột 7: Nút xóa */
     
             str+='<input type="hidden" name="tr_item_id_'+rowcount+'" id="tr_item_id_'+rowcount+'" value="'+item_id+'">';
            // str+='<input type="hidden" id="tr_item_per_'+rowcount+'" name="tr_item_per_'+rowcount+'" value="'+gst_per+'">';
@@ -1537,19 +1516,9 @@ function set_to_original(row_id,item_cost) {
 //INCREMENT ITEM
 function increment_qty(item_id,rowcount){
   var item_qty=$("#item_qty_"+rowcount+"_"+item_id).val();
-  var stock=$("#td_"+rowcount+"_1").html();
-    
-    new_item_qty=parseFloat(item_qty)+1;
-    $("#item_qty_"+rowcount+"_"+item_id).val(parseFloat(new_item_qty).toFixed(0));
-  /*if(parseFloat(item_qty)<parseFloat(stock)){
-    new_item_qty=parseFloat(item_qty)+1;
-
-    if(parseFloat(new_item_qty)>parseFloat(stock)){
-      new_item_qty = stock;
-    }
-
-    $("#item_qty_"+item_id).val(parseFloat(new_item_qty).toFixed(0));
-  }*/
+  // Bỏ check stock vì cột stock đã được loại bỏ
+  new_item_qty=parseFloat(item_qty)+1;
+  $("#item_qty_"+rowcount+"_"+item_id).val(parseFloat(new_item_qty).toFixed(0));
   make_subtotal(item_id,rowcount);
   calculate_payments();
 }
@@ -1557,8 +1526,6 @@ function increment_qty(item_id,rowcount){
 function decrement_qty(item_id,rowcount){
   var item_qty=parseFloat($("#item_qty_"+rowcount+"_"+item_id).val());
       item_qty = isNaN(item_qty) ? 0 : item_qty;
-  var stock= parseFloat($("#td_"+rowcount+"_1").html());
-      stock = isNaN(stock) ? 0 : stock;
 
   if(item_qty<1){
      $("#item_qty_"+rowcount+"_"+item_id).val((item_qty).toFixed(0));
@@ -1583,26 +1550,17 @@ function getPrices(rowcount, item_id) {
 }
 function item_qty_input(item_id,rowcount){
   var item_qty=$("#item_qty_"+rowcount+"_"+item_id).val();
-  var stock=$("#td_"+rowcount+"_1").html();
-  if(stock==0){
-    toastr["warning"]("item Not Available in stock!");
-    //return;  
-  }
-  if(parseFloat(item_qty)>parseFloat(stock)){
-    $("#item_qty_"+rowcount+"_"+item_id).val(stock);
-    toastr["warning"]("Oops! You have only "+stock+" items in Stock");
-   // return;
-  }
-  if(item_qty==0){
+  // Bỏ check stock vì cột stock đã được loại bỏ
+  if(item_qty==0 || item_qty==""){
     $("#item_qty_"+rowcount+"_"+item_id).val(1);
-    toastr["warning"]("You must have atlease one Quantity");
-    //return; 
-  }
-  /*else{
-    $("#item_qty_"+item_id).val(1);
-    toastr["warning"]("You must have atlease one Quantity");
+    toastr["warning"]("Bạn phải có ít nhất 1 số lượng");
     return; 
-  }*/
+  }
+  if(parseFloat(item_qty) < 0){
+    $("#item_qty_"+rowcount+"_"+item_id).val(1);
+    toastr["warning"]("Số lượng phải lớn hơn 0");
+    return; 
+  }
   make_subtotal(item_id,rowcount);
 }
 
@@ -1613,7 +1571,6 @@ function zero_stock(){
 //LEFT SIDE: REMOVE ROW 
 function removerow(id){//id=Rowid  
     $("#row_"+id).remove();
-    $("#tr_items_name_"+id).remove();
      $("#tr_items_desc_"+id).remove();
     failed.currentTime = 0;
     failed.play();
@@ -1627,27 +1584,33 @@ function make_subtotal(item_id,rowcount){
 
    //Find the Tax type and Tax amount
    var tax_type = $("#tr_tax_type_"+rowcount).val();
-   var tax_amount = $("#td_data_"+rowcount+"_11").val();
+   var tax_amount = parseFloat($("#td_data_"+rowcount+"_4").val());
+       tax_amount = isNaN(tax_amount) ? 0 : tax_amount;
 
-  var sales_price     =$("#sales_price_"+rowcount).val();
-  //var gst_per         =$("#tr_item_per_"+rowcount).val();
+  var sales_price = parseFloat($("#sales_price_"+rowcount).val());
+      sales_price = isNaN(sales_price) ? 0 : sales_price;
   
-  var item_qty        =$("#item_qty_"+rowcount+"_"+item_id).val();
+  var item_qty = parseFloat($("#item_qty_"+rowcount+"_"+item_id).val());
+      item_qty = isNaN(item_qty) ? 1 : item_qty;
+
+  var tot_sales_price = item_qty * sales_price;
+
+  var subtotal = tot_sales_price;
+  /*Discount*/
+  var discount_amt = parseFloat($("#item_discount_"+rowcount).val());
+      discount_amt = isNaN(discount_amt) ? 0 : discount_amt;
+
+  subtotal = (tax_type=='Inclusive') ? subtotal : subtotal + tax_amount;
+
+  subtotal -= discount_amt;
   
-
-  var tot_sales_price =parseFloat(item_qty)*parseFloat(sales_price);
-  //var gst_amt=(tot_sales_price * gst_per)/100;
-
-  var subtotal        =parseFloat(tot_sales_price);
-  /*Discounr*/
-  var discount_amt    =$("#item_discount_"+rowcount).val();
-
-  subtotal = (tax_type=='Inclusive') ? subtotal : parseFloat(subtotal) + parseFloat(tax_amount);
-
-  subtotal -= parseFloat(discount_amt);
-  
-  $("#td_data_"+rowcount+"_4").val(parseFloat(subtotal).toFixed(0));
+  $("#td_data_"+rowcount+"_5").val(parseFloat(subtotal).toFixed(0));
   final_total();
+}
+
+// Alias function để đảm bảo backward compatibility
+function calculate_payments(){
+  adjust_payments();
 }
 
 function calulate_discount(discount_input,discount_type,total){
@@ -1675,7 +1638,7 @@ function final_total(){
       //var tax_amt = parseFloat($("#td_data_"+i+"_11").val());
       item_id=$("#tr_item_id_"+i).val();
       
-      total=parseFloat(total)+ + +parseFloat($("#td_data_"+i+"_4").val()).toFixed(0);
+      total=parseFloat(total)+ + +parseFloat($("#td_data_"+i+"_5").val()).toFixed(0);
       //console.log("==>total="+total);
       //console.log("==>tax_amt="+tax_amt);
      // total+=tax_amt;
@@ -1713,7 +1676,7 @@ function final_total_reward(){
       //var tax_amt = parseFloat($("#td_data_"+i+"_11").val());
       item_id=$("#tr_item_id_"+i).val();
       
-      total=parseFloat(total)+ + +parseFloat($("#td_data_"+i+"_4").val()).toFixed(0);
+      total=parseFloat(total)+ + +parseFloat($("#td_data_"+i+"_5").val()).toFixed(0);
       item_qty=parseFloat(item_qty)+ + +parseFloat($("#item_qty_"+i+"_"+item_id).val()).toFixed(0);
       console.log('reward :' +item_id);
       }
@@ -1751,7 +1714,7 @@ function adjust_payments(){
   if($(".items_table tr").length>1){
     for(i=0;i<rowcount;i++){
       if(document.getElementById('tr_item_id_'+i)){
-      total=parseFloat(total)+ + +parseFloat($("#td_data_"+i+"_4").val()).toFixed(0);
+      total=parseFloat(total)+ + +parseFloat($("#td_data_"+i+"_5").val()).toFixed(0);
       item_id=$("#tr_item_id_"+i).val();
       item_qty=parseFloat(item_qty)+ + +parseFloat($("#item_qty_"+i+"_"+item_id).val()).toFixed(0);
       }
@@ -1823,7 +1786,7 @@ function adjust_payments2(){
   if($(".items_table tr").length>1){
     for(i=0;i<rowcount;i++){
       if(document.getElementById('tr_item_id_'+i)){
-      total=parseFloat(total)+ + +parseFloat($("#td_data_"+i+"_4").val()).toFixed(0);
+      total=parseFloat(total)+ + +parseFloat($("#td_data_"+i+"_5").val()).toFixed(0);
       item_id=$("#tr_item_id_"+i).val();
       item_qty=parseFloat(item_qty)+ + +parseFloat($("#item_qty_"+i+"_"+item_id).val()).toFixed(0);
       }
@@ -2250,6 +2213,9 @@ $('#order_date,#delivery_date,#cheque_date').datepicker({
       $("#tr_tax_value_"+row_id).val(tax);//%
       //$("#td_data_"+row_id+"_12").html(tax_type+" "+tax_name);
       
+      // Cập nhật giá trị chiết khấu và thuế hiển thị
+      set_tax_value(row_id);
+      
       var item_id=$("#tr_item_id_"+row_id).val();
       make_subtotal(item_id,row_id);
       //calculate_tax(row_id);
@@ -2280,7 +2246,7 @@ $('#order_date,#delivery_date,#cheque_date').datepicker({
       var tax_amount = (tax_type=='Inclusive') ? calculate_inclusive(sales_price,tax) : calculate_exclusive(sales_price,tax);
       
       $("#item_discount_"+row_id).val(discount_amt);
-      $("#td_data_"+row_id+"_11").val(tax_amount);
+      $("#td_data_"+row_id+"_4").val(tax_amount);
     }
     //Sale Items Modal Operations End
 
