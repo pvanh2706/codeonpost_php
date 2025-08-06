@@ -525,11 +525,11 @@ padding-right: 2px;
       //$("#popup_description").val(description);
       //$("#popup_row_id").val(row_id);
       
-      $("#sales_item2_finalprice0").val(item_pr0+'₫');
-      $("#sales_item2_finalprice1").val(item_pr1+'₫');
-      $("#sales_item2_finalprice2").val(item_pr2+'₫');
-      $("#sales_item2_finalprice3").val(item_pr3+'₫');
-      $("#sales_item2_finalprice").val(item_pr+'₫');
+      $("#sales_item2_finalprice0").val(item_pr0);
+      $("#sales_item2_finalprice1").val(item_pr1);
+      $("#sales_item2_finalprice2").val(item_pr2);
+      $("#sales_item2_finalprice3").val(item_pr3);
+      $("#sales_item2_finalprice").val(item_pr);
     }
 
     function set_info(){
