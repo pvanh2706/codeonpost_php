@@ -24,8 +24,8 @@
   <link rel="stylesheet" href="<?php echo $theme_link; ?>toastr/toastr.css">
   <!--Custom Css File-->
   <link rel="stylesheet" href="<?php echo $theme_link; ?>dist/css/custom.css">
-  <!-- Autocomplete -->
-  <link rel="stylesheet" href="<?php echo $theme_link; ?>plugins/autocomplete/autocomplete.css">
+  <!-- jQuery UI - Compatible with jQuery 2.2.3 -->
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/ui-lightness/jquery-ui.css">
   <!-- Pace Loader -->
   <link rel="stylesheet" href="<?php echo $theme_link; ?>plugins/pace/pace.min.css">
   <!-- iCheck -->

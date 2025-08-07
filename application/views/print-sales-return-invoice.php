@@ -18,6 +18,40 @@ th, td {
 }
 body{
   word-wrap: break-word;
+  font-family: Arial, sans-serif;
+  margin: 20px;
+  background: white;
+  color: black;
+}
+/* Debug styling */
+.debug-info {
+    background: #f0f0f0; 
+    border: 1px solid #ccc; 
+    padding: 10px; 
+    margin: 10px 0;
+    font-family: monospace;
+}
+
+/* Print styles - Hide debug info and print button when printing */
+@media print {
+    .debug-info,
+    .no-print {
+        display: none !important;
+    }
+    
+    body {
+        margin: 0;
+        font-size: 12px;
+    }
+    
+    table {
+        width: 100%;
+        page-break-inside: avoid;
+    }
+    
+    .amt-in-word {
+        font-size: 11px;
+    }
 }
 </style>
 
@@ -36,9 +70,14 @@ function formatNumber($number) {
 
 </head>
 <body onload="window.print();"><!--  -->
+
 <?php
 
     $q1=$this->db->query("select * from db_company where id=1 and status=1");
+    if($q1->num_rows() == 0) {
+        echo "<div style='color: red; padding: 20px;'>ERROR: Company data not found!</div>";
+        exit;
+    }
     $res1=$q1->row();
     $company_name=$res1->company_name;
     $company_mobile=$res1->mobile;
@@ -78,7 +117,10 @@ function formatNumber($number) {
                            b.`id`='$return_id' 
                            ");
                           
-    
+    if($q3->num_rows() == 0) {
+        echo "<div style='color: red; padding: 20px;'>ERROR: Return record not found for ID: $return_id</div>";
+        exit;
+    }
     $res3=$q3->row();
     $customer_name=$res3->customer_name;
     $customer_mobile=$res3->mobile;
@@ -116,7 +158,7 @@ function formatNumber($number) {
     if(!empty($customer_country)){
       $Query1 = $this->db->query("select country from db_country where id='$customer_country'");
       if($Query1->num_rows()>0){
-        $customer_country = $Query1->get()->row()->country;  
+        $customer_country = $Query1->row()->country;  
       }
       else{
         $customer_country = '';
@@ -125,7 +167,7 @@ function formatNumber($number) {
     if(!empty($customer_state)){
       $Query1 = $this->db->query("select state from db_states where id='$customer_state'");
       if($Query1->num_rows()>0){
-        $customer_state = $Query1->get()->row()->state;  
+        $customer_state = $Query1->row()->state;  
       }
       else{
         $customer_state = '';
@@ -338,9 +380,11 @@ function formatNumber($number) {
   <tr>
     <td colspan="10">
 <?php
-     
+     try {
       echo "<span class='amt-in-word'>Số tiền bằng chữ: <i style='font-weight:bold;'>".NumberToWords(round($grand_total))." đồng</i></span>";
-
+     } catch(Exception $e) {
+      echo "<span class='amt-in-word'>Số tiền bằng chữ: <i style='font-weight:bold;'>".number_format(round($grand_total), 0, ',', '.')." đồng</i></span>";
+     }
       ?>
   
 </td>
