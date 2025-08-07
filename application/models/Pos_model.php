@@ -721,7 +721,8 @@ class Pos_model extends CI_Model {
 					$per_item_price_inc_tax=$price_per_unit;
 				}*/
 				$per_item_price_inc_tax=$price_per_unit;
-				$per_item_price_inc_tax=number_format($per_item_price_inc_tax,2,'.','');	
+				$per_item_price_display = number_format($per_item_price_inc_tax,0,'.', ',');
+				$per_item_price_value = number_format($per_item_price_inc_tax,2,'.','');	
 
 				$tax_amt = $res3->tax_amt;
 				$tax_type = $res3->tax_type;
@@ -729,38 +730,40 @@ class Pos_model extends CI_Model {
 				$tax_value = $q6->tax;
 
 		  		$quantity        ='<div class="input-group input-group-sm"><span class="input-group-btn"><button onclick="decrement_qty('.$res3->item_id.','.$i.')" type="button" class="btn btn-default btn-flat"><i class="fa fa-minus text-danger"></i></button></span>';
-			    $quantity       .='<input typ="text" value="'.$res3->sales_qty.'" class="form-control text-center" onkeyup="item_qty_input('.$res3->item_id.','.$i.')" id="item_qty_'.$res3->item_id.'" name="item_qty_'.$res3->item_id.'">';
+			    $quantity       .='<input type="text" value="'.$res3->sales_qty.'" class="form-control text-center" style="background-color: white !important; color: black !important; font-weight: bold !important; min-width: 60px !important;" onkeyup="item_qty_input('.$res3->item_id.','.$i.')" id="item_qty_'.$i.'_'.$res3->item_id.'" name="item_qty_'.$i.'_'.$res3->item_id.'">';
 			    $quantity       .='<span class="input-group-btn"><button onclick="increment_qty('.$res3->item_id.','.$i.')" type="button" class="btn btn-default btn-flat"><i class="fa fa-plus text-success"></i></button></span></div>';
 			    //$sub_total       =$per_item_price_inc_tax * $res3->sales_qty;
 			    $sub_total = $res3->total_cost;
+			    $sub_total_display = number_format($sub_total,0,'.', ',');
 			    $remove_btn      ='<a class="fa fa-fw fa-trash-o text-red" style="cursor: pointer;font-size: 20px;" onclick="removerow('.$i.')" title="Delete Item?"></a>';
 			    
-		  		echo '<tr id="row_'.$i.'" data-row="0" data-item-id="'.$res3->item_id.'" >'; /*item id */
+		  		echo '<tr id="row_'.$i.'" data-row="0" data-item-id="'.$res3->item_id.'" class="itemrows" data-rowcount="'.$i.'">'; /*item id */
 		  		echo '<td id="td_'.$i.'_0">
 		  		<a data-toggle="tooltip" title="Click to Change Tax" class="pointer" id="td_data_'.$i.'_0" onclick="show_sales_item_modal('.$i.')">'.$q5->row()->item_name.'<i onclick="" class="fa fa-edit pointer"></i></a>
 		  		</td>';  /*td_0_0 item name*/
-		  		echo '<td id="td_'.$i.'_1">'.$stock.'</td>';  /*td_0_1 item available qty*/
-		  		echo '<td id="td_'.$i.'_2">'.$quantity.'</td>';    /*td_0_2 item available qty */
+		  		
+		  		echo '<td id="td_'.$i.'_2">'.$quantity.'</td>';    /*td_0_2 item quantity */
 
-		  		$info = '<input id="sales_price_'.$i.'" onblur="set_to_original('.$i.','.$res3->purchase_price.')" onkeyup="update_price('.$i.','.$res3->purchase_price.')" name="sales_price_'.$i.'" type="text" class="form-control text-left no-padding" value="'.$per_item_price_inc_tax.'">';
+		  		$info = '<input id="sales_price_'.$i.'" onblur="set_to_original('.$i.','.$res3->purchase_price.')" onkeyup="update_price('.$i.','.$res3->purchase_price.')" name="sales_price_'.$i.'" type="text" class="form-control text-left no-padding" value="'.$per_item_price_display.'" data-raw-value="'.$per_item_price_value.'">';
 
 		  		echo '<td id="td_'.$i.'_3" class="text-right" >'.$info.'</td>';    /*td_0_3 item sales price */
 
 		  		/*Discount*/
-		  		$info = '<input data-toggle="tooltip" title="Click to Change" onclick="show_sales_item_modal('.$i.')" id="item_discount_'.$i.'" readonly name="item_discount_'.$i.'" type="text" class="form-control text-left no-padding" value="'.$item_discount.'">';
+		  		$item_discount_display = ($item_discount > 0) ? number_format($item_discount,0,'.', ',') : $item_discount;
+		  		$info = '<input data-toggle="tooltip" title="Click to Change" onclick="show_sales_item_modal('.$i.')" id="item_discount_'.$i.'" readonly name="item_discount_'.$i.'" type="text" class="form-control text-left no-padding" value="'.$item_discount_display.'">';
 
-		  		echo '<td id="td_'.$i.'_6" class="text-right" >'.$info.'</td>';
+		  		echo '<td id="td_'.$i.'_6" class="text-right" >'.$info.'</td>';    /*td_0_6 item discount */
 
-
-		  		echo '<td id="td_'.$i.'_11" class="'.tax_disable_class().'"><input data-toggle="tooltip" title="Click to Change" id="td_data_'.$i.'_11" onclick="show_sales_item_modal('.$i.')" name="td_data_'.$i.'_11" type="text" class="form-control no-padding pointer" readonly value="'.$tax_amt.'"></td>';
+		  		echo '<td id="td_'.$i.'_11" class="'.tax_disable_class().'"><input data-toggle="tooltip" title="Click to Change" id="td_data_'.$i.'_11" onclick="show_sales_item_modal('.$i.')" name="td_data_'.$i.'_11" type="text" class="form-control no-padding pointer" readonly value="'.$tax_amt.'"></td>';    /*td_0_11 item tax */
 
 		  		echo '<td id="td_'.$i.'_4" class="text-right" >
-		  		<input data-toggle="tooltip" title="Total" id="td_data_'.$i.'_4" name="td_data_'.$i.'_4" type="text" class="form-control no-padding pointer" readonly value="'.number_format($sub_total,2,'.','').'"></td>';    /*td_0_4 item sub_total */
-		  		echo '<td id="td_'.$i.'_5">'.$remove_btn.'</td>';    /* td_0_5 item gst_amt  */
+		  		<input data-toggle="tooltip" title="Total" id="td_data_'.$i.'_4" name="td_data_'.$i.'_4" type="text" class="form-control no-padding pointer" readonly value="'.$sub_total_display.'" data-raw-value="'.$sub_total.'"></td>';    /*td_0_4 item sub_total */
+		  		echo '<td id="td_'.$i.'_5">'.$remove_btn.'</td>';    /* td_0_5 remove button */
 
 		  		echo '<input type="hidden" name="tr_item_id_'.$i.'" id="tr_item_id_'.$i.'" value="'.$res3->item_id.'">'; 
 		  		echo '<input type="hidden" id="tr_item_per_'.$i.'" name="tr_item_per_'.$i.'" value="'.$q6->tax.'">';
-		  		echo '<input type="hidden" id="tr_sales_price_temp_'.$i.'" name="tr_sales_price_temp_'.$i.'" value="'.$per_item_price_inc_tax.'">';
+		  		echo '<input type="hidden" id="tr_sales_price_temp_'.$i.'" name="tr_sales_price_temp_'.$i.'" value="'.$per_item_price_value.'">';
+		  		echo '<input type="hidden" id="tr_stock_'.$i.'" name="tr_stock_'.$i.'" value="'.$stock.'">';
 		  		echo '</tr>';
 		  		echo '<input type="hidden" id="tr_tax_type_'.$i.'" name="tr_tax_type_'.$i.'" value="'.$tax_type.'">';
         		echo '<input type="hidden" id="tr_tax_id_'.$i.'" name="tr_tax_id_'.$i.'" value="'.$tax_id.'">';
