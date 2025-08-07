@@ -203,3 +203,6 @@ $lang['send_sms'] = 'Gửi SMS';
 $lang['sms_templates'] = 'Mẫu SMS';
 $lang['sms_api'] = 'API SMS';
 $lang['tax_amount'          ] = 'Số tiền thuế';
+$lang['role_name'] = 'Tên quyền hạn';
+$lang['new_role'] = 'Thêm quyền hạn';
+$lang['role_list'] = 'Danh sách quyền hạn';
