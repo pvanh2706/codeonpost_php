@@ -441,7 +441,7 @@
                                             removerow(T);
                                         }
                                     } else {
-                                        alert('Có cái gì đâu mà bấm xóa vậy cha nội!');
+                                        alert('Không có thông tin nào để xóa!');
                                     }
                             });
                           </script>
@@ -1475,6 +1475,17 @@ function addrow_gift(id='',item_obj=''){
   
 function update_price(row_id,item_cost){
 
+  // Get current value and remove any existing commas
+  var current_value = $("#sales_price_"+row_id).val().replace(/,/g, '');
+  var sales_price = parseFloat(current_value);
+  
+  if(!isNaN(sales_price)) {
+    // Format with commas and update the display
+    var formatted_price = new Intl.NumberFormat('en-US').format(Math.round(sales_price));
+    $("#sales_price_"+row_id).val(formatted_price);
+    $("#sales_price_"+row_id).attr('data-raw-value', sales_price);
+  }
+
   //Input
   /*var sales_price=$("#sales_price_"+row_id).val().trim();
   if(sales_price!='' || sales_price==0) {sales_price = parseFloat(sales_price); }
@@ -1516,9 +1527,20 @@ function set_to_original(row_id,item_cost) {
 //INCREMENT ITEM
 function increment_qty(item_id,rowcount){
   var item_qty=$("#item_qty_"+rowcount+"_"+item_id).val();
-  // Bỏ check stock vì cột stock đã được loại bỏ
-  new_item_qty=parseFloat(item_qty)+1;
-  $("#item_qty_"+rowcount+"_"+item_id).val(parseFloat(new_item_qty).toFixed(0));
+  // Use hidden field instead of removed stock column
+  var stock=$("#tr_stock_"+rowcount).val();
+    
+    new_item_qty=parseFloat(item_qty)+1;
+    $("#item_qty_"+rowcount+"_"+item_id).val(parseFloat(new_item_qty).toFixed(0));
+  /*if(parseFloat(item_qty)<parseFloat(stock)){
+    new_item_qty=parseFloat(item_qty)+1;
+
+    if(parseFloat(new_item_qty)>parseFloat(stock)){
+      new_item_qty = stock;
+    }
+
+    $("#item_qty_"+item_id).val(parseFloat(new_item_qty).toFixed(0));
+  }*/
   make_subtotal(item_id,rowcount);
   calculate_payments();
 }
@@ -1526,6 +1548,9 @@ function increment_qty(item_id,rowcount){
 function decrement_qty(item_id,rowcount){
   var item_qty=parseFloat($("#item_qty_"+rowcount+"_"+item_id).val());
       item_qty = isNaN(item_qty) ? 0 : item_qty;
+  // Use hidden field instead of removed stock column  
+  var stock= parseFloat($("#tr_stock_"+rowcount).val());
+      stock = isNaN(stock) ? 0 : stock;
 
   if(item_qty<1){
      $("#item_qty_"+rowcount+"_"+item_id).val((item_qty).toFixed(0));
@@ -1550,8 +1575,18 @@ function getPrices(rowcount, item_id) {
 }
 function item_qty_input(item_id,rowcount){
   var item_qty=$("#item_qty_"+rowcount+"_"+item_id).val();
-  // Bỏ check stock vì cột stock đã được loại bỏ
-  if(item_qty==0 || item_qty==""){
+  // Use hidden field instead of removed stock column
+  var stock=$("#tr_stock_"+rowcount).val();
+  if(stock==0){
+    toastr["warning"]("item Not Available in stock!");
+    //return;  
+  }
+  if(parseFloat(item_qty)>parseFloat(stock)){
+    $("#item_qty_"+rowcount+"_"+item_id).val(stock);
+    toastr["warning"]("Oops! You have only "+stock+" items in Stock");
+   // return;
+  }
+  if(item_qty==0 || item_qty=='' || isNaN(item_qty)){
     $("#item_qty_"+rowcount+"_"+item_id).val(1);
     toastr["warning"]("Bạn phải có ít nhất 1 số lượng");
     return; 
@@ -1582,29 +1617,69 @@ function removerow(id){//id=Rowid
 function make_subtotal(item_id,rowcount){
   set_tax_value(rowcount);
 
-   //Find the Tax type and Tax amount
+   //Find the Tax type and Tax amount  
    var tax_type = $("#tr_tax_type_"+rowcount).val();
-   var tax_amount = parseFloat($("#td_data_"+rowcount+"_4").val());
-       tax_amount = isNaN(tax_amount) ? 0 : tax_amount;
+// <<<<<<< HEAD
+  //  var tax_amount = parseFloat($("#td_data_"+rowcount+"_4").val());
+  //      tax_amount = isNaN(tax_amount) ? 0 : tax_amount;
 
-  var sales_price = parseFloat($("#sales_price_"+rowcount).val());
-      sales_price = isNaN(sales_price) ? 0 : sales_price;
+  // var sales_price = parseFloat($("#sales_price_"+rowcount).val());
+  //     sales_price = isNaN(sales_price) ? 0 : sales_price;
+  
+  // var item_qty = parseFloat($("#item_qty_"+rowcount+"_"+item_id).val());
+  //     item_qty = isNaN(item_qty) ? 1 : item_qty;
+
+  // var tot_sales_price = item_qty * sales_price;
+
+  // var subtotal = tot_sales_price;
+  // /*Discount*/
+  // var discount_amt = parseFloat($("#item_discount_"+rowcount).val());
+  //     discount_amt = isNaN(discount_amt) ? 0 : discount_amt;
+
+  // subtotal = (tax_type=='Inclusive') ? subtotal : subtotal + tax_amount;
+
+  // subtotal -= discount_amt;
+  
+  // $("#td_data_"+rowcount+"_5").val(parseFloat(subtotal).toFixed(0));
+// =======
+   var tax_percentage = parseFloat($("#tr_tax_value_"+rowcount).val()); //%
+   tax_percentage = isNaN(tax_percentage) ? 0 : tax_percentage;
+
+  // Remove commas from sales price before parsing
+  var sales_price_text = $("#sales_price_"+rowcount).val().replace(/,/g, '');
+  var sales_price = parseFloat(sales_price_text);
+  sales_price = isNaN(sales_price) ? 0 : sales_price;
   
   var item_qty = parseFloat($("#item_qty_"+rowcount+"_"+item_id).val());
-      item_qty = isNaN(item_qty) ? 1 : item_qty;
-
+  item_qty = isNaN(item_qty) ? 1 : item_qty;
+  
   var tot_sales_price = item_qty * sales_price;
 
-  var subtotal = tot_sales_price;
   /*Discount*/
-  var discount_amt = parseFloat($("#item_discount_"+rowcount).val());
-      discount_amt = isNaN(discount_amt) ? 0 : discount_amt;
-
-  subtotal = (tax_type=='Inclusive') ? subtotal : subtotal + tax_amount;
-
-  subtotal -= discount_amt;
+  var discount_amt = parseFloat($("#item_discount_"+rowcount).val().replace(/,/g, ''));
+  discount_amt = isNaN(discount_amt) ? 0 : discount_amt;
   
-  $("#td_data_"+rowcount+"_5").val(parseFloat(subtotal).toFixed(0));
+  // Calculate tax amount based on type
+  var tax_amount = 0;
+  if(tax_type == 'Exclusive') {
+    // For exclusive: tax = (subtotal after discount) * tax_percentage / 100
+    tax_amount = ((tot_sales_price - discount_amt) * tax_percentage) / 100;
+  } else {
+    // For inclusive: tax is already included in price
+    tax_amount = 0;
+  }
+
+  var subtotal = tot_sales_price + tax_amount - discount_amt;
+  
+  // Update tax display
+  $("#td_data_"+rowcount+"_11").val(Math.round(tax_amount));
+  
+  // Format the result with commas and update both display and raw value
+  var subtotal_formatted = new Intl.NumberFormat('en-US').format(Math.round(subtotal));
+  $("#td_data_"+rowcount+"_4").val(subtotal_formatted);
+  $("#td_data_"+rowcount+"_4").attr('data-raw-value', subtotal);
+  
+// >>>>>>> fixbug_vanh
   final_total();
 }
 
@@ -1614,11 +1689,16 @@ function calculate_payments(){
 }
 
 function calulate_discount(discount_input,discount_type,total){
+  discount_input = parseFloat(discount_input);
+  discount_input = isNaN(discount_input) ? 0 : discount_input;
+  total = parseFloat(total);
+  total = isNaN(total) ? 0 : total;
+  
   if(discount_type=='in_percentage'){
-    return parseFloat((total*discount_input)/100);
+    return (total * discount_input) / 100;
   }
   else{//in_fixed
-    return parseFloat(discount_input);
+    return discount_input;
   }
 }
 //LEFT SIDE: FINAL TOTAL
@@ -1626,10 +1706,11 @@ function final_total(){
   var total=0;
   var item_qty=0;
   var rowcount=$("#hidden_rowcount").val();
-  var discount_input=$("#discount_input").val();
+  var discount_input=parseFloat($("#discount_input").val());
+  discount_input = isNaN(discount_input) ? 0 : discount_input;
   var discount_type=$("#discount_type").val();
   var other_charges=parseFloat($("#other_charges").val());
-      other_charges = (isNaN(other_charges)) ? parseFloat(0) :other_charges;
+      other_charges = (isNaN(other_charges)) ? 0 : other_charges;
 
   if($(".items_table tr").length>1){
     for(i=0;i<rowcount;i++){
@@ -1638,12 +1719,25 @@ function final_total(){
       //var tax_amt = parseFloat($("#td_data_"+i+"_11").val());
       item_id=$("#tr_item_id_"+i).val();
       
-      total=parseFloat(total)+ + +parseFloat($("#td_data_"+i+"_5").val()).toFixed(0);
-      //console.log("==>total="+total);
-      //console.log("==>tax_amt="+tax_amt);
-     // total+=tax_amt;
-      //console.log("==>total="+total);
-      item_qty=parseFloat(item_qty)+ + +parseFloat($("#item_qty_"+i+"_"+item_id).val()).toFixed(0);
+
+    //   total=parseFloat(total)+ + +parseFloat($("#td_data_"+i+"_5").val()).toFixed(0);
+    //   //console.log("==>total="+total);
+    //   //console.log("==>tax_amt="+tax_amt);
+    //  // total+=tax_amt;
+    //   //console.log("==>total="+total);
+    //   item_qty=parseFloat(item_qty)+ + +parseFloat($("#item_qty_"+i+"_"+item_id).val()).toFixed(0);
+      // Use raw value if available, otherwise parse the formatted value
+      var current_total = $("#td_data_"+i+"_4").attr('data-raw-value');
+      if(!current_total) {
+        current_total = $("#td_data_"+i+"_4").val().replace(/,/g, '');
+      }
+      current_total = parseFloat(current_total);
+      current_total = isNaN(current_total) ? 0 : current_total;
+      total = total + current_total;
+      
+      var current_qty = parseFloat($("#item_qty_"+i+"_"+item_id).val());
+      current_qty = isNaN(current_qty) ? 0 : current_qty;
+      item_qty = item_qty + current_qty;
       //console.log('non reward :' +item_qty);
       }
     }//for end
@@ -1696,9 +1790,9 @@ function final_total_reward(){
 }
 function set_total(tot_qty=0, tot_amt=0, tot_disc=0, tot_grand=0){
   $(".tot_qty   ").html(tot_qty);
-  $(".tot_amt   ").html((round_off(tot_amt).toFixed(0)));
-  $(".tot_disc  ").html((round_off(tot_disc).toFixed(0)));
-  $(".tot_grand ").html((round_off(tot_grand)).toFixed(0));
+  $(".tot_amt   ").html(new Intl.NumberFormat('en-US').format(Math.round(tot_amt)));
+  $(".tot_disc  ").html(new Intl.NumberFormat('en-US').format(Math.round(tot_disc)));
+  $(".tot_grand ").html(new Intl.NumberFormat('en-US').format(Math.round(tot_grand)));
 }
 
 //LEFT SIDE: FINAL TOTAL
@@ -1714,9 +1808,20 @@ function adjust_payments(){
   if($(".items_table tr").length>1){
     for(i=0;i<rowcount;i++){
       if(document.getElementById('tr_item_id_'+i)){
-      total=parseFloat(total)+ + +parseFloat($("#td_data_"+i+"_5").val()).toFixed(0);
+     // total=parseFloat(total)+ + +parseFloat($("#td_data_"+i+"_5").val()).toFixed(0);
+      // Use raw value if available, otherwise parse the formatted value
+      var current_total = $("#td_data_"+i+"_4").attr('data-raw-value');
+      if(!current_total) {
+        current_total = $("#td_data_"+i+"_4").val().replace(/,/g, '');
+      }
+      current_total = parseFloat(current_total);
+      current_total = isNaN(current_total) ? 0 : current_total;
+      total = total + current_total;
+
       item_id=$("#tr_item_id_"+i).val();
-      item_qty=parseFloat(item_qty)+ + +parseFloat($("#item_qty_"+i+"_"+item_id).val()).toFixed(0);
+      var current_qty = parseFloat($("#item_qty_"+i+"_"+item_id).val());
+      current_qty = isNaN(current_qty) ? 0 : current_qty;
+      item_qty = item_qty + current_qty;
       }
     }//for end
   }//items_table
@@ -1928,9 +2033,10 @@ $(document).ready(function(){
 
     $(".box").append('<div class="overlay"><i class="fa fa-refresh fa-spin"></i></div>');
     $.get("<?php echo $base_url ?>pos/fetch_sales/<?php echo $sales_id ?>",{},function(result){
-     // console.log(result);
+      console.log("API Result:", result);
       result=result.split("<<<###>>>");
-      $('#pos-form-tbody').append(result[0]);
+      console.log("HTML Content:", result[0]);
+     $('#pos-form-tbody').append(result[0]);
       //$('#pos-form-tbody-modal').append(result[0]);
       $('#discount_input').val(result[1]);
       $('#discount_type').val(result[2]);
@@ -1939,6 +2045,15 @@ $(document).ready(function(){
       $('#other_charges').val(result[4]);
       $('#sales_date').val(result[5]);
       $("#hidden_rowcount").val(parseFloat($(".items_table tr").length)-1);
+      
+      // Debug: Check if quantity inputs have values
+      $('input[id*="item_qty_"]').each(function(){
+        console.log("Quantity input:", $(this).attr('id'), "Value:", $(this).val());
+      });
+      
+      // Recalculate totals after loading data
+      final_total();
+      calculate_payments();
       
       $(".overlay").remove();
       //$("#customer_id").trigger("change");
@@ -2224,12 +2339,16 @@ $('#order_date,#delivery_date,#cheque_date').datepicker({
     function set_tax_value(row_id){
       //get the sales price of the item
       var tax_type = $("#tr_tax_type_"+row_id).val();
-      var tax = $("#tr_tax_value_"+row_id).val(); //%
+      var tax = parseFloat($("#tr_tax_value_"+row_id).val()); //%
+      tax = isNaN(tax) ? 0 : tax;
+      
       var item_id=$("#tr_item_id_"+row_id).val();
       var qty=($("#item_qty_"+row_id+"_"+item_id).val());
           qty = (isNaN(qty)) ? 0 :qty;
 
-      var sales_price = parseFloat($("#sales_price_"+row_id).val());
+      // Remove commas from sales price before parsing
+      var sales_price_text = $("#sales_price_"+row_id).val().replace(/,/g, '');
+      var sales_price = parseFloat(sales_price_text);
           sales_price = (isNaN(sales_price)) ? 0 :sales_price;
           sales_price = sales_price * qty;
 
@@ -2243,7 +2362,17 @@ $('#order_date,#delivery_date,#cheque_date').datepicker({
      
       sales_price-=parseFloat(discount_amt);
 
-      var tax_amount = (tax_type=='Inclusive') ? calculate_inclusive(sales_price,tax) : calculate_exclusive(sales_price,tax);
+      // Calculate tax amount correctly
+      var tax_amount = 0;
+      if(tax_type=='Exclusive') {
+          // For exclusive: tax = sales_price * tax / 100
+          tax_amount = (sales_price * tax) / 100;
+      } else {
+          // For inclusive: use the existing function
+          tax_amount = parseFloat(calculate_inclusive(sales_price,tax));
+      }
+      
+      tax_amount = Math.round(tax_amount);
       
       $("#item_discount_"+row_id).val(discount_amt);
       $("#td_data_"+row_id+"_4").val(tax_amount);

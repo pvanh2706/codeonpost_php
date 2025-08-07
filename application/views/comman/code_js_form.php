@@ -33,8 +33,8 @@
 <script src="<?php echo $theme_link; ?>js/custom.js?v=<?= time();?>" ></script>
 <!-- sweet alert -->
 <script src="<?php echo $theme_link; ?>js/sweetalert.min.js"></script>
-<!-- Autocomplete -->      
-<script src="<?php echo $theme_link; ?>plugins/autocomplete/autocomplete.js"></script>
+<!-- jQuery UI - Compatible with jQuery 2.2.3 -->      
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
 <!-- Pace Loader -->
 <script src="<?php echo $theme_link; ?>plugins/pace/pace.min.js"></script>
 
