@@ -33,6 +33,26 @@ padding-right: 2px;
 .tax-total-column {
     border-right: 2px solid #3c8dbc !important;
 }
+
+/* Discount percentage display */
+#discount_percentage_display {
+    font-style: italic;
+    margin-left: 5px;
+}
+
+/* Payment suggestion styling */
+.payment-suggestion {
+    display: none;
+    transition: all 0.3s ease-in-out;
+    opacity: 0;
+    transform: translateY(-5px);
+}
+
+.payment-suggestion.show {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
 </style>
 
 </head>
@@ -452,7 +472,7 @@ function round_off($amount) {
                                     
                                     <div class="col-md-12 d-flex justify-content">
                                         <div class="col-md-6">
-                                            <div class="form-group">
+                                            <div class="form-group" style="display: none;">
                                               <label for="other_charges_input" class="col-md-4 control-label">Phụ phí khác</label>    
                                               <div class="col-md-8">
                                                  <input onclick="this.select();" type="text" class="form-control text-right only_currency" id="other_charges_input" name="other_charges_input" onkeyup="final_total();" value="<?php echo formatNumber($other_charges_input); ?>">
@@ -463,10 +483,10 @@ function round_off($amount) {
                                            <div class="form-group">
                                           <label for="discount_to_all_input" class="col-md-4 control-label">Chiết khấu</label>    
                                           <div class="col-md-4">
-                                             <input type="text" class="form-control  text-right only_currency" id="discount_to_all_input" name="discount_to_all_input" onkeyup="enable_or_disable_item_discount();" value="<?php echo formatNumber($discount_input); ?>">
+                                             <input type="text" class="form-control  text-right" id="discount_to_all_input" name="discount_to_all_input" onkeyup="console.log('Input onkeyup triggered, value:', this.value); enable_or_disable_item_discount();" value="<?php echo formatNumber($discount_input); ?>">
                                           </div>
                                           <div class="col-md-4">
-                                             <select class="form-control" onchange="final_total();" id='discount_to_all_type' name="discount_to_all_type">
+                                             <select class="form-control" onchange="console.log('Dropdown onchange triggered, new value:', this.value); final_total();" id='discount_to_all_type' name="discount_to_all_type">
                                                  <option value='in_fixed'>Cố định (₫)</option>
                                                 <option value='in_percentage'>Phần trăm (%)</option>
                                                 
@@ -483,7 +503,7 @@ function round_off($amount) {
                                        
                                         <div class="form-group">
                                           <label for="sales_note" class="col-md-4 control-label">Ghi chú đơn hàng (F8)</label>    
-                                          <div class="col-md-8>
+                                          <div class="col-md-8">
                                              <textarea rows="3" class="form-control text-left" id='sales_note' name="sales_note"><?= $sales_note; ?></textarea>
                                             <span id="sales_note_msg" style="display:none" class="text-danger"></span>
                                           </div>
@@ -493,8 +513,8 @@ function round_off($amount) {
                                             <div class="form-group">
                                                 <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Số lượng | <span class="total_quantity text-danger" >0</span></span>
                                                 <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Tổng tạm tính <small>(trước thuế)</small> | <span class="text-danger" id="subtotal_amt" name="subtotal_amt">0</span> ₫</span>
-                                                <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Phụ phí (có thuế) | <span class="text-danger" id="other_charges_amt" name="other_charges_amt">0</span> ₫</span>
-                                                <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Chiết khấu | <span class="text-danger" id="discount_to_all_amt" name="discount_to_all_amt">0</span> ₫</span>
+                                                <span style="text-align: left; font-weight: bold; display: none;" class="form-control btn btn-file" >Phụ phí (có thuế) | <span class="text-danger" id="other_charges_amt" name="other_charges_amt">0</span> ₫</span>
+                                                <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Chiết khấu | <span class="text-danger" id="discount_to_all_amt" name="discount_to_all_amt">0</span> ₫ <span id="discount_percentage_display" style="color: #666; font-size: 0.9em;"></span></span>
                                                 <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Tổng trước thuế | <span class="text-danger" id="total_before_tax_amt" name="total_before_tax_amt">0</span> ₫</span>
                                                 <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Tổng tiền thuế | <span class="text-danger" id="total_tax_amt" name="total_tax_amt">0</span> ₫</span>
                                                 <span style="text-align: left; font-weight: bold;" class="form-control btn btn-file" >Tổng sau thuế | <span class="text-danger" id="total_after_tax_amt" name="total_after_tax_amt">0</span> ₫</span>
@@ -513,10 +533,27 @@ function round_off($amount) {
                                                 <div class="box box-solid bg-gray">
                                                     <div class="box-body">
                                                         <div class="row">
-                                                            <div class="col-md-6">
-                                                                <label for="amount">Số tiền thanh toán</label>
-                                                                <input onclick="this.select();" type="text" class="form-control text-right paid_amt only_currency" id="amount" name="amount" placeholder=""  >
-                                                                <span id="amount_msg" style="display:none" class="text-danger"></span>
+                                                            <div class="col-md-6">                                                <label for="amount">Số tiền thanh toán</label>
+                                                <input onclick="this.select();" type="text" class="form-control text-right paid_amt only_currency" id="amount" name="amount" placeholder=""  >
+                                                <div class="payment-suggestion" style="margin-top: 8px; padding: 8px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 6px; border-left: 4px solid #28a745;">
+                                                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                                                        <div style="display: flex; align-items: center;">
+                                                            <i class="fa fa-lightbulb-o" style="color: #ffc107; margin-right: 8px; font-size: 16px;"></i>
+                                                            <span style="color: #495057; font-weight: 500; font-size: 14px;">Gợi ý thanh toán:</span>
+                                                        </div>
+                                                        <div style="display: flex; align-items: center;">
+                                                            <span id="amount_suggestion" style="color: #dc3545; font-weight: bold; font-size: 16px; margin-right: 8px;">0</span>
+                                                            <span style="color: #dc3545; font-weight: bold; font-size: 14px;">₫</span>
+                                                            <button type="button" id="fill_suggestion_btn" class="btn btn-sm btn-outline-success" style="margin-left: 10px; padding: 2px 8px; font-size: 12px;">
+                                                                <i class="fa fa-arrow-down" style="margin-right: 4px;"></i>Điền
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    <div style="margin-top: 4px; font-size: 11px; color: #6c757d; font-style: italic;">
+                                                        Tự động cập nhật theo tổng hóa đơn
+                                                    </div>
+                                                </div>
+                                                <span id="amount_msg" style="display:none" class="text-danger"></span>
                                                             </div>
                                                             <div class="col-md-6">
                                                                 <label for="payment_type">Hình thức thanh toán</label>
@@ -670,26 +707,65 @@ function round_off($amount) {
 
             autoLoadFirstCustomer(customer_id);
             
+            // Log giá trị ban đầu của chiết khấu
+            console.log('=== PAGE LOAD DISCOUNT VALUES ===');
+            console.log('Initial discount input value:', $('#discount_to_all_input').val());
+            console.log('Initial discount type:', $('#discount_to_all_type').val());
+            console.log('=== END PAGE LOAD DISCOUNT VALUES ===');
+            
             // Format các input có sẵn khi load trang
             $('.only_currency').each(function() {
                 var rawValue = $(this).val().replace(/[^0-9]/g, '');
                 if (rawValue) {
-                    $(this).val(formatCurrency(formatNumber(rawValue)));
+                    $(this).val(formatNumber(rawValue));
                 }
             });
             
-            // Event listener cho input currency
+            // Event listener cho input currency - chỉ cho phép số
             $(document).on('input', '.only_currency', function() {
-                var rawValue = $(this).val().replace(/[^0-9]/g, '');
-                if (rawValue) {
-                    $(this).val(formatCurrency(formatNumber(rawValue)));
+                // Bỏ qua xử lý cho input chiết khấu trong modal
+                if ($(this).attr('id') === 'item_discount_input') {
+                    return;
                 }
+                var rawValue = $(this).val().replace(/[^0-9]/g, '');
+                $(this).val(rawValue); // Chỉ giữ số thô, không format ngay
             });
             
             $(document).on('blur', '.only_currency', function() {
+                // Bỏ qua xử lý cho input chiết khấu trong modal
+                if ($(this).attr('id') === 'item_discount_input') {
+                    return;
+                }
                 var rawValue = $(this).val().replace(/[^0-9]/g, '');
                 if (rawValue) {
-                    $(this).val(formatCurrency(formatNumber(rawValue)));
+                    $(this).val(formatNumber(rawValue)); // Format khi blur
+                }
+            });
+            
+            // Xử lý riêng cho input chiết khấu - cho phép nhập số dài
+            $(document).on('input', '#item_discount_input', function() {
+                var value = $(this).val();
+                // Chỉ cho phép số và dấu chấm thập phân
+                var cleanValue = value.replace(/[^0-9.]/g, '');
+                
+                // Đảm bảo chỉ có một dấu thập phân
+                var parts = cleanValue.split('.');
+                if (parts.length > 2) {
+                    cleanValue = parts[0] + '.' + parts.slice(1).join('');
+                }
+                
+                $(this).val(cleanValue);
+            });
+            
+            $(document).on('blur', '#item_discount_input', function() {
+                var value = $(this).val();
+                if (value) {
+                    // Parse số từ format hiện tại (có thể có dấu chấm phân cách)
+                    var numericValue = parseDirectNumber(value);
+                    if (!isNaN(numericValue) && numericValue > 0) {
+                        // Format lại số với dấu phẩy phân cách hàng nghìn
+                        $(this).val(formatNumber(numericValue));
+                    }
                 }
             });
             
@@ -723,6 +799,70 @@ function round_off($amount) {
                 formatAllTotalColumns(); // Format tất cả các cột tổng tiền
                 final_total();
             }, 500);
+            
+            // Thêm event listener cho việc thay đổi giá trị chiết khấu
+            $('#discount_to_all_input').on('input keyup', function() {
+                console.log('=== DISCOUNT INPUT CHANGED ===');
+                console.log('Event type:', event.type);
+                console.log('Raw input value:', $(this).val());
+                
+                // Format input dựa trên loại chiết khấu
+                var discountType = $('#discount_to_all_type').val();
+                var rawValue = $(this).val().replace(/[^0-9.]/g, '');
+                
+                console.log('Discount type:', discountType);
+                console.log('Cleaned raw value:', rawValue);
+                
+                if (rawValue && discountType === 'in_fixed') {
+                    // Nếu là cố định, format như tiền tệ
+                    var numericValue = parseFloat(rawValue);
+                    if (!isNaN(numericValue)) {
+                        $(this).val(formatNumber(numericValue));
+                        console.log('Fixed discount formatted to:', formatNumber(numericValue));
+                    }
+                } else if (rawValue && discountType === 'in_percentage') {
+                    // Nếu là phần trăm, chỉ cho phép số
+                    var numericValue = parseFloat(rawValue);
+                    if (!isNaN(numericValue) && numericValue <= 100) {
+                        $(this).val(numericValue);
+                        console.log('Percentage discount set to:', numericValue);
+                    }
+                }
+                
+                console.log('Final input value:', $(this).val());
+                console.log('Calling final_total()...');
+                final_total();
+                console.log('=== END DISCOUNT INPUT CHANGED ===');
+            });
+            
+            // Thêm event listener cho việc thay đổi loại chiết khấu
+            $('#discount_to_all_type').on('change', function() {
+                console.log('=== DISCOUNT TYPE CHANGED ===');
+                console.log('New discount type:', $(this).val());
+                console.log('Current input value:', $('#discount_to_all_input').val());
+                
+                // Reset và format lại input khi thay đổi loại
+                var currentValue = $('#discount_to_all_input').val().replace(/[^0-9.]/g, '');
+                console.log('Cleaned current value:', currentValue);
+                
+                if (currentValue) {
+                    var numericValue = parseFloat(currentValue);
+                    if (!isNaN(numericValue)) {
+                        if ($(this).val() === 'in_fixed') {
+                            $('#discount_to_all_input').val(formatNumber(numericValue));
+                            console.log('Changed to fixed, formatted value:', formatNumber(numericValue));
+                        } else {
+                            $('#discount_to_all_input').val(numericValue);
+                            console.log('Changed to percentage, raw value:', numericValue);
+                        }
+                    }
+                }
+                
+                console.log('Final input value after type change:', $('#discount_to_all_input').val());
+                console.log('Calling final_total()...');
+                final_total();
+                console.log('=== END DISCOUNT TYPE CHANGED ===');
+            });
 
          });
          
@@ -734,13 +874,50 @@ function round_off($amount) {
          
          // Hàm parse số trực tiếp (cho phụ phí và chiết khấu)
          function parseDirectNumber(value) {
-             if (!value) return 0;
-             return parseFloat(value) || 0;
+             console.log('parseDirectNumber input:', value);
+             if (!value) {
+                 console.log('parseDirectNumber output: 0 (empty value)');
+                 return 0;
+             }
+             
+             var stringValue = value.toString();
+             console.log('parseDirectNumber string value:', stringValue);
+             
+             // Xử lý format số có dấu chấm phân cách hàng nghìn
+             // Ví dụ: "1.000.000" -> "1000000", "1.5" -> "1.5"
+             var parts = stringValue.split('.');
+             console.log('parseDirectNumber parts:', parts);
+             
+             var cleanValue = '';
+             if (parts.length > 2) {
+                 // Nhiều dấu chấm = format hàng nghìn + thập phân
+                 // Ghép phần nguyên và giữ phần thập phân cuối
+                 var integerPart = parts.slice(0, -1).join('');
+                 var decimalPart = parts[parts.length - 1];
+                 cleanValue = integerPart + '.' + decimalPart;
+             } else if (parts.length === 2) {
+                 // Một dấu chấm - kiểm tra xem có phải thập phân không
+                 if (parts[1].length <= 2 && parts[0].length <= 3) {
+                     // Có vẻ là số thập phân (ví dụ: "1.5", "12.34")
+                     cleanValue = stringValue;
+                 } else {
+                     // Có vẻ là format hàng nghìn (ví dụ: "1000.000")
+                     cleanValue = parts.join('');
+                 }
+             } else {
+                 // Không có dấu chấm
+                 cleanValue = stringValue.replace(/[^0-9]/g, '');
+             }
+             
+             console.log('parseDirectNumber cleaned:', cleanValue);
+             var result = parseFloat(cleanValue) || 0;
+             console.log('parseDirectNumber output:', result);
+             return result;
          }
          
          // Hàm format số thành tiền tệ VN
          function formatCurrency(amount) {
-             return formatNumber(amount) + '₫';
+             return formatNumber(amount);
          }
          
          // Hàm format số
@@ -974,16 +1151,35 @@ function round_off($amount) {
              var discountInput = parseDirectNumber($('#discount_to_all_input').val());
              var discountType = $('#discount_to_all_type').val();
              var discount = 0;
+             var discountDisplayText = '';
+             
+             console.log('=== FINAL_TOTAL DISCOUNT CALCULATION ===');
+             console.log('Raw discount input value:', $('#discount_to_all_input').val());
+             console.log('Parsed discount input:', discountInput);
+             console.log('Discount type:', discountType);
+             console.log('Total after tax for percentage calculation:', totals.totalAfterTax);
              
              if (discountInput > 0) {
                  if (discountType === 'in_fixed') {
                      discount = discountInput;
+                     discountDisplayText = '';
+                     console.log('Fixed discount applied:', discount);
                  } else if (discountType === 'in_percentage') {
                      discount = (totals.totalAfterTax * discountInput) / 100;
+                     discountDisplayText = '(' + formatNumber(discountInput) + '%)';
+                     console.log('Percentage discount calculation:', totals.totalAfterTax, 'x', discountInput, '% =', discount);
+                     console.log('Display text:', discountDisplayText);
                  }
+             } else {
+                 console.log('No discount applied (input is 0 or empty)');
              }
              
+             console.log('Final discount amount:', discount);
+             console.log('Formatted discount display:', formatNumber(discount));
+             console.log('=== END FINAL_TOTAL DISCOUNT CALCULATION ===');
+             
              $('#discount_to_all_amt').html(formatNumber(discount));
+             $('#discount_percentage_display').html(discountDisplayText);
              $('#hidden_discount_to_all_amt').val(discount);
              
              // Tính tổng cuối cùng
@@ -994,6 +1190,36 @@ function round_off($amount) {
              // Hiển thị (chỉ sử dụng formatNumber để tránh ký hiệu tiền tệ trùng lặp)
              $('#round_off_amt').html(formatNumber(roundDiff));
              $('#total_amt').html(formatNumber(roundedTotal));
+             
+             // Cập nhật gợi ý và tự động điền số tiền thanh toán thông minh
+             $('#amount_suggestion').html(formatNumber(roundedTotal));
+             
+             // Hiện/ẩn gợi ý dựa trên tổng tiền với hiệu ứng mượt mà
+             if (roundedTotal > 0) {
+                 if (!$('.payment-suggestion').hasClass('show')) {
+                     $('.payment-suggestion').show().addClass('show');
+                 }
+                 
+                 // Tự động điền nếu ô input trống hoặc bằng 0
+                 if ($('#amount').length > 0) {
+                     var currentAmount = $('#amount').val().replace(/[^0-9]/g, '');
+                     if (!currentAmount || currentAmount === '0' || currentAmount === '') {
+                         $('#amount').val(formatNumber(roundedTotal));
+                     }
+                 }
+             } else {
+                 if ($('.payment-suggestion').hasClass('show')) {
+                     $('.payment-suggestion').removeClass('show');
+                     setTimeout(function() {
+                         $('.payment-suggestion').hide();
+                     }, 300); // Chờ animation hoàn tất
+                 }
+                 
+                 // Xóa số tiền thanh toán khi tổng = 0
+                 if ($('#amount').length > 0) {
+                     $('#amount').val('');
+                 }
+             }
              
              // Lưu giá trị số cho tính toán
              $('#hidden_total_amt').val(roundedTotal);
@@ -1015,23 +1241,36 @@ function round_off($amount) {
              var discountInput = parseDirectNumber($('#discount_to_all_input').val());
              var rowcount = $('#hidden_rowcount').val();
              
+             console.log('=== ENABLE_OR_DISABLE_ITEM_DISCOUNT ===');
+             console.log('Raw discount input:', $('#discount_to_all_input').val());
+             console.log('Parsed discount input:', discountInput);
+             console.log('Row count:', rowcount);
+             
              if (discountInput > 0) {
                  // Nếu có chiết khấu tổng, có thể disable item discount
                  $('.item_discount').attr({
                      'style': 'border-color:red;cursor:no-drop',
                  });
+                 console.log('Item discounts disabled (border set to red)');
              } else {
                  // Nếu không có chiết khấu tổng, cho phép item discount
                  $('.item_discount').attr({
                      'style': '',
                  });
+                 console.log('Item discounts enabled (border reset)');
              }
              
              // Sửa chữa cột thuế trước khi tính lại
+             console.log('Calling fixAllTaxColumns()...');
              fixAllTaxColumns();
              
              // Tính lại thuế cho tất cả các dòng
+             console.log('Calling recalculateAllTax()...');
              recalculateAllTax();
+             
+             console.log('=== END ENABLE_OR_DISABLE_ITEM_DISCOUNT ===');
+             // Tính lại tổng cuối cùng (nhưng không gọi lại từ final_total để tránh loop)
+             // final_total(); // Comment out để tránh infinite loop
          }
          
          // Hàm set_tax_value (nếu chưa có)
@@ -1204,6 +1443,202 @@ function round_off($amount) {
               121: "F10",
               122: "F11",
               123: "F12"
+            }
+
+            // Sale Items Modal Operations Start
+            function show_sales_item_modal(row_id){
+              console.log('show_sales_item_modal called with row_id:', row_id);
+              $('#sales_item').modal('toggle');
+              $("#popup_tax_id").select2();
+
+              //Find the item details
+              var item_name = $("#td_data_"+row_id+"_1").html();
+              var tax_type = $("#tr_tax_type_"+row_id).val();
+              var tax_id = $("#tr_tax_id_"+row_id).val();
+              var description = $("#description_"+row_id).val();
+
+              /*Discount*/
+              var item_discount_input = $("#item_discount_input_"+row_id).val();
+              var item_discount_type = $("#item_discount_type_"+row_id).val();
+
+              //Set to Popup
+              $("#item_discount_input").val(item_discount_input);
+              $("#item_discount_type").val(item_discount_type).select2();
+
+              $("#popup_item_name").html(item_name);
+              $("#popup_tax_type").val(tax_type).select2();
+              $("#popup_tax_id").val(tax_id).select2();
+              $("#popup_description").val(description);
+              $("#popup_row_id").val(row_id);
+            }
+            
+            function show_sales_item_modal_price(row_id){
+              $('#sales_item2').modal('toggle');
+
+              //Find the item details
+              var item_name = $("#td_data_"+row_id+"_1").html();
+              
+              var item_pr0 = $("#row_"+row_id).attr("data-p0");
+              var item_pr1 = $("#row_"+row_id).attr("data-p1");
+              var item_pr2 = $("#row_"+row_id).attr("data-p2");
+              var item_pr3 = $("#row_"+row_id).attr("data-p3");
+              var item_pr = $("#row_"+row_id).attr("data-p");
+
+              $("#popup_item_name").html(item_name);
+              
+              $("#sales_item2_finalprice0").val(item_pr0);
+              $("#sales_item2_finalprice1").val(item_pr1);
+              $("#sales_item2_finalprice2").val(item_pr2);
+              $("#sales_item2_finalprice3").val(item_pr3);
+              $("#sales_item2_finalprice").val(item_pr);
+            }
+
+            function set_info(){
+              var row_id = $("#popup_row_id").val();
+              var tax_type = $("#popup_tax_type").val();
+              var tax_id = $("#popup_tax_id").val();
+              var description = $("#popup_description").val();
+              var tax_name = ($('option:selected', "#popup_tax_id").attr('data-tax-value'));
+              var tax = parseFloat($('option:selected', "#popup_tax_id").attr('data-tax'));
+
+              /*Discount*/
+              var item_discount_input = $("#item_discount_input").val();
+              // Chuyển đổi từ format có dấu chấm phân cách về số thô
+              if (item_discount_input) {
+                  // Loại bỏ tất cả dấu chấm phân cách hàng nghìn, giữ lại dấu chấm thập phân cuối cùng
+                  var parts = item_discount_input.split('.');
+                  if (parts.length > 1) {
+                      // Nếu có nhiều dấu chấm, ghép phần nguyên và giữ phần thập phân cuối
+                      var integerPart = parts.slice(0, -1).join('');
+                      var decimalPart = parts[parts.length - 1];
+                      item_discount_input = integerPart + '.' + decimalPart;
+                  } else {
+                      // Nếu chỉ có một phần, loại bỏ tất cả dấu chấm
+                      item_discount_input = item_discount_input.replace(/\./g, '');
+                  }
+              }
+              var item_discount_type = $("#item_discount_type").val();
+
+              //Set it into row 
+              $("#item_discount_input_"+row_id).val(item_discount_input);
+              $("#item_discount_type_"+row_id).val(item_discount_type);
+
+              $("#tr_tax_type_"+row_id).val(tax_type);
+              $("#tr_tax_id_"+row_id).val(tax_id);
+              $("#tr_tax_value_"+row_id).val(tax);//%
+              $("#description_"+row_id).val(description);
+              $("#td_data_"+row_id+"_12").html(tax_name);
+              
+              calculate_tax(row_id);
+              $('#sales_item').modal('toggle');
+            }
+
+            function set_tax_value(row_id){
+              //get the sales price of the item
+              var tax_type = $("#tr_tax_type_"+row_id).val();
+              var tax = $("#tr_tax_value_"+row_id).val(); //%
+              var qty=$("#td_data_"+row_id+"_3").val().trim();
+                  qty = (isNaN(qty)) ? 0 :qty;
+              var sales_price = parseFloat($("#td_data_"+row_id+"_10").val());
+                  sales_price = (isNaN(sales_price)) ? 0 :sales_price;
+                  sales_price = sales_price * qty;
+
+              /*Discount*/
+              var item_discount_type = $("#item_discount_type_"+row_id).val();
+              var item_discount_input = parseDirectNumber($("#item_discount_input_"+row_id).val());
+                  item_discount_input = (isNaN(item_discount_input)) ? 0 :item_discount_input;
+
+              //Calculate discount      
+              var discount_amt=(item_discount_type=='Percentage') ? ((sales_price) * item_discount_input)/100 : (item_discount_input * qty);
+              
+              sales_price-=parseFloat(discount_amt);
+
+              var tax_amount = (tax_type=='Inclusive') ? calculate_inclusive(sales_price,tax) : calculate_exclusive(sales_price,tax);
+              
+              $("#td_data_"+row_id+"_8").val(discount_amt);
+              $("#td_data_"+row_id+"_11").val(tax_amount);
+            }
+            //Sale Items Modal Operations End
+
+            // Thêm sự kiện cho gợi ý số tiền thanh toán
+            $(document).ready(function() {
+                // Ẩn gợi ý ban đầu
+                $('.payment-suggestion').hide();
+                
+                // Khởi tạo tính toán khi trang load
+                final_total();
+                
+                // Xử lý nút "Điền" gợi ý
+                $(document).on('click', '#fill_suggestion_btn', function() {
+                    var suggestedAmount = $('#amount_suggestion').text();
+                    if (suggestedAmount && suggestedAmount !== '0') {
+                        $('#amount').val(suggestedAmount).focus().select();
+                        
+                        // Hiệu ứng flash để người dùng biết đã điền
+                        $('#amount').addClass('flash-success');
+                        setTimeout(function() {
+                            $('#amount').removeClass('flash-success');
+                        }, 1000);
+                        
+                        // Hiển thị thông báo nhỏ
+                        showPaymentFillNotification();
+                    }
+                });
+                
+                // Click vào toàn bộ vùng gợi ý để điền nhanh
+                $(document).on('click', '.payment-suggestion', function(e) {
+                    if (!$(e.target).is('#fill_suggestion_btn, #fill_suggestion_btn *')) {
+                        $('#fill_suggestion_btn').click();
+                    }
+                });
+                
+                // Thêm hiệu ứng hover cho vùng gợi ý
+                $('.payment-suggestion').hover(
+                    function() {
+                        if ($(this).hasClass('show')) {
+                            $(this).css({
+                                'transform': 'translateY(-1px)',
+                                'box-shadow': '0 4px 12px rgba(0,0,0,0.15)',
+                                'cursor': 'pointer'
+                            });
+                        }
+                    },
+                    function() {
+                        $(this).css({
+                            'transform': 'translateY(0)',
+                            'box-shadow': 'none',
+                            'cursor': 'default'
+                        });
+                    }
+                );
+                
+                // Thêm CSS động cho hiệu ứng flash
+                if ($('#flash-success-style').length === 0) {
+                    $('<style id="flash-success-style">' +
+                        '.flash-success { ' +
+                            'animation: flashSuccess 1s ease-in-out; ' +
+                            'border-color: #28a745 !important; ' +
+                            'box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25) !important; ' +
+                        '} ' +
+                        '@keyframes flashSuccess { ' +
+                            '0% { background-color: #d4edda; } ' +
+                            '50% { background-color: #c3e6cb; } ' +
+                            '100% { background-color: #fff; } ' +
+                        '}' +
+                    '</style>').appendTo('head');
+                }
+            });
+            
+            // Hàm hiển thị thông báo điền số tiền
+            function showPaymentFillNotification() {
+                if (typeof toastr !== 'undefined') {
+                    toastr.success('Đã điền số tiền thanh toán!', '', {
+                        timeOut: 1500,
+                        positionClass: 'toast-top-right',
+                        showDuration: 300,
+                        hideDuration: 300
+                    });
+                }
             }
 
         </script>

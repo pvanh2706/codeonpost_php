@@ -213,8 +213,8 @@ $(document).ready(function() {
                 }, 0 );
             //$( api.column( 0 ).footer() ).html('Total');
             $( api.column( 6 ).footer() ).html(Intl.NumberFormat().format(invoice_total));
-            $( api.column( 7 ).footer() ).html(Intl.NumberFormat().format(sales_due)+'₫');
-            $( api.column( 8 ).footer() ).html(Intl.NumberFormat().format(sales_return_due)+'₫');
+            $( api.column( 7 ).footer() ).html(Intl.NumberFormat().format(sales_due));
+            $( api.column( 8 ).footer() ).html(Intl.NumberFormat().format(sales_return_due));
         },
         /*End Footer Total*/
     });

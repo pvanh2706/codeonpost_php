@@ -385,7 +385,7 @@
                              <h4><b id="subtotal_amt" name="subtotal_amt"><?=$CI->currency(number_format($subtotal));?></b></h4>
                           </th>
                        </tr>
-                       <tr>
+                       <tr style="display: none;">
                           <th class="text-right" style="font-size: 17px;">Phụ phí khác</th>
                           <th class="text-right" style="padding-left:10%;font-size: 17px;">
                              <h4><b id="other_charges_amt" name="other_charges_amt"><?=$CI->currency(number_format($other_charges_amt));?></b></h4>

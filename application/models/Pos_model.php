@@ -735,11 +735,12 @@ class Pos_model extends CI_Model {
 			    $sub_total = $res3->total_cost;
 			    $remove_btn      ='<a class="fa fa-fw fa-trash-o text-red" style="cursor: pointer;font-size: 20px;" onclick="removerow('.$i.')" title="Delete Item?"></a>';
 			    
-		  		echo '<tr id="row_'.$i.'" data-row="0" data-item-id="'.$res3->item_id.'" >'; /*item id */
+		  		echo '<tr id="tr_items_desc_'.$i.'"><td colspan="6" ><input type="text" class="form-control" name="td_description_'.$i.'" id="td_description_'.$i.'" value="'.$description.'" placeholder="Ghi chú thêm cho sản phẩm '.$q5->row()->item_name.' (Nếu có)" /></td></tr>';
+		  		echo '<tr class="itemrows" data-rowcount="'.$i.'" id="row_'.$i.'" data-row="0" data-item-id="'.$res3->item_id.'" >'; /*item id */
 		  		echo '<td id="td_'.$i.'_0">
 		  		<a data-toggle="tooltip" title="Click to Change Tax" class="pointer" id="td_data_'.$i.'_0" onclick="show_sales_item_modal('.$i.')">'.$q5->row()->item_name.'<i onclick="" class="fa fa-edit pointer"></i></a>
 		  		</td>';  /*td_0_0 item name*/
-		  		echo '<td id="td_'.$i.'_1">'.$stock.'</td>';  /*td_0_1 item available qty*/
+		  		//echo '<td id="td_'.$i.'_1">'.$stock.'</td>';  /*td_0_1 item available qty*/
 		  		echo '<td id="td_'.$i.'_2">'.$quantity.'</td>';    /*td_0_2 item available qty */
 
 		  		$info = '<input id="sales_price_'.$i.'" onblur="set_to_original('.$i.','.$res3->purchase_price.')" onkeyup="update_price('.$i.','.$res3->purchase_price.')" name="sales_price_'.$i.'" type="text" class="form-control text-left no-padding" value="'.$per_item_price_inc_tax.'">';
@@ -892,9 +893,9 @@ class Pos_model extends CI_Model {
 			    
 			    
 			    
-			    echo '<tr id="tr_items_name_'.$i.'"><td colspan="5" id="td_'.$i.'_0"><span id="td_data_'.$i.'_0" style="white-space: break-spaces; text-overflow: ellipsis; overflow: hidden;"><i class="fa fa-plus-square" onclick="addrow_gift('.$res3->item_id.');"></i> '.$q5->row()->item_name.'</span></td></tr>';
-			    echo '<tr id="tr_items_desc_'.$i.'"><td colspan="5" ><input type="text" class="form-control" name="td_description_'.$i.'" id="td_description_'.$i.'" placeholder="Ghi chú thêm cho sản phẩm '.$q5->row()->item_name.' (Nếu có)" /></td></tr>';
+			    echo '<tr id="tr_items_desc_'.$i.'"><td colspan="6" ><input type="text" class="form-control" name="td_description_'.$i.'" id="td_description_'.$i.'" value="'.$description.'" placeholder="Ghi chú thêm cho sản phẩm '.$q5->row()->item_name.' (Nếu có)" /></td></tr>';
                 echo '<tr class="itemrows" data-rowcount="'.$i.'" id="row_'.$i.'" data-price-lv="" data-row="0" data-item-id='.$res3->item_id.'>';/*item id*/
+			    echo '<td id="td_'.$i.'_0"><span id="plus_'.$i.'" onclick="addrow_gift('.$res3->item_id.');"><i class="fa fa-plus-square" aria-hidden="true"></i></span> <span id="td_data_'.$i.'_0" style="white-space: break-spaces; text-overflow: ellipsis; overflow: hidden;">'.$q5->row()->item_name.'</span></td>';/* td_0_0 item name*/
 			    echo '<td id="td_'.$i.'_2">'.$quantity.'</td>';/* td_0_2 item available qty*/
 			    $info1='<input id="sales_price_'.$i.'" onblur="set_to_original('.$i.','.$res3->price_per_unit.')" onkeyup="update_price('.$i.','.$q5->row()->final_price.')" name="sales_price_'.$i.'" type="text" class="form-control no-padding min_width priceset" value="'.$res3->price_per_unit.'">';
             

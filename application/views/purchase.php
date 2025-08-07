@@ -265,7 +265,7 @@
                                        </div>
                                     </div>
                                  </div-->
-                                 <div class="row">
+                                 <div class="row" style="display: none;">
                                     <div class="col-md-12">
                                        <div class="form-group">
                                           <label for="other_charges_input" class="col-sm-4 control-label">Phụ phí khác</label>    
@@ -364,14 +364,13 @@
                                                     <b id="other_charges_amt" name="other_charges_amt">0</b>₫
                                                   </h4>
                                                 </th>
-                                             </tr>
-                                             <tr>
-                                                <th class="text-right" style="font-size: 17px;">Phụ phí khác</th>
-                                                <th class="text-right" style="padding-left:10%;font-size: 17px;">
-                                                   <h4>
-                                                    <b id="discount_to_all_amt" name="discount_to_all_amt">0</b>₫</h4>
-                                                </th>
-                                             </tr>
+                                             </tr>                             <tr style="display: none;">
+                                <th class="text-right" style="font-size: 17px;">Phụ phí khác</th>
+                                <th class="text-right" style="padding-left:10%;font-size: 17px;">
+                                   <h4>
+                                    <b id="discount_to_all_amt" name="discount_to_all_amt">0</b>₫</h4>
+                                </th>
+                             </tr>
                                              <!--tr style="<?= (!is_enabled_round_off()) ? 'display: none;' : '';?>">
                                                 <th class="text-right" style="font-size: 17px;"><?= $this->lang->line('round_off'); ?>
                                                   

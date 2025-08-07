@@ -16,10 +16,14 @@
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
     <!-- Content Header (Page header) -->
+    <?php
+      $page_title = 'Danh sách quyền hạn';
+      $base_url = base_url();
+    ?>
     <section class="content-header">
       <h1>
         <?=$page_title;?>
-        <small>View/Search Items Category</small>
+        <small>Xem/Tìm kiếm quyền hạn</small>
       </h1>
       <ol class="breadcrumb">
         <li><a href="<?php echo $base_url; ?>dashboard"><i class="fa fa-dashboard"></i> Home</a></li>

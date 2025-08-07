@@ -23,10 +23,14 @@ echo "<pre>";
          <!-- Content Wrapper. Contains page content -->
          <div class="content-wrapper">
             <!-- Content Header (Page header) -->
+            <?php
+               $page_title = isset($role_id) ? 'Cập nhật quyền hạn' : 'Thêm quyền hạn';
+               $base_url = base_url();
+               ?>
             <section class="content-header">
                <h1>
                   <?=$page_title;?>
-                  <small>Add/Update Role</small>
+                  <small>Thêm mới/Cập nhật quyền hạn</small>
                </h1>
                <ol class="breadcrumb">
                   <li><a href="<?php echo $base_url; ?>dashboard"><i class="fa fa-dashboard"></i> Home</a></li>
@@ -379,6 +383,12 @@ echo "<pre>";
                                               <div class="checkbox icheck"><label>
                                                 <input type="checkbox" class="items_all" id='import_items' name="permission[import_items]"> <?= $this->lang->line('import_items'); ?>
                                               </label></div>
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="items_all" id='print_item_labels' name="permission[print_item_labels]"> IN TEM SẢN PHẨM
+                                              </label></div>
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="items_all" id='items_stock_view' name="permission[items_stock_view]"> XEM TỒN KHO
+                                              </label></div>
                                           </td>
                                         </tr>
                                         <!-- Brands -->
@@ -460,6 +470,9 @@ echo "<pre>";
                                               <div class="checkbox icheck"><label>
                                                 <input type="checkbox" class="customers_all" id='import_customers' name="permission[import_customers]"> <?= $this->lang->line('import_customers'); ?>
                                               </label></div>
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="customers_all" id='import_customers_bulk' name="permission[import_customers_bulk]"> THÊM NHIỀU THEO DANH SÁCH
+                                              </label></div>
                                           </td>
                                         </tr>
                                         <!-- Purchase -->
@@ -500,6 +513,9 @@ echo "<pre>";
                                               <div class="checkbox icheck"><label>
                                                 <input type="checkbox" class="purchase_all" id='purchase_payment_delete' name="permission[purchase_payment_delete]"> <?= $this->lang->line('purchase_payments_delete'); ?>
                                               </label></div>
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="purchase_all" id='purchase_list_view' name="permission[purchase_list_view]"> XEM DANH SÁCH ĐƠN NHẬP HÀNG
+                                              </label></div>
                                           </td>
                                         </tr>
                                         <!-- Purchase Return-->
@@ -539,6 +555,9 @@ echo "<pre>";
                                               </label></div>
                                               <div class="checkbox icheck"><label>
                                                 <input type="checkbox" class="purchase_return_all" id='purchase_return_payment_delete' name="permission[purchase_return_payment_delete]"> <?= $this->lang->line('purchase_return_payments_delete'); ?>
+                                              </label></div>
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="purchase_return_all" id='purchase_return_list_view' name="permission[purchase_return_list_view]"> XEM DANH SÁCH ĐƠN TRẢ NHẬP HÀNG
                                               </label></div>
                                           </td>
                                         </tr>
@@ -584,6 +603,9 @@ echo "<pre>";
                                               </label></div>
                                               <div class="checkbox icheck"><label>
                                                 <input type="checkbox" class="sales_all" id='sales_payment_delete' name="permission[sales_payment_delete]"> <?= $this->lang->line('sales_payments_delete'); ?>
+                                              </label></div>
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="sales_all" id='sales_list_view' name="permission[sales_list_view]"> XEM DANH SÁCH ĐƠN BÁN HÀNG
                                               </label></div>
                                           </td>
                                         </tr>
@@ -702,10 +724,257 @@ echo "<pre>";
                                               <div class="checkbox icheck"><label>
                                                 <input type="checkbox" class="reports_all" id='expired_items_report' name="permission[expired_items_report]"> <?= $this->lang->line('expired_items_report'); ?>
                                               </label></div>
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="reports_all" id='sales_return_report_extended' name="permission[sales_return_report_extended]"> BÁO CÁO TRẢ HÀNG CHI TIẾT
+                                              </label></div>
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="reports_all" id='product_sales_detailed_report' name="permission[product_sales_detailed_report]"> BÁO CÁO SẢN PHẨM BÁN CHI TIẾT
+                                              </label></div>
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="reports_all" id='product_purchase_detailed_report' name="permission[product_purchase_detailed_report]"> BÁO CÁO SẢN PHẨM NHẬP CHI TIẾT
+                                              </label></div>
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="reports_all" id='expired_products_detailed_report' name="permission[expired_products_detailed_report]"> BÁO CÁO SẢN PHẨM HẾT HẠN CHI TIẾT
+                                              </label></div>
                                           </td>
                                         </tr>
 
-                                        <!--DASHBOARD  -->
+                                        <!-- TAX GROUP -->
+                                        <tr>
+                                          <td><?= $i++;?></td>
+                                          <td>Tax Group</td>
+                                          <td>
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="change_me" id="tax_group"> CHỌN TẤT CẢ
+                                              </label></div>
+                                          </td>
+                                          <td>
+                                              <input type="hidden" name="module[tax_group]" value="on">
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="tax_group_all" id='tax_group_add' name="permission[tax_group_add]"> THÊM
+                                              </label></div>
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="tax_group_all" id='tax_group_edit' name="permission[tax_group_edit]"> SỬA
+                                              </label></div>
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="tax_group_all" id='tax_group_delete' name="permission[tax_group_delete]"> XÓA
+                                              </label></div>
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="tax_group_all" id='tax_group_view' name="permission[tax_group_view]"> XEM
+                                              </label></div>
+                                          </td>
+                                        </tr>
+                                        <!-- WAREHOUSE -->
+                                        <tr>
+                                          <td><?= $i++;?></td>
+                                          <td>Warehouse</td>
+                                          <td>
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="change_me" id="warehouse"> CHỌN TẤT CẢ
+                                              </label></div>
+                                          </td>
+                                          <td>
+                                              <input type="hidden" name="module[warehouse]" value="on">
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="warehouse_all" id='warehouse_add' name="permission[warehouse_add]"> THÊM
+                                              </label></div>
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="warehouse_all" id='warehouse_edit' name="permission[warehouse_edit]"> SỬA
+                                              </label></div>
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="warehouse_all" id='warehouse_delete' name="permission[warehouse_delete]"> XÓA
+                                              </label></div>
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="warehouse_all" id='warehouse_view' name="permission[warehouse_view]"> XEM
+                                              </label></div>
+                                          </td>
+                                        </tr>
+                                        <!-- ORDERS -->
+                                        <tr>
+                                          <td><?= $i++;?></td>
+                                          <td>Orders</td>
+                                          <td>
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="change_me" id="orders"> CHỌN TẤT CẢ
+                                              </label></div>
+                                          </td>
+                                          <td>
+                                              <input type="hidden" name="module[orders]" value="on">
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="orders_all" id='orders_add' name="permission[orders_add]"> THÊM
+                                              </label></div>
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="orders_all" id='orders_edit' name="permission[orders_edit]"> SỬA
+                                              </label></div>
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="orders_all" id='orders_delete' name="permission[orders_delete]"> XÓA
+                                              </label></div>
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="orders_all" id='orders_view' name="permission[orders_view]"> XEM
+                                              </label></div>
+                                          </td>
+                                        </tr>
+                                        <!-- EMAIL -->
+                                        <tr>
+                                          <td><?= $i++;?></td>
+                                          <td>Email</td>
+                                          <td>
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="change_me" id="email"> CHỌN TẤT CẢ
+                                              </label></div>
+                                          </td>
+                                          <td>
+                                              <input type="hidden" name="module[email]" value="on">
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="email_all" id='send_email' name="permission[send_email]"> GỬI EMAIL
+                                              </label></div>
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="email_all" id='email_template_edit' name="permission[email_template_edit]"> SỬA MẪU EMAIL
+                                              </label></div>
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="email_all" id='email_template_view' name="permission[email_template_view]"> XEM MẪU EMAIL
+                                              </label></div>
+                                          </td>
+                                        </tr>
+                                        <!-- IMPORT -->
+                                        <tr>
+                                          <td><?= $i++;?></td>
+                                          <td>Import Data</td>
+                                          <td>
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="change_me" id="import"> CHỌN TẤT CẢ
+                                              </label></div>
+                                          </td>
+                                          <td>
+                                              <input type="hidden" name="module[import]" value="on">
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="import_all" id='import_data' name="permission[import_data]"> NHẬP DỮ LIỆU
+                                              </label></div>
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="import_all" id='import_excel' name="permission[import_excel]"> NHẬP TỪ EXCEL
+                                              </label></div>
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="import_all" id='import_csv' name="permission[import_csv]"> NHẬP TỪ CSV
+                                              </label></div>
+                                          </td>
+                                        </tr>
+                                        <!-- TEMPLATES -->
+                                        <tr>
+                                          <td><?= $i++;?></td>
+                                          <td>Templates</td>
+                                          <td>
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="change_me" id="templates"> CHỌN TẤT CẢ
+                                              </label></div>
+                                          </td>
+                                          <td>
+                                              <input type="hidden" name="module[templates]" value="on">
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="templates_all" id='templates_add' name="permission[templates_add]"> THÊM
+                                              </label></div>
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="templates_all" id='templates_edit' name="permission[templates_edit]"> SỬA
+                                              </label></div>
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="templates_all" id='templates_delete' name="permission[templates_delete]"> XÓA
+                                              </label></div>
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="templates_all" id='templates_view' name="permission[templates_view]"> XEM
+                                              </label></div>
+                                          </td>
+                                        </tr>
+                                        <!-- BARCODE & QR CODE -->
+                                        <tr>
+                                          <td><?= $i++;?></td>
+                                          <td>Barcode & QR Code</td>
+                                          <td>
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="change_me" id="barcode"> CHỌN TẤT CẢ
+                                              </label></div>
+                                          </td>
+                                          <td>
+                                              <input type="hidden" name="module[barcode]" value="on">
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="barcode_all" id='generate_barcode' name="permission[generate_barcode]"> TẠO MÃ VẠCH
+                                              </label></div>
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="barcode_all" id='generate_qrcode' name="permission[generate_qrcode]"> TẠO MÃ QR
+                                              </label></div>
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="barcode_all" id='print_barcode' name="permission[print_barcode]"> IN MÃ VẠCH
+                                              </label></div>
+                                          </td>
+                                        </tr>
+                                        <!-- SALES STOCK -->
+                                        <tr>
+                                          <td><?= $i++;?></td>
+                                          <td>Sales Stock</td>
+                                          <td>
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="change_me" id="sales_stock"> CHỌN TẤT CẢ
+                                              </label></div>
+                                          </td>
+                                          <td>
+                                              <input type="hidden" name="module[sales_stock]" value="on">
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="sales_stock_all" id='sales_stock_view' name="permission[sales_stock_view]"> XEM TỒN KHO BÁN HÀNG
+                                              </label></div>
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="sales_stock_all" id='sales_stock_report' name="permission[sales_stock_report]"> BÁO CÁO TỒN KHO
+                                              </label></div>
+                                          </td>
+                                        </tr>
+                                        <!-- POINTS MANAGEMENT -->
+                                        <tr>
+                                          <td><?= $i++;?></td>
+                                          <td>Points Management</td>
+                                          <td>
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="change_me" id="points"> CHỌN TẤT CẢ
+                                              </label></div>
+                                          </td>
+                                          <td>
+                                              <input type="hidden" name="module[points]" value="on">
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="points_all" id='points_add' name="permission[points_add]"> THÊM ĐIỂM
+                                              </label></div>
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="points_all" id='points_edit' name="permission[points_edit]"> SỬA ĐIỂM
+                                              </label></div>
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="points_all" id='points_delete' name="permission[points_delete]"> XÓA ĐIỂM
+                                              </label></div>
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="points_all" id='points_view' name="permission[points_view]"> XEM ĐIỂM
+                                              </label></div>
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="points_all" id='customer_point' name="permission[customer_point]"> ĐIỂM TÍCH LŨY KHÁCH HÀNG
+                                              </label></div>
+                                          </td>
+                                        </tr>
+                                        <!-- SYSTEM UPDATES -->
+                                        <tr>
+                                          <td><?= $i++;?></td>
+                                          <td>System Updates</td>
+                                          <td>
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="change_me" id="updates"> CHỌN TẤT CẢ
+                                              </label></div>
+                                          </td>
+                                          <td>
+                                              <input type="hidden" name="module[updates]" value="on">
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="updates_all" id='system_update' name="permission[system_update]"> CẬP NHẬT HỆ THỐNG
+                                              </label></div>
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="updates_all" id='database_update' name="permission[database_update]"> CẬP NHẬT CSDL
+                                              </label></div>
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="updates_all" id='backup_restore' name="permission[backup_restore]"> SAO LƯU & PHỤC HỒI
+                                              </label></div>
+                                          </td>
+                                        </tr>
+                                        <!--HELP & DOCUMENTATION  -->
                                         <tr>
                                           <td><?= $i++;?></td>
                                           <td><?= $this->lang->line('help_documentation'); ?></td>
@@ -719,8 +988,27 @@ echo "<pre>";
                                               <div class="checkbox icheck"><label>
                                                 <input type="checkbox" class="help_all" id='help' name="permission[help]"> <?= $this->lang->line('help_documentation'); ?>
                                               </label></div>
+                                          </td>
+                                        </tr>
+                                        <!--SYSTEM ROOT  -->
+                                        <tr>
+                                          <td><?= $i++;?></td>
+                                          <td>Hệ thống chính</td>
+                                          <td>
                                               <div class="checkbox icheck"><label>
-                                                <input type="checkbox" class="help_all" id='help' name="permission[customer_point]"> Điểm tích lũy
+                                                <input type="checkbox" class="change_me" id="system_root"> CHỌN TẤT CẢ
+                                              </label></div>
+                                          </td>
+                                          <td>
+                                              <input type="hidden" name="module[system_root]" value="on">
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="system_root_all" id='root_access' name="permission[root_access]"> ĐẶC QUYỀN ROOT
+                                              </label></div>
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="system_root_all" id='system_settings_full' name="permission[system_settings_full]"> CÀI ĐẶT HỆ THỐNG TOÀN QUYỀN
+                                              </label></div>
+                                              <div class="checkbox icheck"><label>
+                                                <input type="checkbox" class="system_root_all" id='database_management' name="permission[database_management]"> QUẢN LÝ CSDL TOÀN QUYỀN
                                               </label></div>
                                           </td>
                                         </tr>
