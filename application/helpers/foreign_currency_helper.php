@@ -6,9 +6,10 @@
         
         $figure = number_format($fig, 0, '.', '');
 
-        $number = explode('.', $figure)[0];
+        $parts = explode('.', $figure);
+        $number = $parts[0];
         
-        $decimal = (int)explode('.', $figure)[1];
+        $decimal = isset($parts[1]) ? (int)$parts[1] : 0;
 
         $sub_part = $decimal > 0 ? (" ".($decimal <= 19 ? handleXDigits($decimal) : handleTwoDigits($decimal))." ".getCurrencyCodeUnit($currency_code)['fraction']) : "";
 

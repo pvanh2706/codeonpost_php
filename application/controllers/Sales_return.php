@@ -244,12 +244,26 @@ class Sales_return extends MY_Controller {
 	//Print sales invoice 
 	public function print_invoice($return_id)
 	{
+		// Check if return_id is provided
+		if(empty($return_id)) {
+			show_error('Return ID is required');
+			return;
+		}
+		
+		// Check if return exists
+		$check_return = $this->db->query("SELECT id FROM db_salesreturn WHERE id = " . (int)$return_id);
+		if($check_return->num_rows() == 0) {
+			show_error('Return record not found with ID: ' . $return_id);
+			return;
+		}
+		
 		if(!$this->permissions('sales_return_add') && !$this->permissions('sales_return_edit')){
 			$this->show_access_denied_page();
 		}
 		$data=$this->data;
 		$data=array_merge($data,array('return_id'=>$return_id));
 		$data['page_title']=$this->lang->line('sales_invoice');
+		
 		$this->load->view('print-sales-return-invoice',$data);
 		
 	}
