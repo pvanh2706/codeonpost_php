@@ -356,19 +356,19 @@
                                                     <b id="subtotal_amt" name="subtotal_amt">0</b>₫
                                                    </h4>
                                                 </th>
-                                             </tr>
-                                             <tr>
-                                                <th class="text-right" style="font-size: 17px;">Tổng chiết khấu</th>
-                                                <th class="text-right" style="padding-left:10%;font-size: 17px;">
-                                                   <h4>
-                                                    <b id="other_charges_amt" name="other_charges_amt">0</b>₫
-                                                  </h4>
-                                                </th>
-                                             </tr>                             <tr style="display: none;">
+                                             </tr>                             <tr>
+                                <th class="text-right" style="font-size: 17px;">Tổng chiết khấu</th>
+                                <th class="text-right" style="padding-left:10%;font-size: 17px;">
+                                   <h4>
+                                    <b id="discount_to_all_amt" name="discount_to_all_amt">0</b>₫
+                                  </h4>
+                                </th>
+                             </tr>
+                             <tr style="display: none;">
                                 <th class="text-right" style="font-size: 17px;">Phụ phí khác</th>
                                 <th class="text-right" style="padding-left:10%;font-size: 17px;">
                                    <h4>
-                                    <b id="discount_to_all_amt" name="discount_to_all_amt">0</b>₫</h4>
+                                    <b id="other_charges_amt" name="other_charges_amt">0</b>₫</h4>
                                 </th>
                              </tr>
                                              <!--tr style="<?= (!is_enabled_round_off()) ? 'display: none;' : '';?>">
@@ -613,8 +613,7 @@
            //CAlculate Item wise price and tax and discount
            var tax_each = (tax_type=='Inclusive') ? 0 : calculate_exclusive((purchase_price-discount_amt/parseFloat(qty)),tax);
            
-           console.log("discount="+(purchase_price-discount_amt/parseFloat(qty)));
-           console.log("tax_each="+tax_each);
+
            var price_per_unit = (purchase_price - (discount_amt/parseFloat(qty)))+(parseFloat(tax_each));
 
            $("#td_data_"+i+"_10").val('').val(price_per_unit.toFixed(0));
@@ -717,10 +716,10 @@
            if((subtotal!=null || subtotal!='') && (subtotal!=0)){
              
              //subtotal
-             $("#subtotal_amt").html(subtotal.toFixed(0));
+             $("#subtotal_amt").html(parseFloat(subtotal).toLocaleString('vi-VN'));
              
              //other charges total amount
-             $("#other_charges_amt").html(parseFloat(other_charges_total_amt).toFixed(0));
+             $("#other_charges_amt").html(parseFloat(other_charges_total_amt).toLocaleString('vi-VN'));
              
              //other charges total amount
             
@@ -748,17 +747,17 @@
                  else{
                     //discount += $("#")
                  }
-                   discount=parseFloat(discount).toFixed(0);
+                   discount=parseFloat(discount);
                    
-                    $("#discount_to_all_amt").html(discount);  
+                    $("#discount_to_all_amt").html(discount.toLocaleString('vi-VN'));  
                     $("#hidden_discount_to_all_amt").val(discount);  
              //}
              //subtotal_round=Math.round(taxable);
              subtotal_round=round_off(taxable);//round_off() method custom defined
              subtotal_diff=subtotal_round-taxable;
          
-             $("#round_off_amt").html(parseFloat(subtotal_diff).toFixed(0)); 
-             $("#total_amt").html(parseFloat(subtotal_round).toFixed(0)); 
+             $("#round_off_amt").html(parseFloat(subtotal_diff).toLocaleString('vi-VN')); 
+             $("#total_amt").html(parseFloat(subtotal_round).toLocaleString('vi-VN')); 
              $("#hidden_total_amt").val(parseFloat(subtotal_round).toFixed(0)); 
            }
            else{
