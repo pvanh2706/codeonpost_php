@@ -229,7 +229,7 @@
                                                    <th rowspan='2' style="width:15%">Sản phẩm</th>
                                                    <th rowspan='2' style="width:15%;min-width: 180px;">Số lượng</th>
                                                    <th rowspan='2' style="width:15%">Giá nhập (<?=$CURRENCY;?>)</th>
-                                                   <th rowspan='2' style="width:5%">Chiếc khấu (<?=$CURRENCY;?>)</th>
+                                                   <th rowspan='2' style="width:5%">Chiết khấu (<?=$CURRENCY;?>)</th>
                                                    <th rowspan='2' class="<?=tax_disable_class()?>" style="width:7.5%">Thuế %</th>
                                                    <th rowspan='2' class="<?=tax_disable_class()?>" style="width:7.5%">Giá trị thuế (<?=$CURRENCY;?>)</th>
                                                    

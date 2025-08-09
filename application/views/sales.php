@@ -345,7 +345,7 @@ function round_off($amount) {
                                                                 dataType: "json"
                                                             }).done(function(result){
                                                                 var prlvs = result[0].itemprice;
-                                                                console.log('Result: '+ datarow + ' | ' + result[0].itemprice);
+
                                                                 // Format giá khi hiển thị trong input
                                                                 $("#td_data_"+datarow+"_10").val(formatNumber(prlvs));
                                                                 calculate_tax(datarow);
@@ -483,10 +483,10 @@ function round_off($amount) {
                                            <div class="form-group">
                                           <label for="discount_to_all_input" class="col-md-4 control-label">Chiết khấu</label>    
                                           <div class="col-md-4">
-                                             <input type="text" class="form-control  text-right" id="discount_to_all_input" name="discount_to_all_input" onkeyup="console.log('Input onkeyup triggered, value:', this.value); enable_or_disable_item_discount();" value="<?php echo formatNumber($discount_input); ?>">
+                                             <input type="text" class="form-control  text-right" id="discount_to_all_input" name="discount_to_all_input" onkeyup="enable_or_disable_item_discount();" value="<?php echo formatNumber($discount_input); ?>">
                                           </div>
                                           <div class="col-md-4">
-                                             <select class="form-control" onchange="console.log('Dropdown onchange triggered, new value:', this.value); final_total();" id='discount_to_all_type' name="discount_to_all_type">
+                                             <select class="form-control" onchange="final_total();" id='discount_to_all_type' name="discount_to_all_type">
                                                  <option value='in_fixed'>Cố định (₫)</option>
                                                 <option value='in_percentage'>Phần trăm (%)</option>
                                                 
@@ -708,10 +708,7 @@ function round_off($amount) {
             autoLoadFirstCustomer(customer_id);
             
             // Log giá trị ban đầu của chiết khấu
-            console.log('=== PAGE LOAD DISCOUNT VALUES ===');
-            console.log('Initial discount input value:', $('#discount_to_all_input').val());
-            console.log('Initial discount type:', $('#discount_to_all_type').val());
-            console.log('=== END PAGE LOAD DISCOUNT VALUES ===');
+
             
             // Format các input có sẵn khi load trang
             $('.only_currency').each(function() {
@@ -727,6 +724,14 @@ function round_off($amount) {
                 if ($(this).attr('id') === 'item_discount_input') {
                     return;
                 }
+                
+                // Xử lý đặc biệt cho ô thanh toán
+                if ($(this).attr('id') === 'amount') {
+                    var rawValue = $(this).val().replace(/[^0-9]/g, '');
+                    $(this).val(rawValue); // Chỉ giữ số thô khi đang nhập
+                    return;
+                }
+                
                 var rawValue = $(this).val().replace(/[^0-9]/g, '');
                 $(this).val(rawValue); // Chỉ giữ số thô, không format ngay
             });
@@ -736,10 +741,40 @@ function round_off($amount) {
                 if ($(this).attr('id') === 'item_discount_input') {
                     return;
                 }
+                
+                // Xử lý đặc biệt cho ô thanh toán
+                if ($(this).attr('id') === 'amount') {
+                    var rawValue = $(this).val().replace(/[^0-9]/g, '');
+                    if (rawValue) {
+                        $(this).val(formatNumber(rawValue)); // Format khi blur
+                        // Cập nhật hidden input với giá trị số thực
+                        $('#amount_numeric').val(rawValue);
+
+                    }
+                    return;
+                }
+                
                 var rawValue = $(this).val().replace(/[^0-9]/g, '');
                 if (rawValue) {
                     $(this).val(formatNumber(rawValue)); // Format khi blur
                 }
+            });
+            
+            // Thêm event handler riêng cho ô thanh toán khi submit form
+            $(document).on('focus', '#amount', function() {
+                // Khi focus vào ô thanh toán, chuyển về số thô để dễ chỉnh sửa
+                var currentValue = $(this).val();
+                var rawValue = parseCurrency(currentValue);
+                if (rawValue > 0) {
+                    $(this).val(rawValue);
+                }
+            });
+            
+            // Đảm bảo trước khi submit form, chuyển đổi giá trị thanh toán về số
+            $('#sales-form').on('submit', function() {
+                var paymentAmount = getPaymentAmount();
+                $('#amount_numeric').val(paymentAmount);
+
             });
             
             // Xử lý riêng cho input chiết khấu - cho phép nhập số dài
@@ -802,78 +837,119 @@ function round_off($amount) {
             
             // Thêm event listener cho việc thay đổi giá trị chiết khấu
             $('#discount_to_all_input').on('input keyup', function() {
-                console.log('=== DISCOUNT INPUT CHANGED ===');
-                console.log('Event type:', event.type);
-                console.log('Raw input value:', $(this).val());
+
                 
                 // Format input dựa trên loại chiết khấu
                 var discountType = $('#discount_to_all_type').val();
                 var rawValue = $(this).val().replace(/[^0-9.]/g, '');
                 
-                console.log('Discount type:', discountType);
-                console.log('Cleaned raw value:', rawValue);
+
                 
                 if (rawValue && discountType === 'in_fixed') {
                     // Nếu là cố định, format như tiền tệ
                     var numericValue = parseFloat(rawValue);
                     if (!isNaN(numericValue)) {
                         $(this).val(formatNumber(numericValue));
-                        console.log('Fixed discount formatted to:', formatNumber(numericValue));
+
                     }
                 } else if (rawValue && discountType === 'in_percentage') {
                     // Nếu là phần trăm, chỉ cho phép số
                     var numericValue = parseFloat(rawValue);
                     if (!isNaN(numericValue) && numericValue <= 100) {
                         $(this).val(numericValue);
-                        console.log('Percentage discount set to:', numericValue);
+
                     }
                 }
                 
-                console.log('Final input value:', $(this).val());
-                console.log('Calling final_total()...');
-                final_total();
-                console.log('=== END DISCOUNT INPUT CHANGED ===');
+
             });
             
             // Thêm event listener cho việc thay đổi loại chiết khấu
             $('#discount_to_all_type').on('change', function() {
-                console.log('=== DISCOUNT TYPE CHANGED ===');
-                console.log('New discount type:', $(this).val());
-                console.log('Current input value:', $('#discount_to_all_input').val());
+
                 
                 // Reset và format lại input khi thay đổi loại
                 var currentValue = $('#discount_to_all_input').val().replace(/[^0-9.]/g, '');
-                console.log('Cleaned current value:', currentValue);
+
                 
                 if (currentValue) {
                     var numericValue = parseFloat(currentValue);
                     if (!isNaN(numericValue)) {
                         if ($(this).val() === 'in_fixed') {
                             $('#discount_to_all_input').val(formatNumber(numericValue));
-                            console.log('Changed to fixed, formatted value:', formatNumber(numericValue));
+
                         } else {
                             $('#discount_to_all_input').val(numericValue);
-                            console.log('Changed to percentage, raw value:', numericValue);
+
                         }
                     }
                 }
                 
-                console.log('Final input value after type change:', $('#discount_to_all_input').val());
-                console.log('Calling final_total()...');
-                final_total();
-                console.log('=== END DISCOUNT TYPE CHANGED ===');
+
             });
 
          });
          
-         // Hàm chuyển đổi format tiền tệ về số
-         function parseCurrency(value) {
-             if (!value) return 0;
-             return parseFloat(value.toString().replace(/[^0-9]/g, '')) || 0;
+         // Hàm chuyên biệt để lấy giá trị thanh toán từ input #amount
+         function getPaymentAmount() {
+             var amountValue = $('#amount').val();
+             
+             if (!amountValue) {
+                 return 0;
+             }
+             
+             // Sử dụng parseCurrency để xử lý đúng format VN
+             var numericValue = parseCurrency(amountValue);
+             
+             return numericValue;
          }
          
-         // Hàm parse số trực tiếp (cho phụ phí và chiết khấu)
-         function parseDirectNumber(value) {
+         // Hàm set giá trị thanh toán vào input #amount
+         function setPaymentAmount(amount) {
+             $('#amount').val(formatNumber(amount));
+         }
+         
+         // Hàm chuyển đổi format tiền tệ về số (xử lý format VN)
+         function parseCurrency(value) {
+             if (!value) return 0;
+             
+             var stringValue = value.toString();
+             console.log('parseCurrency input:', stringValue);
+             
+             var stringValue = value.toString();
+             
+             // Xử lý format tiền tệ Việt Nam với dấu chấm phân cách hàng nghìn
+             // Ví dụ: "100.000" -> "100000", "1.000.000" -> "1000000"
+             var parts = stringValue.split('.');
+             
+             if (parts.length > 1) {
+                 // Kiểm tra xem có phải là format hàng nghìn không
+                 var isThousandSeparator = true;
+                 for (var i = 1; i < parts.length; i++) {
+                     if (parts[i].length !== 3) {
+                         isThousandSeparator = false;
+                         break;
+                     }
+                 }
+                 
+                 if (isThousandSeparator) {
+                     // Format hàng nghìn: nối tất cả các phần
+                     stringValue = parts.join('');
+                 } else {
+                     // Có thể là số thập phân, giữ nguyên
+                     stringValue = stringValue;
+                 }
+             }
+             
+             // Chỉ giữ lại số
+             var cleanValue = stringValue.replace(/[^0-9.]/g, '');
+             var result = parseFloat(cleanValue) || 0;
+             
+             console.log('pars             
+             var cleanValue = stringValue.replace(/[^0-9.]/g, '');
+             var result = parseFloat(cleanValue) || 0;
+             
+             return result;ctNumber(value) {
              console.log('parseDirectNumber input:', value);
              if (!value) {
                  console.log('parseDirectNumber output: 0 (empty value)');
@@ -883,29 +959,36 @@ function round_off($amount) {
              var stringValue = value.toString();
              console.log('parseDirectNumber string value:', stringValue);
              
-             // Xử lý format số có dấu chấm phân cách hàng nghìn
-             // Ví dụ: "1.000.000" -> "1000000", "1.5" -> "1.5"
+             // Xóa bỏ ký hiệu tiền tệ và khoảng trắng
+             stringValue = stringValue.replace(/[₫\s]/g, '');
+             
+             // Xử lý format số có dấu chấm phân cách hàng nghìn (format VN)
+             // Ví dụ: "100.000" -> "100000", "1.000.000" -> "1000000"
              var parts = stringValue.split('.');
              console.log('parseDirectNumber parts:', parts);
              
              var cleanValue = '';
              if (parts.length > 2) {
-                 // Nhiều dấu chấm = format hàng nghìn + thập phân
-                 // Ghép phần nguyên và giữ phần thập phân cuối
-                 var integerPart = parts.slice(0, -1).join('');
-                 var decimalPart = parts[parts.length - 1];
-                 cleanValue = integerPart + '.' + decimalPart;
+                 // Nhiều dấu chấm = chắc chắn là format hàng nghìn
+                 cleanValue = parts.join('');
              } else if (parts.length === 2) {
-                 // Một dấu chấm - kiểm tra xem có phải thập phân không
-                 if (parts[1].length <= 2 && parts[0].length <= 3) {
-                     // Có vẻ là số thập phân (ví dụ: "1.5", "12.34")
+                 // Một dấu chấm - kiểm tra pattern để phân biệt hàng nghìn vs thập phân
+                 var firstPart = parts[0];
+                 var secondPart = parts[1];
+                 
+                 // Nếu phần sau dấu chấm có đúng 3 chữ số và phần trước >= 1 chữ số
+                 // thì đây là format hàng nghìn VN
+                 if (secondPart.length === 3 && firstPart.length >= 1) {
+                     cleanValue = parts.join('');
+                 } else if (secondPart.length <= 2) {
+                     // Nếu phần sau dấu chấm <= 2 chữ số thì có thể là thập phân
                      cleanValue = stringValue;
                  } else {
-                     // Có vẻ là format hàng nghìn (ví dụ: "1000.000")
+                     // Trường hợp khác, coi như hàng nghìn
                      cleanValue = parts.join('');
                  }
              } else {
-                 // Không có dấu chấm
+                 // Không có dấu chấm - chỉ giữ số
                  cleanValue = stringValue.replace(/[^0-9]/g, '');
              }
              

@@ -292,7 +292,7 @@
 					</tr>
 					
 					<tr>
-						<td style=" padding-left: 2px; padding-right: 2px;" colspan="2" align="left">Tổng chiếc khấu</td>
+						<td style=" padding-left: 2px; padding-right: 2px;" colspan="2" align="left">Tổng Chiết khấu</td>
 						<td style=" padding-left: 2px; padding-right: 2px;" align="right"><?= number_format($total_discount); ?>₫</td>
 					</tr>
 					
