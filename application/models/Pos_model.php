@@ -474,15 +474,24 @@ class Pos_model extends CI_Model {
 				$tax_type =$this->xss_html_filter(trim($_REQUEST['tr_tax_type_'.$i]));
 				$tax_id =$this->xss_html_filter(trim($_REQUEST['tr_tax_id_'.$i]));
 				$tax_value =$this->xss_html_filter(trim($_REQUEST['tr_tax_value_'.$i]));//%
-				$total_cost =$this->xss_html_filter(trim($_REQUEST['td_data_'.$i.'_4']));
+				$total_cost =$this->xss_html_filter(trim($_REQUEST['td_data_'.$i.'_5']));  // Fixed: _5 is subtotal, not _4
 				$description =$this->xss_html_filter(trim($_REQUEST['td_description_'.$i]));
 				$purchase_price =$this->xss_html_filter(trim($_REQUEST['purchase_price_'.$i]));
+				
+				// Clean numeric values by removing commas
+				$price_per_unit = str_replace(',', '', $price_per_unit);
+				$tax_amt = str_replace(',', '', $tax_amt);
+				$total_cost = str_replace(',', '', $total_cost);
+				$purchase_price = str_replace(',', '', $purchase_price);
 				
 				$item_name = trim($_REQUEST['td_data_'.$i.'_0']);
 
 				$discount_type =$this->xss_html_filter(trim($_REQUEST['item_discount_type_'.$i]));
 				$discount_input =$this->xss_html_filter(trim($_REQUEST['item_discount_input_'.$i]));
 				$discount_amt =$this->xss_html_filter(trim($_REQUEST['item_discount_'.$i]));
+				
+				// Clean discount amount by removing commas
+				$discount_amt = str_replace(',', '', $discount_amt);
 				$discount_amt = (empty($discount_amt)) ? 0 : $discount_amt;
 				
 				$discount_amt_per_unit = $discount_amt/$sales_qty;
@@ -722,7 +731,7 @@ class Pos_model extends CI_Model {
 				}*/
 				$per_item_price_inc_tax=$price_per_unit;
 				$per_item_price_display = number_format($per_item_price_inc_tax,0,'.', ',');
-				$per_item_price_value = number_format($per_item_price_inc_tax,2,'.','');	
+				$per_item_price_value = $per_item_price_inc_tax;	// Keep raw value for data-raw-value
 
 				$tax_amt = $res3->tax_amt;
 				$tax_type = $res3->tax_type;
@@ -753,13 +762,13 @@ class Pos_model extends CI_Model {
 		  		$item_discount_display = ($item_discount > 0) ? number_format($item_discount,0,'.', ',') : $item_discount;
 		  		$info = '<input data-toggle="tooltip" title="Click to Change" onclick="show_sales_item_modal('.$i.')" id="item_discount_'.$i.'" readonly name="item_discount_'.$i.'" type="text" class="form-control text-left no-padding" value="'.$item_discount_display.'">';
 
-		  		echo '<td id="td_'.$i.'_6" class="text-right" >'.$info.'</td>';    /*td_0_6 item discount */
+		  		echo '<td id="td_'.$i.'_4" class="text-right" >'.$info.'</td>';    /*td_0_4 item discount */
 
 		  		echo '<td id="td_'.$i.'_11" class="'.tax_disable_class().'"><input data-toggle="tooltip" title="Click to Change" id="td_data_'.$i.'_11" onclick="show_sales_item_modal('.$i.')" name="td_data_'.$i.'_11" type="text" class="form-control no-padding pointer" readonly value="'.$tax_amt.'"></td>';    /*td_0_11 item tax */
 
-		  		echo '<td id="td_'.$i.'_4" class="text-right" >
-		  		<input data-toggle="tooltip" title="Total" id="td_data_'.$i.'_4" name="td_data_'.$i.'_4" type="text" class="form-control no-padding pointer" readonly value="'.$sub_total_display.'" data-raw-value="'.$sub_total.'"></td>';    /*td_0_4 item sub_total */
-		  		echo '<td id="td_'.$i.'_5">'.$remove_btn.'</td>';    /* td_0_5 remove button */
+		  		echo '<td id="td_'.$i.'_5" class="text-right" >
+		  		<input data-toggle="tooltip" title="Total" id="td_data_'.$i.'_5" name="td_data_'.$i.'_5" type="text" class="form-control no-padding pointer" readonly value="'.$sub_total_display.'" data-raw-value="'.$sub_total.'"></td>';    /*td_0_5 item sub_total */
+		  		echo '<td id="td_'.$i.'_6">'.$remove_btn.'</td>';    /* td_0_6 remove button */
 
 		  		echo '<input type="hidden" name="tr_item_id_'.$i.'" id="tr_item_id_'.$i.'" value="'.$res3->item_id.'">'; 
 		  		echo '<input type="hidden" id="tr_item_per_'.$i.'" name="tr_item_per_'.$i.'" value="'.$q6->tax.'">';
@@ -1046,12 +1055,20 @@ class Pos_model extends CI_Model {
 				$tax_type =$this->xss_html_filter(trim($_REQUEST['tr_tax_type_'.$i]));
 				$tax_id =$this->xss_html_filter(trim($_REQUEST['tr_tax_id_'.$i]));
 				$tax_value =$this->xss_html_filter(trim($_REQUEST['tr_tax_value_'.$i]));//%
-				$total_cost =$this->xss_html_filter(trim($_REQUEST['td_data_'.$i.'_4']));
+				$total_cost =$this->xss_html_filter(trim($_REQUEST['td_data_'.$i.'_5']));  // Fixed: _5 is subtotal, not _4
 				$description =$this->xss_html_filter(trim($_REQUEST['td_description_'.$i]));
+				
+				// Clean numeric values by removing commas
+				$price_per_unit = str_replace(',', '', $price_per_unit);
+				$tax_amt = str_replace(',', '', $tax_amt);
+				$total_cost = str_replace(',', '', $total_cost);
 				
 				$discount_type =$this->xss_html_filter(trim($_REQUEST['item_discount_type_'.$i]));
 				$discount_input =$this->xss_html_filter(trim($_REQUEST['item_discount_input_'.$i]));
 				$discount_amt =$this->xss_html_filter(trim($_REQUEST['item_discount_'.$i]));
+				
+				// Clean discount amount by removing commas
+				$discount_amt = str_replace(',', '', $discount_amt);
 
 				if($tax_type=='Exclusive'){
 					$single_unit_total_cost = $price_per_unit + ($tax_value * $price_per_unit / 100);

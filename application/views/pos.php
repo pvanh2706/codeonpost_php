@@ -395,7 +395,9 @@
                                             }).done(function(result){
                                                 var prlvs = result[0].itemprice;
                                                 console.log('Result: '+ datarow + ' | ' + result[0].itemprice);
-                                                $("#sales_price_"+datarow).val(prlvs);
+                                                var formatted_price = formatNumberWithCommas(prlvs);
+                                                $("#sales_price_"+datarow).val(formatted_price);
+                                                $("#sales_price_"+datarow).attr('data-raw-value', prlvs);
                                                 
                                             })
                                             //adjust_payments();
@@ -430,7 +432,7 @@
                           <th width="15%">Đ.Giá</th>
                           <th width="10%">C.Khấu</th>
                           <th width="10%" class='<?=tax_disable_class()?>'><?= $this->lang->line('tax'); ?></th>
-                          <th width="20%">T.Tính</th>
+                          <th width="20%">T.Tính 1</th>
                           <th width="5%" class="text-center"><i id="clearAllrow" class="fa fa-close" title="xóa hết cho nhanh" style="cursor: pointer;"></i></th>
                           <script>
                               $("#clearAllrow").click(function(){
@@ -881,7 +883,9 @@
                                             }).done(function(result){
                                                 var prlvs = result[0].itemprice;
                                                 //console.log('Result: '+ datarow + ' | ' + result[0].itemprice);
-                                                $("#sales_price_"+datarow).val(prlvs);
+                                                var formatted_price = formatNumberWithCommas(prlvs);
+                                                $("#sales_price_"+datarow).val(formatted_price);
+                                                $("#sales_price_"+datarow).attr('data-raw-value', prlvs);
                                                 make_subtotal(itemid,datarow);
                                                 calculate_payments();
                                                 
@@ -1207,6 +1211,22 @@
   }
   }
 
+// Helper functions for number formatting
+function formatNumberWithCommas(num) {
+  if (isNaN(num) || num === null || num === undefined) return '0';
+  return new Intl.NumberFormat('en-US').format(Math.round(parseFloat(num)));
+}
+
+function removeCommasFromNumber(str) {
+  if (typeof str !== 'string') str = String(str);
+  return str.replace(/,/g, '');
+}
+
+function parseNumberSafely(str) {
+  var cleaned = removeCommasFromNumber(str);
+  var parsed = parseFloat(cleaned);
+  return isNaN(parsed) ? 0 : parsed;
+}
 
 //REMOTELY FETCH THE ALL ITEMS OR CATEGORY WISE ITEMS.
 function get_details(){
@@ -1304,8 +1324,9 @@ function addrow(id='',item_obj=''){
             str+='<td id="td_'+rowcount+'_0">' + doubleItem + '</td>';/* Cột 1: Tên sản phẩm */ 
             str+='<td id="td_'+rowcount+'_1">'+quantity+'</td>';/* Cột 2: Số lượng */
             
-            // Cột 3: Đơn giá
-            info='<input  id="sales_price_'+rowcount+'" onblur="set_to_original('+rowcount+','+item_cost+')" onkeyup="update_price('+rowcount+','+item_cost+')" name="sales_price_'+rowcount+'" type="text" class="form-control no-padding min_width priceset" value="'+sales_price+'">';
+            // Cột 3: Đơn giá - Format với dấu phẩy
+            var formatted_sales_price = formatNumberWithCommas(sales_price);
+            info='<input  id="sales_price_'+rowcount+'" onblur="set_to_original('+rowcount+','+item_cost+')" onkeyup="update_price('+rowcount+','+item_cost+')" name="sales_price_'+rowcount+'" type="text" class="form-control no-padding min_width priceset" value="'+formatted_sales_price+'" data-raw-value="'+sales_price+'">';
             str+='<td id="td_'+rowcount+'_2" class="text-right">'+ info   +'</td>';/* Cột 3: Đơn giá */
     
             // Cột 4: Chiết khấu
@@ -1315,8 +1336,9 @@ function addrow(id='',item_obj=''){
             // Cột 5: Thuế
             str+='<td id="td_'+rowcount+'_4" class="<?=tax_disable_class()?>"><input data-toggle="tooltip" title="Click to Change" id="td_data_'+rowcount+'_4" onclick="show_sales_item_modal('+rowcount+')" name="td_data_'+rowcount+'_4" type="text" class="form-control no-padding pointer min_width" readonly value="'+tax_amt+'"></td>';/* Cột 5: Thuế */
     
-            // Cột 6: Thành tiền
-            str+='<td id="td_'+rowcount+'_5" class="text-right"><input data-toggle="tooltip" title="Total" id="td_data_'+rowcount+'_5" name="td_data_'+rowcount+'_5" type="text" class="form-control no-padding pointer" readonly value="'+sub_total+'"></td>';/* Cột 6: Thành tiền */
+            // Cột 6: Thành tiền - Format với dấu phẩy
+            var formatted_sub_total = formatNumberWithCommas(sub_total);
+            str+='<td id="td_'+rowcount+'_5" class="text-right"><input data-toggle="tooltip" title="Total" id="td_data_'+rowcount+'_5" name="td_data_'+rowcount+'_5" type="text" class="form-control no-padding pointer" readonly value="'+formatted_sub_total+'" data-raw-value="'+sub_total+'"></td>';/* Cột 6: Thành tiền */
             
             // Cột 7: Nút xóa
             str+='<td id="td_'+rowcount+'_6">'+ remove_btn    +'</td>';/* Cột 7: Nút xóa */
@@ -1424,8 +1446,9 @@ function addrow_gift(id='',item_obj=''){
             str+='<td id="td_'+rowcount+'_0"><span id="td_data_'+rowcount+'_0" style="white-space: break-spaces; text-overflow: ellipsis; overflow: hidden;"><i class="fa fa-gift"></i> '+ item_name     +'</span></td>';/* Cột 1: Tên sản phẩm */ 
             str+='<td id="td_'+rowcount+'_1">'+quantity+'</td>';/* Cột 2: Số lượng */
             
-            // Cột 3: Đơn giá
-            info='<input id="sales_price_'+rowcount+'" onblur="set_to_original('+rowcount+','+item_cost+')" onkeyup="update_price('+rowcount+','+item_cost+')" name="sales_price_'+rowcount+'" type="text" class="form-control no-padding min_width priceset" value="'+sales_price+'">';
+            // Cột 3: Đơn giá - Format với dấu phẩy
+            var formatted_sales_price = formatNumberWithCommas(sales_price);
+            info='<input id="sales_price_'+rowcount+'" onblur="set_to_original('+rowcount+','+item_cost+')" onkeyup="update_price('+rowcount+','+item_cost+')" name="sales_price_'+rowcount+'" type="text" class="form-control no-padding min_width priceset" value="'+formatted_sales_price+'" data-raw-value="'+sales_price+'">';
             str+='<td id="td_'+rowcount+'_2" class="text-right">'+ info   +'</td>';/* Cột 3: Đơn giá */
     
             // Cột 4: Chiết khấu
@@ -1435,8 +1458,9 @@ function addrow_gift(id='',item_obj=''){
             // Cột 5: Thuế
             str+='<td id="td_'+rowcount+'_4" class="<?=tax_disable_class()?>"><input data-toggle="tooltip" title="Click to Change" id="td_data_'+rowcount+'_4" onclick="show_sales_item_modal('+rowcount+')" name="td_data_'+rowcount+'_4" type="text" class="form-control no-padding pointer min_width" readonly value="'+tax_amt+'"></td>';/* Cột 5: Thuế */
     
-            // Cột 6: Thành tiền
-            str+='<td id="td_'+rowcount+'_5" class="text-right"><input data-toggle="tooltip" title="" id="td_data_'+rowcount+'_5" name="td_data_'+rowcount+'_5" type="text" class="form-control no-padding pointer" readonly value="'+sub_total+'"></td>';/* Cột 6: Thành tiền */
+            // Cột 6: Thành tiền - Format với dấu phẩy
+            var formatted_sub_total = formatNumberWithCommas(sub_total);
+            str+='<td id="td_'+rowcount+'_5" class="text-right"><input data-toggle="tooltip" title="" id="td_data_'+rowcount+'_5" name="td_data_'+rowcount+'_5" type="text" class="form-control no-padding pointer" readonly value="'+formatted_sub_total+'" data-raw-value="'+sub_total+'"></td>';/* Cột 6: Thành tiền */
             
             // Cột 7: Nút xóa
             str+='<td id="td_'+rowcount+'_6">'+ remove_btn    +'</td>';/* Cột 7: Nút xóa */
@@ -1476,12 +1500,12 @@ function addrow_gift(id='',item_obj=''){
 function update_price(row_id,item_cost){
 
   // Get current value and remove any existing commas
-  var current_value = $("#sales_price_"+row_id).val().replace(/,/g, '');
+  var current_value = ($("#sales_price_"+row_id).val() || '0').replace(/,/g, '');
   var sales_price = parseFloat(current_value);
   
   if(!isNaN(sales_price)) {
     // Format with commas and update the display
-    var formatted_price = new Intl.NumberFormat('en-US').format(Math.round(sales_price));
+    var formatted_price = formatNumberWithCommas(sales_price);
     $("#sales_price_"+row_id).val(formatted_price);
     $("#sales_price_"+row_id).attr('data-raw-value', sales_price);
   }
@@ -1508,7 +1532,7 @@ function update_price(row_id,item_cost){
 function set_to_original(row_id,item_cost) {
   return true;
   /*Input*/
-  var sales_price=$("#sales_price_"+row_id).val().trim();
+  var sales_price=($("#sales_price_"+row_id).val() || '0').replace(/,/g, '').trim();
   if(sales_price!='' || sales_price==0) {sales_price = parseFloat(sales_price); }
 
   /*Default set from item master*/
@@ -1646,7 +1670,8 @@ function make_subtotal(item_id,rowcount){
    tax_percentage = isNaN(tax_percentage) ? 0 : tax_percentage;
 
   // Remove commas from sales price before parsing
-  var sales_price_text = $("#sales_price_"+rowcount).val().replace(/,/g, '');
+  var sales_price_val = $("#sales_price_"+rowcount).val() || '0';
+  var sales_price_text = sales_price_val.replace(/,/g, '');
   var sales_price = parseFloat(sales_price_text);
   sales_price = isNaN(sales_price) ? 0 : sales_price;
   
@@ -1656,7 +1681,8 @@ function make_subtotal(item_id,rowcount){
   var tot_sales_price = item_qty * sales_price;
 
   /*Discount*/
-  var discount_amt = parseFloat($("#item_discount_"+rowcount).val().replace(/,/g, ''));
+  var discount_val = $("#item_discount_"+rowcount).val() || '0';
+  var discount_amt = parseFloat(discount_val.replace(/,/g, ''));
   discount_amt = isNaN(discount_amt) ? 0 : discount_amt;
   
   // Calculate tax amount based on type
@@ -1675,12 +1701,12 @@ function make_subtotal(item_id,rowcount){
   $("#td_data_"+rowcount+"_11").val(Math.round(tax_amount));
   
   // Format the result with commas and update both display and raw value
-  var subtotal_formatted = new Intl.NumberFormat('en-US').format(Math.round(subtotal));
-  $("#td_data_"+rowcount+"_4").val(subtotal_formatted);
-  $("#td_data_"+rowcount+"_4").attr('data-raw-value', subtotal);
+  var subtotal_formatted = formatNumberWithCommas(Math.round(subtotal));
+  $("#td_data_"+rowcount+"_5").val(subtotal_formatted);
+  $("#td_data_"+rowcount+"_5").attr('data-raw-value', Math.round(subtotal));
   
 // >>>>>>> fixbug_vanh
-  final_total();
+  adjust_payments(); // Use adjust_payments instead of final_total for consistency
 }
 
 // Alias function để đảm bảo backward compatibility
@@ -1727,9 +1753,10 @@ function final_total(){
     //   //console.log("==>total="+total);
     //   item_qty=parseFloat(item_qty)+ + +parseFloat($("#item_qty_"+i+"_"+item_id).val()).toFixed(0);
       // Use raw value if available, otherwise parse the formatted value
-      var current_total = $("#td_data_"+i+"_4").attr('data-raw-value');
-      if(!current_total) {
-        current_total = $("#td_data_"+i+"_4").val().replace(/,/g, '');
+      var current_total = $("#td_data_"+i+"_5").attr('data-raw-value');
+      if(!current_total || current_total === '' || current_total === 'undefined') {
+        var val = $("#td_data_"+i+"_5").val();
+        current_total = val ? val.replace(/,/g, '') : '0';
       }
       current_total = parseFloat(current_total);
       current_total = isNaN(current_total) ? 0 : current_total;
@@ -1770,7 +1797,7 @@ function final_total_reward(){
       //var tax_amt = parseFloat($("#td_data_"+i+"_11").val());
       item_id=$("#tr_item_id_"+i).val();
       
-      total=parseFloat(total)+ + +parseFloat($("#td_data_"+i+"_5").val()).toFixed(0);
+      total=parseFloat(total)+ + +parseFloat(($("#td_data_"+i+"_5").val() || '0').replace(/,/g, '')).toFixed(0);
       item_qty=parseFloat(item_qty)+ + +parseFloat($("#item_qty_"+i+"_"+item_id).val()).toFixed(0);
       console.log('reward :' +item_id);
       }
@@ -1810,9 +1837,10 @@ function adjust_payments(){
       if(document.getElementById('tr_item_id_'+i)){
      // total=parseFloat(total)+ + +parseFloat($("#td_data_"+i+"_5").val()).toFixed(0);
       // Use raw value if available, otherwise parse the formatted value
-      var current_total = $("#td_data_"+i+"_4").attr('data-raw-value');
-      if(!current_total) {
-        current_total = $("#td_data_"+i+"_4").val().replace(/,/g, '');
+      var current_total = $("#td_data_"+i+"_5").attr('data-raw-value');
+      if(!current_total || current_total === '' || current_total === 'undefined') {
+        var val = $("#td_data_"+i+"_5").val();
+        current_total = val ? val.replace(/,/g, '') : '0';
       }
       current_total = parseFloat(current_total);
       current_total = isNaN(current_total) ? 0 : current_total;
@@ -1891,7 +1919,7 @@ function adjust_payments2(){
   if($(".items_table tr").length>1){
     for(i=0;i<rowcount;i++){
       if(document.getElementById('tr_item_id_'+i)){
-      total=parseFloat(total)+ + +parseFloat($("#td_data_"+i+"_5").val()).toFixed(0);
+      total=parseFloat(total)+ + +parseFloat(($("#td_data_"+i+"_5").val() || '0').replace(/,/g, '')).toFixed(0);
       item_id=$("#tr_item_id_"+i).val();
       item_qty=parseFloat(item_qty)+ + +parseFloat($("#item_qty_"+i+"_"+item_id).val()).toFixed(0);
       }
@@ -2051,9 +2079,27 @@ $(document).ready(function(){
         console.log("Quantity input:", $(this).attr('id'), "Value:", $(this).val());
       });
       
+      // Ensure all price and subtotal fields have proper formatting and data attributes
+      $('input[id^="sales_price_"]').each(function() {
+        var $this = $(this);
+        var rawValue = $this.attr('data-raw-value');
+        if (rawValue) {
+          var formattedValue = formatNumberWithCommas(parseFloat(rawValue));
+          $this.val(formattedValue);
+        }
+      });
+      
+      $('input[id^="td_data_"][id$="_5"]').each(function() {
+        var $this = $(this);
+        var rawValue = $this.attr('data-raw-value');
+        if (rawValue) {
+          var formattedValue = formatNumberWithCommas(parseFloat(rawValue));
+          $this.val(formattedValue);
+        }
+      });
+      
       // Recalculate totals after loading data
-      final_total();
-      calculate_payments();
+      adjust_payments();
       
       $(".overlay").remove();
       //$("#customer_id").trigger("change");
@@ -2062,7 +2108,7 @@ $(document).ready(function(){
         $('#binvoice').parent('div').addClass('checked');
       }
 
-      final_total();
+      // Final calculation after all data is loaded and formatted
       adjust_payments();
 
     });
@@ -2347,7 +2393,7 @@ $('#order_date,#delivery_date,#cheque_date').datepicker({
           qty = (isNaN(qty)) ? 0 :qty;
 
       // Remove commas from sales price before parsing
-      var sales_price_text = $("#sales_price_"+row_id).val().replace(/,/g, '');
+      var sales_price_text = ($("#sales_price_"+row_id).val() || '0').replace(/,/g, '');
       var sales_price = parseFloat(sales_price_text);
           sales_price = (isNaN(sales_price)) ? 0 :sales_price;
           sales_price = sales_price * qty;
@@ -2441,8 +2487,18 @@ $('#order_date,#delivery_date,#cheque_date').datepicker({
 
 //Reset Tooltip
 function reset_tooltip() {
-  $('[data-toggle="tooltip"]').tooltip("destroy");
-  $('[data-toggle="tooltip"]').tooltip(); // re-enabling 
+  try {
+    $('[data-toggle="tooltip"]').each(function() {
+      if ($(this).data('bs.tooltip') || $(this).data('tooltip')) {
+        $(this).tooltip("destroy");
+      }
+    });
+    $('[data-toggle="tooltip"]').tooltip(); // re-enabling 
+  } catch (error) {
+    console.log('Tooltip reset error:', error);
+    // Try alternative approach
+    $('[data-toggle="tooltip"]').tooltip();
+  }
 }
 $('.search_div').on('scroll', function() {
     if ($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight) {

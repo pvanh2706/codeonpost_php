@@ -30,6 +30,58 @@ function resetUIButton() {
 // Biến flag để ngăn chặn double-click
 var isProcessing = false;
 
+// Helper function để remove dấu phẩy từ các input trước khi submit
+function prepareFormDataForSubmit() {
+    // Remove commas from all sales_price fields
+    $('input[id^="sales_price_"]').each(function() {
+        var $this = $(this);
+        var rawValue = $this.attr('data-raw-value');
+        if (rawValue) {
+            $this.val(rawValue);
+        } else {
+            var cleanValue = removeCommasFromNumber($this.val());
+            $this.val(cleanValue);
+        }
+    });
+    
+    // Remove commas from all subtotal fields
+    $('input[id^="td_data_"][id$="_5"]').each(function() {
+        var $this = $(this);
+        var rawValue = $this.attr('data-raw-value');
+        if (rawValue) {
+            $this.val(rawValue);
+        } else {
+            var cleanValue = removeCommasFromNumber($this.val());
+            $this.val(cleanValue);
+        }
+    });
+}
+
+// Helper function để restore format sau khi submit
+function restoreFormDataFormat() {
+    // Restore format for sales_price fields
+    $('input[id^="sales_price_"]').each(function() {
+        var $this = $(this);
+        var rawValue = parseNumberSafely($this.val());
+        if (!isNaN(rawValue)) {
+            var formattedValue = formatNumberWithCommas(rawValue);
+            $this.val(formattedValue);
+            $this.attr('data-raw-value', rawValue);
+        }
+    });
+    
+    // Restore format for subtotal fields  
+    $('input[id^="td_data_"][id$="_5"]').each(function() {
+        var $this = $(this);
+        var rawValue = parseNumberSafely($this.val());
+        if (!isNaN(rawValue)) {
+            var formattedValue = formatNumberWithCommas(rawValue);
+            $this.val(formattedValue);
+            $this.attr('data-raw-value', rawValue);
+        }
+    });
+}
+
 function save(print=false,pay_all=false){
 
 //$('.make_sale').on("click",function (e) {
@@ -88,6 +140,10 @@ function save(print=false,pay_all=false){
 		// Đặt flag đang xử lý
 		isProcessing = true;
 		$("#"+this_btn).attr('disabled',true);  //Enable Save or Update button
+		
+		// Chuẩn bị dữ liệu form - remove dấu phẩy trước khi submit
+		prepareFormDataForSubmit();
+		
 		//e.preventDefault();
 		var data = new Array(2);
 		data= new FormData($('#pos-form')[0]);//form name
@@ -188,6 +244,9 @@ function save(print=false,pay_all=false){
 				$("."+this_btn).attr('disabled',false);  //Enable Save or Update button
 				$(".overlay").remove();
 				
+				// Restore format cho các input field
+				restoreFormDataFormat();
+				
 				// Reset flag đang xử lý sau khi hoàn thành
 				isProcessing = false;
 				resetUIButton(); // Reset UI button
@@ -197,6 +256,10 @@ function save(print=false,pay_all=false){
 		   	    toastr['error']("Có lỗi xảy ra: " + error);
 		   	    $("."+this_btn).attr('disabled',false);
 		   	    $(".overlay").remove();
+		   	    
+		   	    // Restore format cho các input field
+		   	    restoreFormDataFormat();
+		   	    
 		   	    // Reset flag đang xử lý khi có lỗi
 		   	    isProcessing = false;
 		   	    resetUIButton(); // Reset UI button

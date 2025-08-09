@@ -110,6 +110,7 @@ class Pos extends MY_Controller {
 	}
 	public function fetch_sales($sales_id){
 	    $result=$this->pos_model->edit_pos($sales_id);
+	    echo $result;
 	}
 	/* ######################################## HOLD INVOICE ############################# */
 	public function hold_invoice(){
