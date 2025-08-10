@@ -1915,7 +1915,7 @@ function saveEInvoiceData() {
     });
     
     console.log('Invoice data to save:', invoiceData);
-    return;
+   //  return;
     // AJAX call to save e-invoice data
     $.ajax({
         url: "<?php echo site_url('sales/save_einvoice_data'); ?>",
