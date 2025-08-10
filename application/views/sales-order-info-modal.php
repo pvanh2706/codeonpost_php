@@ -1871,16 +1871,16 @@ function saveEInvoiceData() {
         var itemId = $(this).data('item-id');
         var itemName = $(this).find('.item-name-input').val() || 'sp1';
         var qty = parseFloat($(this).find('.item-qty-input').val()) || 0;
-        var unitPrice = parseFloat($(this).find('.item-price-input').val().replace(/,/g, '')) || 0;
+        var unitPrice = parseFloat($(this).find('.item-price-input').val().replace(/,/g, '').replace('.', '')) || 0;
         var discountPercent = parseFloat($(this).find('.item-discount-percent-input').val()) || 0;
         var taxPercent = parseFloat($(this).find('.item-tax-percent-input').val()) || 0;
         
         // Calculate amounts
         var subtotal = qty * unitPrice;
-        var discountAmount = parseFloat($(this).find('.item-discount-amount').val().replace(/,/g, '')) || 0;
+        var discountAmount = parseFloat($(this).find('.item-discount-amount').val().replace(/,/g, '').replace('.', '')) || 0;
         var afterDiscount = subtotal - discountAmount;
-        var taxAmount = parseFloat($(this).find('.item-tax-amount').val().replace(/,/g, '')) || 0;
-        var totalAmount = parseFloat($(this).find('.item-total').val().replace(/,/g, '')) || 0;
+        var taxAmount = parseFloat($(this).find('.item-tax-amount').val().replace(/,/g, '').replace('.', '')) || 0;
+        var totalAmount = parseFloat($(this).find('.item-total').val().replace(/,/g, '').replace('.', '')) || 0;
         console.log('discountAmount:', discountAmount, 'taxAmount:', taxAmount, 'totalAmount:', totalAmount);
 
         invoiceData.items.push({
@@ -1915,7 +1915,7 @@ function saveEInvoiceData() {
     });
     
     console.log('Invoice data to save:', invoiceData);
-    // return;
+    return;
     // AJAX call to save e-invoice data
     $.ajax({
         url: "<?php echo site_url('sales/save_einvoice_data'); ?>",
