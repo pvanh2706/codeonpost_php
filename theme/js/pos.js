@@ -1172,7 +1172,7 @@ function processEInvoiceCalculation(useTestData = false, roundingMethod = 1) {
         ui_data = getItemsDataFromUI(rowcount);
         invoice_discount_amount = parseFloat($(".sales_div_tot_discount").text().trim()) || 0;
         invoice_service_amount = parseFloat($("#other_charges_amt").text().trim()) || 0;
-        invoice_amount = parseFloat($(".sales_div_tot_payble").text().trim().replace('đ', '').replace('.', '').replace(',', '.')) || 0;
+        invoice_amount = parseFloat($(".sales_div_tot_payble").text().trim().replace('đ', '').replace('.', '').replace(',', '')) || 0;
     }
     
     // Bước 1: Hiển thị dữ liệu đầu vào
