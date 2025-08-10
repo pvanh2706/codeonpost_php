@@ -566,7 +566,7 @@
         </span>
         <?php } ?>
         
-        <?php if($sales_status != 'Final') { ?>
+        <?php if($sales_status == 'Shipping') { ?>
         <span class="btn btn-success" id="btn_final_<?=$sales_id?>" onclick="stt_final_now(<?=$sales_id?>)">
             <i class="fa fa-check"></i> 
           Đã giao hàng
@@ -728,55 +728,38 @@ function pay_now(sales_id){
   });
 }
 
-function stt_final_now(sales_id){
-  $.post('<?= base_url();?>sales/show_stt_final_now_modal', {sales_id: sales_id}, function(result) {
-    $(".pay_now_modal").html('').html(result);
-    //Date picker
-    $('.datepicker').datepicker({
-      autoclose: true,
-    format: 'dd-mm-yyyy',
-     todayHighlight: true
-    });
-    $('#pay_now').modal('toggle');
-
-  });
-}
-
 function stt_shipping_now(sales_id){
   $.post('<?= base_url();?>sales/show_stt_shipping_now_modal', {sales_id: sales_id}, function(result) {
     $(".pay_now_modal").html('').html(result);
-    //Date picker
-    $('.datepicker').datepicker({
-      autoclose: true,
-    format: 'dd-mm-yyyy',
-     todayHighlight: true
-    });
     $('#pay_now').modal('toggle');
+  });
+}
 
+function stt_final_now(sales_id){
+  $.post('<?= base_url();?>sales/show_stt_final_now_modal', {sales_id: sales_id}, function(result) {
+    $(".pay_now_modal").html('').html(result);
+    $('#pay_now').modal('toggle');
   });
 }
 
 function save_stt_final(sales_id){
   //var base_url=$("#base_url").val().trim();
+    $(".box").append('<div class="overlay"><i class="fa fa-refresh fa-spin"></i></div>');
+    $(".payment_save").attr('disabled',true);  //Disable Save button
+    
     $.post('<?= base_url();?>sales/save_stt_final', {sales_id: sales_id}, function(result) {
       result=result.trim();
         if(result=="success")
         {
           $('#pay_now').modal('toggle');
-          toastr["success"]("Hoàn thành!");
+          toastr["success"]("Đã cập nhật trạng thái giao hàng thành công!");
           success.currentTime = 0; 
           success.play();
           
-          // Cập nhật trạng thái hiển thị
-          $("#status_display_" + sales_id).text("Đã giao hàng");
-          
-          // Ẩn nút "Đã giao hàng" vì đã hoàn thành
-          $("#btn_final_" + sales_id).hide();
-          
-          // Reload datatable nếu có
-          if(typeof $('#example2').DataTable === 'function') {
-            $('#example2').DataTable().ajax.reload();
-          }
+          // Reload lại trang để cập nhật đầy đủ
+          setTimeout(function() {
+            location.reload();
+          }, 1500);
         }
         else if(result=="failed")
         {
@@ -797,26 +780,22 @@ function save_stt_final(sales_id){
 
 function save_stt_shipping(sales_id){
   //var base_url=$("#base_url").val().trim();
+    $(".box").append('<div class="overlay"><i class="fa fa-refresh fa-spin"></i></div>');
+    $(".payment_save").attr('disabled',true);  //Disable Save button
+    
     $.post('<?= base_url();?>sales/save_stt_shipping', {sales_id: sales_id}, function(result) {
       result=result.trim();
         if(result=="success")
         {
           $('#pay_now').modal('toggle');
-          toastr["success"]("Hoàn thành!");
+          toastr["success"]("Đã cập nhật trạng thái xuất kho thành công!");
           success.currentTime = 0; 
           success.play();
           
-          // Cập nhật trạng thái hiển thị
-          $("#status_display_" + sales_id).text("Đã xuất kho");
-          
-          // Ẩn nút "Đã xuất kho" và hiện nút "Đã giao hàng"
-          $("#btn_shipping_" + sales_id).hide();
-          $("#btn_final_" + sales_id).show();
-          
-          // Reload datatable nếu có
-          if(typeof $('#example2').DataTable === 'function') {
-            $('#example2').DataTable().ajax.reload();
-          }
+          // Reload lại trang để cập nhật đầy đủ
+          setTimeout(function() {
+            location.reload();
+          }, 1500);
         }
         else if(result=="failed")
         {

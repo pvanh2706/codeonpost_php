@@ -107,7 +107,7 @@
                               </tr>
                               <!-- Total Purchase Doscount -->
                               <tr>
-                                 <td>Tổng chiếc khấu nhập</td>
+                                 <td>Tổng Chiết khấu nhập</td>
                                  <td class="text-right text-bold purchase_discount_amt"><?php echo $CI->currency(number_format(0,0,'.','')); ?></td>
                               </tr>
                               <!-- Total Purchase Paid Amount -->
@@ -140,7 +140,7 @@
                               </tr>
                               <!-- Total Purchase return Doscount -->
                               <tr>
-                                 <td>Tổng chiếc khấu trả hàng nhập</td>
+                                 <td>Tổng Chiết khấu trả hàng nhập</td>
                                  <td class="text-right text-bold purchase_return_discount_amt"><?php echo $CI->currency(number_format(0, 0,'.','')); ?></td>
                               </tr>
                               <!-- Total Purchase Return Paid Amount -->
@@ -192,7 +192,7 @@
                               </tr>
                               <!-- Total Sales Doscount -->
                               <tr>
-                                 <td>Tổng chiếc khấu đơn hàng</td>
+                                 <td>Tổng Chiết khấu đơn hàng</td>
                                  <td class="text-right text-bold sales_discount_amt"><?php echo $CI->currency(number_format(0,0,'.','')); ?></td>
                               </tr>
                               <!-- Total Sales Paid Amount -->
@@ -225,7 +225,7 @@
                               </tr>
                               <!-- Total Sales return Doscount -->
                               <tr>
-                                 <td>Tổng chiếc khấu đơn trả hàng</td>
+                                 <td>Tổng Chiết khấu đơn trả hàng</td>
                                  <td class="text-right text-bold sales_return_discount_amt"><?php echo $CI->currency(number_format(0,0,'.','')); ?></td>
                               </tr>
                               <!-- Total Sales return Paid Amount -->
@@ -331,7 +331,7 @@
                                          <div class="alert alert-info text-left">
                                             <p>
                                              <strong>Long đẹp trai:</strong>
-                                             Báo cáo này bỏ qua phần chiếc khấu của đơn hàng nha ông, tại chưa biết tính sao cho tối ưu
+                                             Báo cáo này bỏ qua phần Chiết khấu của đơn hàng nha ông, tại chưa biết tính sao cho tối ưu
                                              <Item Wise & Invoice wise Reports total Gross Profit may worries,
                                              Invoice wise Report deducts Discount on Invoice.>
                                            </p>
@@ -357,7 +357,7 @@
                                                 <th style="">Khách hàng</th>
                                                 <th style="">Tổng đơn</th>
                                                 <th style="">Giá trị nhập</th>
-                                                <th style="">Chiếc khấu</th>
+                                                <th style="">Chiết khấu</th>
                                                 <th style="">Lợi nhuận</th>
                                                 
                                               </tr>
