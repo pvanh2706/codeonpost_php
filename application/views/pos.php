@@ -581,7 +581,7 @@
                           <div class="form-control"><?= $CI->currency('<span style="font-size: 19px;" class="tot_amt text-bold"></span>');?></div>
                   </div>
                   <div class="col-md-3 text-right">
-                          <label> Chiếc khấu thêm: <a class="fa fa-pencil-square-o cursor-pointer" data-toggle="modal" data-target="#discount-modal"></a></label>
+                          <label> Chiết khấu thêm: <a class="fa fa-pencil-square-o cursor-pointer" data-toggle="modal" data-target="#discount-modal"></a></label>
                           <div class="form-control"><?= $CI->currency('<span style="font-size: 19px;" class="tot_disc text-bold"></span>');?></div>
                   </div>
                   <div class="col-md-3 text-right">
@@ -616,7 +616,7 @@
                             <!--  -->
                             <div class="row ">
                               <div class="col-md-12 border-custom-bottom">
-                                <span class="col-md-7 text-right text-bold " data-toggle="modal" data-target="#discount-modal">Chiếc khấu:</span>
+                                <span class="col-md-7 text-right text-bold " data-toggle="modal" data-target="#discount-modal">Chiết khấu:</span>
                                 <span class="col-md-5 text-right text-bold  custom-font-sizes " ><span class="sales_div_tot_discount">0</span>₫</span>
                               </div>
                             </div>

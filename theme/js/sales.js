@@ -8,9 +8,45 @@ function formatNumber(amount) {
     return parseFloat(amount).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
 }
 
-// Hàm parse tiền tệ về số
+// Hàm parse tiền tệ về số (xử lý format VN)
 function parseCurrency(str) {
-    return parseFloat(str.replace(/[^0-9.-]+/g, ''));
+    if (!str) return 0;
+    
+    var stringValue = str.toString();
+    console.log('parseCurrency JS input:', stringValue);
+    
+    // Xóa bỏ ký hiệu tiền tệ và khoảng trắng
+    stringValue = stringValue.replace(/[₫\s]/g, '');
+    
+    // Xử lý format tiền tệ Việt Nam với dấu chấm phân cách hàng nghìn
+    // Ví dụ: "100.000" -> "100000", "1.000.000" -> "1000000"
+    var parts = stringValue.split('.');
+    
+    if (parts.length > 1) {
+        // Kiểm tra xem có phải là format hàng nghìn không
+        var isThousandSeparator = true;
+        for (var i = 1; i < parts.length; i++) {
+            if (parts[i].length !== 3) {
+                isThousandSeparator = false;
+                break;
+            }
+        }
+        
+        if (isThousandSeparator) {
+            // Format hàng nghìn: nối tất cả các phần
+            stringValue = parts.join('');
+        } else {
+            // Có thể là số thập phân, giữ nguyên
+            stringValue = stringValue;
+        }
+    }
+    
+    // Chỉ giữ lại số
+    var cleanValue = stringValue.replace(/[^0-9.]/g, '');
+    var result = parseFloat(cleanValue) || 0;
+    
+    console.log('parseCurrency JS output:', result);
+    return result;
 }
 
 // Format input tiền tệ cho dòng mới
@@ -104,6 +140,15 @@ $("#save,#update").on("click", function (e) {
         if(parseFloat($("#total_amt").text())!=parseFloat($("#amount").val())){
           $("#amount").focus();
           toastr["warning"]("Khách lẻ không phải là thượng đế nha!!");
+      var total_amount = parseCurrency($("#total_amt").text());
+      var payment_amount = parseCurrency($("#amount").val());
+      if(total_amount != payment_amount){
+        $("#amount").focus();
+        toastr["warning"]("Khách lẻ không phải là thượng đế nha!!");
+        return;
+      }
+        if($("#payment_type").val()==''){
+          toastr["warning"]("Lựa chọn hình thức thanh toán!!");
           return;
         }
           if($("#payment_type").val()==''){
@@ -693,10 +738,20 @@ function save_payment(sales_id) {
     check_field("amount");
     check_field("payment_date");
 
-    var payment_date = $("#payment_date").val().trim();
-    var amount = $("#amount").val().trim(); //tiền thanh toán
-    var payment_type = $("#payment_type").val().trim();
-    var payment_note = $("#payment_note").val().trim();
+    // var payment_date = $("#payment_date").val().trim();
+    // var amount = $("#amount").val().trim(); //tiền thanh toán
+    // var payment_type = $("#payment_type").val().trim();
+    // var payment_note = $("#payment_note").val().trim();
+
+
+    var payment_date=$("#payment_date").val().trim();
+    var amount_input=$("#amount").val().trim();//tiền thanh toán input
+    var amount = parseCurrency(amount_input); // Chuyển đổi từ format VN về số
+    var payment_type=$("#payment_type").val().trim();
+    var payment_note=$("#payment_note").val().trim();
+    
+    console.log('Payment processing - input:', amount_input, 'parsed:', amount);
+    
 
     var getPoint = Math.floor(amount / 1000);
 

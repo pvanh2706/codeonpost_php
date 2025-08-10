@@ -236,7 +236,7 @@
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                          <label for="item_discount_input">Chiếc khấu</label>
+                                          <label for="item_discount_input">Chiết khấu</label>
                                         <input type="text" class="form-control only_currency" id="item_discount_input" name="item_discount_input" placeholder="" value="0">
                                         </div>
                                    

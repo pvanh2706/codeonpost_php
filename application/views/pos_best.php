@@ -404,7 +404,7 @@
                           <?= $CI->currency('<span style="font-size: 19px;" class="tot_amt text-bold"></span>');?>
                   </div>
                   <div class="col-md-3 text-right">
-                          <label data-toggle="modal" data-target="#discount-modal">Chiếc khấu</label><br>
+                          <label data-toggle="modal" data-target="#discount-modal">Chiết khấu</label><br>
                           <?= $CI->currency('<span style="font-size: 19px;" class="tot_disc text-bold"></span>');?>
                   </div>
                   <div class="col-md-3 text-right">

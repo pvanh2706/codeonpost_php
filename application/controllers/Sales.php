@@ -386,12 +386,54 @@ class Sales extends MY_Controller {
 	public function show_stt_final_now_modal(){
 		$this->permission_check_with_msg('sales_view');
 		$sales_id=$this->input->post('sales_id');
-		echo $this->sales->show_stt_final_now_modal($sales_id);
+		
+		$modal_html = '
+		<div class="modal fade" id="pay_now" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+		  <div class="modal-dialog" role="document">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+		        <h4 class="modal-title" id="myModalLabel">Xác nhận hoàn thành đơn hàng</h4>
+		      </div>
+		      <div class="modal-body">
+		        <h4>Bạn có chắc chắn muốn cập nhật trạng thái thành "Đã giao hàng"?</h4>
+		        <p class="text-muted">Hành động này sẽ đánh dấu đơn hàng đã hoàn thành và không thể hoàn tác.</p>
+		      </div>
+		      <div class="modal-footer">
+		        <button type="button" class="btn btn-default" data-dismiss="modal">Hủy</button>
+		        <button type="button" class="btn btn-success payment_save" onclick="save_stt_final('.$sales_id.')">Xác nhận hoàn thành</button>
+		      </div>
+		    </div>
+		  </div>
+		</div>';
+		
+		echo $modal_html;
 	}
 	public function show_stt_shipping_now_modal(){
 		$this->permission_check_with_msg('sales_view');
 		$sales_id=$this->input->post('sales_id');
-		echo $this->sales->show_stt_shipping_now_modal($sales_id);
+		
+		$modal_html = '
+		<div class="modal fade" id="pay_now" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+		  <div class="modal-dialog" role="document">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+		        <h4 class="modal-title" id="myModalLabel">Xác nhận cập nhật trạng thái</h4>
+		      </div>
+		      <div class="modal-body">
+		        <h4>Bạn có chắc chắn muốn cập nhật trạng thái thành "Đã xuất kho"?</h4>
+		        <p class="text-muted">Hành động này sẽ thay đổi trạng thái đơn hàng và không thể hoàn tác.</p>
+		      </div>
+		      <div class="modal-footer">
+		        <button type="button" class="btn btn-default" data-dismiss="modal">Hủy</button>
+		        <button type="button" class="btn btn-warning payment_save" onclick="save_stt_shipping('.$sales_id.')">Xác nhận xuất kho</button>
+		      </div>
+		    </div>
+		  </div>
+		</div>';
+		
+		echo $modal_html;
 	}
 	public function save_payment(){
 		$this->permission_check_with_msg('sales_add');
@@ -403,11 +445,51 @@ class Sales extends MY_Controller {
 	}
 	public function save_stt_final(){
 		$this->permission_check_with_msg('sales_add');
-		echo $this->sales->save_stt_final();
+		
+		$sales_id = $this->input->post('sales_id');
+		
+		if(!$sales_id) {
+			echo "failed";
+			return;
+		}
+		
+		// Cập nhật trạng thái trong database
+		$data = array(
+			'sales_status' => 'Final'
+		);
+		
+		$this->db->where('id', $sales_id);
+		$result = $this->db->update('db_sales', $data);
+		
+		if($result) {
+			echo "success";
+		} else {
+			echo "failed";
+		}
 	}
 	public function save_stt_shipping(){
 		$this->permission_check_with_msg('sales_add');
-		echo $this->sales->save_stt_shipping();
+		
+		$sales_id = $this->input->post('sales_id');
+		
+		if(!$sales_id) {
+			echo "failed";
+			return;
+		}
+		
+		// Cập nhật trạng thái trong database
+		$data = array(
+			'sales_status' => 'Shipping'
+		);
+		
+		$this->db->where('id', $sales_id);
+		$result = $this->db->update('db_sales', $data);
+		
+		if($result) {
+			echo "success";
+		} else {
+			echo "failed";
+		}
 	}
 	
 	// Method để lấy thông tin thanh toán cập nhật

@@ -162,7 +162,7 @@
                 <!--  -->
                 <div class="row ">
                   <div class="col-md-12 border-custom-bottom">
-                    <span class="col-md-6 text-right text-bold ">Chiếc khấu:</span>
+                    <span class="col-md-6 text-right text-bold ">Chiết khấu:</span>
                     <span class="col-md-6 text-right text-bold  custom-font-size sales_div_tot_discount">0.00</span>
                   </div>
                 </div>
