@@ -81,8 +81,60 @@ function restoreFormDataFormat() {
         }
     });
 }
+// Hàm bỏ dấu chấm, dấu phẩy trong text
+function removeCommasAndDots(text) {
+    if (text === null || text === undefined) {
+        return -1;
+    }
+    return text.replace(/[,\.]/g, '');
+}
 
 function save(print=false,pay_all=false){
+    // // Tìm các tr có class itemrows trong bảng có id là print_area
+    // var itemRows = $('#print_area .itemrows');
+    // // Lặp qua từng dòng để lấy dữ liệu
+    // itemRows.each(function() {
+    //     var row = $(this);
+    //     // Lấy giá trị của thuộc tính "data-item-id" trong thẻ tr
+    //     var itemId = row.attr('data-item-id');
+    //     // Nếu itemID = -1 thì lấy value trong thẻ td đầu tiên
+    //     // Nếu itemID != -1 thì lấy value trong thẻ span thứ hai trong thẻ td đầu tiên
+    //     let itemName = '';
+    //     if(itemId == -1) {
+    //         itemName = row.find('td:first').text();
+    //     } else {
+    //         itemName = row.find('td:first span:nth-child(2)').text();
+    //     }
+    //     // Lấy giá trị của thẻ input đầu tiên trong thẻ td thứ hai làm số lượng
+    //     let itemQuantity = row.find('td:nth-child(2) input').val();
+    //     // Lấy giá trị của thẻ input đầu tiên trong thẻ td thứ ba làm đơn giá
+    //     let itemPrice = row.find('td:nth-child(3) input').val();
+    //     // Lấy giá trị của thẻ input đầu tiên trong thẻ td thứ tư làm chiết khấu
+    //     let itemDiscount = row.find('td:nth-child(4) input').val();
+    //     // Lấy giá trị của thuộc tính "data-raw-value" trong thẻ input đầu tiên trong thẻ td thứ sáu làm thành tiền
+    //     // Input trên dom <input data-toggle="tooltip" title="Total" id="td_data_0_5" name="td_data_0_5" type="text" class="form-control no-padding pointer" readonly="" value="50,000" data-raw-value="55000">
+    //     let itemTotal = row.find('td:nth-child(6) input').attr('data-raw-value');
+    //     // let itemTotal = row.find('td:nth-child(5) input').attr('data-raw-value') || row.find('td:nth-child(5) input').val();
+    //     // Lấy thẻ input thứ 5 trong tr(row) làm phần trăm thuế
+    //     let itemTaxPercent = row.find('input:nth-child(12)').val();
+    //     // Lấy giá trị của thẻ input đầu tiên trong thẻ td thứ năm làm thuế
+    //     let itemTaxAmount = row.find('td:nth-child(5) input').val();
+
+
+    //     console.log('📦 SALES: ID sản phẩm:', itemId);
+    //     console.log('📦 SALES: Tên sản phẩm:', itemName);
+    //     console.log('📦 SALES: Số lượng sản phẩm:', itemQuantity);
+    //     console.log('📦 SALES: Giá sản phẩm:', removeCommasAndDots(itemPrice));
+    //     console.log('📦 SALES: Chiết khấu sản phẩm:', removeCommasAndDots(itemDiscount));
+    //     console.log('📦 SALES: Thành tiền sản phẩm:', removeCommasAndDots(itemTotal));
+    //     console.log('📦 SALES: Phần trăm thuế sản phẩm:', removeCommasAndDots(itemTaxPercent));
+    //     console.log('📦 SALES: Số tiền thuế sản phẩm:', removeCommasAndDots(itemTaxAmount));
+
+    //     //let itemTaxPercent = row.find('td:nth-child(5) input').val();
+    // });
+
+    // return;
+
 
 //$('.make_sale').on("click",function (e) {
 	
@@ -898,22 +950,88 @@ function getItemsDataFromUI(rowcount) {
     var items_data = [];
     var total_before_tax_value = 0;
     
-    for (var i = 0; i < rowcount; i++) {   
-        var item_name = $("#td_data_" + i + "_0").text().trim();
-        var item_quantity = parseFloat($("#item_qty_" + i + "_1").val().trim()) || 0;
-        var item_price = parseFloat($("#sales_price_" + i).val().trim().replace(/,/g, '') || 0);
-        var item_discount_item = parseFloat($("#item_discount_" + i).val().trim()) || 0;
-        var item_tax_percent = parseFloat($("#tr_tax_value_" + i).val().trim()) || 0;
-        var item_tax_amount = parseFloat($("#td_data_" + i + "_4").val().trim()) || 0;
-        var item_amount = parseFloat($("#td_data_" + i + "_5").val().trim().replace(/,/g, '') || 0);
-       	console.log('Sản phẩm ' + i + ': ' + item_name);
-        console.log('  - Số lượng:', item_quantity);
-        console.log('  - Đơn giá:', item_price);
-        console.log('  - Giảm giá sản phẩm:', item_discount_item);
-        console.log('  - Thuế:', item_tax_percent);
-        console.log('  - Tiền thuế:', item_tax_amount);
-        console.log('  - Tổng tiền:', item_amount);
+    // for (var i = 0; i < rowcount; i++) {   
+    //     var item_name = $("#td_data_" + i + "_0").text().trim();
+    //     var item_quantity = parseFloat($("#item_qty_" + i + "_1").val().trim()) || 0;
+    //     var item_price = parseFloat($("#sales_price_" + i).val().trim().replace(/,/g, '') || 0);
+    //     var item_discount_item = parseFloat($("#item_discount_" + i).val().trim()) || 0;
+    //     var item_tax_percent = parseFloat($("#tr_tax_value_" + i).val().trim()) || 0;
+    //     var item_tax_amount = parseFloat($("#td_data_" + i + "_4").val().trim()) || 0;
+    //     var item_amount = parseFloat($("#td_data_" + i + "_5").val().trim().replace(/,/g, '') || 0);
+    //    	console.log('Sản phẩm ' + i + ': ' + item_name);
+    //     console.log('  - Số lượng:', item_quantity);
+    //     console.log('  - Đơn giá:', item_price);
+    //     console.log('  - Giảm giá sản phẩm:', item_discount_item);
+    //     console.log('  - Thuế:', item_tax_percent);
+    //     console.log('  - Tiền thuế:', item_tax_amount);
+    //     console.log('  - Tổng tiền:', item_amount);
 
+    //     // Tính tiền trước thuế ban đầu (sau giảm giá sản phẩm)
+    //     var item_amount_before_tax = (item_quantity * item_price) - item_discount_item;
+    //     total_before_tax_value += item_amount_before_tax;
+        
+    //     items_data.push({
+    //         index: i,
+    //         item_name: item_name,
+    //         item_quantity: item_quantity,
+    //         item_price: item_price,
+    //         item_discount_item: item_discount_item,
+    //         item_tax_percent: item_tax_percent,
+    //         item_tax_amount: item_tax_amount,
+    //         item_amount: item_amount,
+    //         item_amount_before_tax: item_amount_before_tax
+    //     });
+    // }
+
+    // Tìm các tr có class itemrows trong bảng có id là print_area
+    var itemRows = $('#print_area .itemrows');
+    // Lặp qua từng dòng để lấy dữ liệu
+    itemRows.each(function() {
+        var row = $(this);
+        // Lấy giá trị của thuộc tính "data-item-id" trong thẻ tr
+        var itemId = row.attr('data-item-id');
+        // Nếu itemID = -1 thì lấy value trong thẻ td đầu tiên
+        // Nếu itemID != -1 thì lấy value trong thẻ span thứ hai trong thẻ td đầu tiên
+        let itemName = '';
+        if(itemId == -1) {
+            itemName = row.find('td:first').text();
+        } else {
+            itemName = row.find('td:first span:nth-child(2)').text();
+        }
+        // Lấy giá trị của thẻ input đầu tiên trong thẻ td thứ hai làm số lượng
+        let itemQuantity = row.find('td:nth-child(2) input').val();
+        // Lấy giá trị của thẻ input đầu tiên trong thẻ td thứ ba làm đơn giá
+        let itemPrice = row.find('td:nth-child(3) input').val();
+        // Lấy giá trị của thẻ input đầu tiên trong thẻ td thứ tư làm chiết khấu
+        let itemDiscount = row.find('td:nth-child(4) input').val();
+        // Lấy giá trị của thuộc tính "data-raw-value" trong thẻ input đầu tiên trong thẻ td thứ sáu làm thành tiền
+        // Input trên dom <input data-toggle="tooltip" title="Total" id="td_data_0_5" name="td_data_0_5" type="text" class="form-control no-padding pointer" readonly="" value="50,000" data-raw-value="55000">
+        let itemTotal = row.find('td:nth-child(6) input').attr('data-raw-value');
+        // let itemTotal = row.find('td:nth-child(5) input').attr('data-raw-value') || row.find('td:nth-child(5) input').val();
+        // Lấy thẻ input thứ 5 trong tr(row) làm phần trăm thuế
+        let itemTaxPercent = row.find('input:nth-child(12)').val();
+        // Lấy giá trị của thẻ input đầu tiên trong thẻ td thứ năm làm thuế
+        let itemTaxAmount = row.find('td:nth-child(5) input').val();
+
+
+        // console.log('📦 SALES: ID sản phẩm:', itemId);
+        // console.log('📦 SALES: Tên sản phẩm:', itemName);
+        // console.log('📦 SALES: Số lượng sản phẩm:', itemQuantity);
+        // console.log('📦 SALES: Giá sản phẩm:', removeCommasAndDots(itemPrice));
+        // console.log('📦 SALES: Chiết khấu sản phẩm:', removeCommasAndDots(itemDiscount));
+        // console.log('📦 SALES: Thành tiền sản phẩm:', removeCommasAndDots(itemTotal));
+        // console.log('📦 SALES: Phần trăm thuế sản phẩm:', removeCommasAndDots(itemTaxPercent));
+        // console.log('📦 SALES: Số tiền thuế sản phẩm:', removeCommasAndDots(itemTaxAmount));
+
+        var item_name = removeCommasAndDots(itemName);
+        var item_quantity = removeCommasAndDots(itemQuantity);
+        var item_price = removeCommasAndDots(itemPrice);
+        var item_discount_item = removeCommasAndDots(itemDiscount);
+        var item_tax_percent = removeCommasAndDots(itemTaxPercent);
+        var item_tax_amount = removeCommasAndDots(itemTaxAmount);
+        var item_amount = removeCommasAndDots(itemTotal);
+
+        //let itemTaxPercent = row.find('td:nth-child(5) input').val();
         // Tính tiền trước thuế ban đầu (sau giảm giá sản phẩm)
         var item_amount_before_tax = (item_quantity * item_price) - item_discount_item;
         total_before_tax_value += item_amount_before_tax;
@@ -929,7 +1047,9 @@ function getItemsDataFromUI(rowcount) {
             item_amount: item_amount,
             item_amount_before_tax: item_amount_before_tax
         });
-    }
+    });
+
+
     return {
         items: items_data,
         total_before_tax_value: total_before_tax_value
