@@ -1,27 +1,50 @@
+<?php
+header('Content-Type: text/html; charset=utf-8');
+mb_internal_encoding('UTF-8');
+?>
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <title><?= $page_title;?>- Default Format</title>
 <head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <?php include"comman/code_css_form.php"; ?>
 <link rel='shortcut icon' href='<?php echo $theme_link; ?>images/favicon.ico' />
 
 <style>
+/* ===== IMPORT FONT TỪ GOOGLE FONTS (TÙY CHỌN) ===== */
+/* Bỏ comment dòng dưới nếu muốn sử dụng Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+/* Hoặc thêm font khác: */
+/* @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap'); */
+
+/* ===== FONT VÀ CỠ CHỮ CHO BẢNG (TABLE, TH, TD) ===== */
 table, th, td {
     border: 1px solid black;
     border-collapse: collapse;
-    font-family: 'Open Sans', 'Martel Sans', sans-serif;
+    /* THAY ĐỔI FONT CHỮ CHO BẢNG TẠI ĐÂY */
+    font-family: 'Times New Roman', 'Roboto', 'Arial', 'DejaVu Sans', sans-serif;
+    /* font-family: 'Roboto', 'Arial', 'DejaVu Sans', sans-serif; */
+    /* THAY ĐỔI CỠ CHỮ CHO BẢNG TẠI ĐÂY */
+    font-size: 12px;
 }
 th, td {
     padding: 5px;
     text-align: left;   
     vertical-align:top 
 }
+
+/* ===== FONT VÀ CỠ CHỮ CHO TOÀN BỘ TRANG (BODY) ===== */
 body{
   word-wrap: break-word;
-  font-family: Arial, sans-serif;
+  /* THAY ĐỔI FONT CHỮ CHO TOÀN BỘ TRANG TẠI ĐÂY */
+  font-family: 'Roboto', 'Arial', 'DejaVu Sans', sans-serif;
   margin: 20px;
   background: white;
   color: black;
+  /* THAY ĐỔI CỠ CHỮ CHO TOÀN BỘ TRANG TẠI ĐÂY */
+  font-size: 13px;
 }
 /* Debug styling */
 .debug-info {
@@ -32,6 +55,7 @@ body{
     font-family: monospace;
 }
 
+/* ===== STYLE CHO PHẦN IN (PRINT) ===== */
 /* Print styles - Hide debug info and print button when printing */
 @media print {
     .debug-info,
@@ -41,21 +65,37 @@ body{
     
     body {
         margin: 0;
+        /* THAY ĐỔI CỠ CHỮ KHI IN TẠI ĐÂY */
         font-size: 12px;
+        /* THAY ĐỔI FONT CHỮ KHI IN TẠI ĐÂY */
+        font-family: 'Arial', 'DejaVu Sans', sans-serif !important;
     }
     
-    table {
+    table, th, td {
         width: 100%;
         page-break-inside: avoid;
+        /* THAY ĐỔI FONT CHỮ CHO BẢNG KHI IN TẠI ĐÂY */
+        font-family: 'Arial', 'DejaVu Sans', sans-serif !important;
+        /* THAY ĐỔI CỠ CHỮ CHO BẢNG KHI IN TẠI ĐÂY */
+        font-size: 11px;
     }
     
     .amt-in-word {
-        font-size: 11px;
+        /* THAY ĐỔI CỠ CHỮ CHO PHẦN "SỐ TIỀN BẰNG CHỮ" KHI IN TẠI ĐÂY */
+        font-size: 10px;
     }
 }
 </style>
 
 <?php 
+// Hàm đảm bảo UTF-8 encoding
+function ensureUtf8($text) {
+    if (!mb_check_encoding($text, 'UTF-8')) {
+        return mb_convert_encoding($text, 'UTF-8', 'auto');
+    }
+    return $text;
+}
+
 // Hàm format tiền tệ Việt Nam
 function formatCurrency($amount) {
     if ($amount == 0) return '0₫';
@@ -183,60 +223,60 @@ function formatNumber($number) {
     <thead>
       
       <tr>
-          <th colspan="5" rowspan="2" style="padding-left: 15px;">
-            <b><?php echo $company_name; ?></b><br/>
-            <?php echo "Địa chỉ : ".$company_address; ?><br/>
-            <?php echo $company_country; ?><br/>
-            <?php echo "Điện thoại:".$company_mobile; ?><br/>
-            <?php echo (!empty(trim($company_email))) ? "Email: ".$company_email."<br>" : '';?>
-            <?php echo (!empty(trim($company_gst_no))) ? "Mã số thuế: ".$company_gst_no."<br>" : '';?>
-            <?php echo (!empty(trim($company_vat_no))) ? "Mã VAT: ".$company_vat_no."<br>" : '';?>
+          <th colspan="5" rowspan="2" style="padding-left: 25px;">
+            <b><?php echo ensureUtf8($company_name); ?></b><br/>
+            <?php echo ensureUtf8("Địa chỉ : ".$company_address); ?><br/>
+            <?php echo ensureUtf8($company_country); ?><br/>
+            <?php echo ensureUtf8("Điện thoại: ".$company_mobile); ?><br/>
+            <?php echo (!empty(trim($company_email))) ? ensureUtf8("Email: ".$company_email)."<br>" : '';?>
+            <?php echo (!empty(trim($company_gst_no))) ? ensureUtf8("Mã số thuế: ".$company_gst_no)."<br>" : '';?>
+            <?php echo (!empty(trim($company_vat_no))) ? ensureUtf8("Mã VAT: ".$company_vat_no)."<br>" : '';?>
           </th>
-          <th colspan="5" rowspan="1"><b style="text-transform: capitalize;">HÓA ĐƠN TRẢ HÀNG</b> (<?=$return_status;?>)</th>
+          <th colspan="5" rowspan="1"><b style="text-transform: capitalize;"><?php echo ensureUtf8("HÓA ĐƠN TRẢ HÀNG"); ?></b> (<?=ensureUtf8($return_status);?>)</th>
             
       </tr>
       <tr>
           <th colspan="3" rowspan="1">
-              Số hóa đơn : <?php echo "$return_code"; ?><br>
-              Số tham chiếu : <?php echo "$reference_no"; ?>
+              <?php echo ensureUtf8("Số hóa đơn : ".$return_code); ?><br>
+              <?php echo ensureUtf8("Số tham chiếu : ".$reference_no); ?>
           </th>  
-          <th colspan="2" rowspan="1">Ngày lập : <?php echo show_date($return_date)." ".$created_time; ?></th>
+          <th colspan="2" rowspan="1"><?php echo ensureUtf8("Ngày lập : ".show_date($return_date)." ".$created_time); ?></th>
       </tr>
     
 
 
       <tr>
     <td colspan="5" style="padding-left: 15px;">
-    <b>Địa chỉ khách hàng</b><br/>
-    <?php echo "Tên: ".$customer_name; ?><br/>
-      <?php echo "Điện thoại: ".$customer_mobile; ?>
+    <b><?php echo ensureUtf8("Địa chỉ khách hàng"); ?></b><br/>
+    <?php echo ensureUtf8("Tên: ".$customer_name); ?><br/>
+      <?php echo ensureUtf8("Điện thoại: ".$customer_mobile); ?>
       <?php 
               if(!empty($customer_address)){
-                echo $customer_address;
+                echo ensureUtf8($customer_address);
               }
               if(!empty($customer_country)){
-                echo $customer_country;
+                echo ensureUtf8($customer_country);
               }
               if(!empty($customer_state)){
-                echo ",".$customer_state;
+                echo ensureUtf8(",".$customer_state);
               }
               if(!empty($customer_city)){
-                echo ",".$customer_city;
+                echo ensureUtf8(",".$customer_city);
               }
               if(!empty($customer_postcode)){
-                echo "-".$customer_postcode;
+                echo ensureUtf8("-".$customer_postcode);
               }
             ?>
             <br>
-      <?php echo (!empty(trim($customer_email))) ? "Email: ".$customer_email."<br>" : '';?>
-      <?php echo (!empty(trim($customer_gst_no))) ? "Mã số thuế: ".$customer_gst_no."<br>" : '';?>
-      <?php echo (!empty(trim($customer_tax_number))) ? "Mã thuế: ".$customer_tax_number."<br>" : '';?>
+      <?php echo (!empty(trim($customer_email))) ? ensureUtf8("Email: ".$customer_email)."<br>" : '';?>
+      <?php echo (!empty(trim($customer_gst_no))) ? ensureUtf8("Mã số thuế: ".$customer_gst_no)."<br>" : '';?>
+      <?php echo (!empty(trim($customer_tax_number))) ? ensureUtf8("Mã thuế: ".$customer_tax_number)."<br>" : '';?>
   </td>
     
     <td colspan="5" style="padding-left: 15px;">
-    <b>Địa chỉ giao hàng</b><br/>
-   <?php echo "Tên: ".$customer_name; ?><br/>
-      <?php echo "Điện thoại: ".$customer_mobile; ?>
+    <b><?php echo ensureUtf8("Địa chỉ giao hàng"); ?></b><br/>
+   <?php echo ensureUtf8("Tên: ".$customer_name); ?><br/>
+      <?php echo ensureUtf8("Điện thoại: ".$customer_mobile); ?>
       <?php 
               if(!empty($customer_address)){
                 echo $customer_address;
