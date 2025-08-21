@@ -33,6 +33,19 @@
     .sidebar-menu .treeview-menu li a {
         padding-right: 5px;
     }
+    /* Căn giữa icon và text trong submenu */
+    .sidebar-menu .treeview-menu li a {
+        display: flex;
+        align-items: center;
+    }
+    .sidebar-menu .treeview-menu li a i {
+        margin-right: 8px;
+        width: 14px;
+        text-align: center;
+    }
+    .sidebar-menu .treeview-menu li a span {
+        line-height: 1.2;
+    }
 </style>
     <!-- Logo -->
     <a href="<?php echo $base_url; ?>dashboard" class="logo">
