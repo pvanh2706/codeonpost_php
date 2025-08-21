@@ -559,27 +559,45 @@
             <i class="fa fa-print"></i> 
           In hóa đơn A4
         </a-->
-        <?php if($sales_status == 'Quotation') { ?>
-        <span class="btn btn-warning" id="btn_shipping_<?=$sales_id?>" onclick="stt_shipping_now(<?=$sales_id?>)">
-            <i class="fa fa-truck"></i> 
-          Đã xuất kho
-        </span>
+        <?php 
+        // Logic hiển thị nút theo trạng thái
+        if($sales_status == 'Quotation') { 
+            // Trạng thái "Đang giao dịch" - hiển thị 4 nút
+        ?>
+            <!-- Nút Đã xuất kho -->
+            <span class="btn btn-warning" id="btn_shipping_<?=$sales_id?>" onclick="stt_shipping_now(<?=$sales_id?>)">
+                <i class="fa fa-truck"></i> 
+              Đã xuất kho
+            </span>
+            
+            <!-- Nút Đã giao hàng (skip xuất kho) -->
+            <span class="btn btn-success" id="btn_final_<?=$sales_id?>" onclick="stt_final_now(<?=$sales_id?>)">
+                <i class="fa fa-check"></i> 
+              Đã giao hàng
+            </span>
         <?php } ?>
         
-        <?php if($sales_status == 'Shipping') { ?>
-        <span class="btn btn-success" id="btn_final_<?=$sales_id?>" onclick="stt_final_now(<?=$sales_id?>)">
-            <i class="fa fa-check"></i> 
-          Đã giao hàng
-        </span>
+        <?php if($sales_status == 'Shipping') { 
+            // Trạng thái "Đã xuất kho" - hiển thị 3 nút (không có nút Đã xuất kho nữa)
+        ?>
+            <!-- Nút Đã giao hàng -->
+            <span class="btn btn-success" id="btn_final_<?=$sales_id?>" onclick="stt_final_now(<?=$sales_id?>)">
+                <i class="fa fa-check"></i> 
+              Đã giao hàng
+            </span>
         <?php } ?>
         
-        <?php if($payment_status != 'Paid') { ?>
-        <span class="btn btn-primary" id="btn_payment_<?=$sales_id?>" onclick="pay_now(<?=$sales_id?>)">
-            <i class="fa fa-dollar"></i> 
-          Nhận thanh toán
-        </span>
+        <?php 
+        // Nút Nhận thanh toán - hiển thị cho tất cả trạng thái nếu chưa thanh toán đủ
+        if($payment_status != 'Paid') { 
+        ?>
+            <span class="btn btn-primary" id="btn_payment_<?=$sales_id?>" onclick="pay_now(<?=$sales_id?>)">
+                <i class="fa fa-dollar"></i> 
+              Nhận thanh toán
+            </span>
         <?php } ?>
         
+        <!-- Nút In hóa đơn - luôn hiển thị -->
         <a target="_blank" class="btn btn-info pointer" onclick="print_invoice(<?=$sales_id?>)">
             <i class="fa fa-file-text"></i> 
           In hóa đơn POS
@@ -756,10 +774,11 @@ function save_stt_final(sales_id){
           success.currentTime = 0; 
           success.play();
           
-          // Reload lại trang để cập nhật đầy đủ
-          setTimeout(function() {
-            location.reload();
-          }, 1500);
+          // Cập nhật nút theo trạng thái mới (Final)
+          updateButtonsByStatus(sales_id, 'Final');
+          
+          // Cập nhật thông tin thanh toán nếu cần
+          updatePaymentInfo(sales_id);
         }
         else if(result=="failed")
         {
@@ -792,10 +811,11 @@ function save_stt_shipping(sales_id){
           success.currentTime = 0; 
           success.play();
           
-          // Reload lại trang để cập nhật đầy đủ
-          setTimeout(function() {
-            location.reload();
-          }, 1500);
+          // Cập nhật nút theo trạng thái mới (Shipping)
+          updateButtonsByStatus(sales_id, 'Shipping');
+          
+          // Cập nhật thông tin thanh toán nếu cần
+          updatePaymentInfo(sales_id);
         }
         else if(result=="failed")
         {
@@ -854,6 +874,47 @@ function checkAndUpdatePaymentStatus(sales_id) {
             console.log('Error checking payment status:', e);
         }
     });
+}
+
+// Hàm cập nhật hiển thị nút theo trạng thái
+function updateButtonsByStatus(sales_id, new_status) {
+    // Xóa tất cả nút trạng thái hiện có
+    $('#btn_shipping_' + sales_id).remove();
+    $('#btn_final_' + sales_id).remove();
+    
+    if(new_status == 'Quotation') {
+        // Trạng thái "Đang giao dịch" - thêm cả 2 nút
+        var shippingBtn = '<span class="btn btn-warning" id="btn_shipping_' + sales_id + '" onclick="stt_shipping_now(' + sales_id + ')">' +
+                         '<i class="fa fa-truck"></i> Đã xuất kho</span> ';
+        var finalBtn = '<span class="btn btn-success" id="btn_final_' + sales_id + '" onclick="stt_final_now(' + sales_id + ')">' +
+                      '<i class="fa fa-check"></i> Đã giao hàng</span> ';
+        
+        // Thêm nút trước nút thanh toán
+        $('#btn_payment_' + sales_id).before(shippingBtn + finalBtn);
+    }
+    else if(new_status == 'Shipping') {
+        // Trạng thái "Đã xuất kho" - chỉ thêm nút giao hàng
+        var finalBtn = '<span class="btn btn-success" id="btn_final_' + sales_id + '" onclick="stt_final_now(' + sales_id + ')">' +
+                      '<i class="fa fa-check"></i> Đã giao hàng</span> ';
+        
+        $('#btn_payment_' + sales_id).before(finalBtn);
+    }
+    // Trạng thái "Final" - không thêm nút nào
+    
+    // Cập nhật text hiển thị trạng thái
+    var statusText = '';
+    switch(new_status) {
+        case 'Quotation':
+            statusText = 'Đang giao dịch';
+            break;
+        case 'Shipping':
+            statusText = 'Đã xuất kho';
+            break;
+        case 'Final':
+            statusText = 'Đã giao hàng';
+            break;
+    }
+    $('#status_display_' + sales_id).text(statusText);
 }
 </script>
 <script>
