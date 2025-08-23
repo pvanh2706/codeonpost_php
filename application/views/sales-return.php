@@ -402,12 +402,7 @@
                                    <h4><b id="other_charges_amt" name="other_charges_amt">0 ₫</b></h4>
                                 </th>
                              </tr>
-                                             <tr>
-                                                <th class="text-left" style="font-size: 17px; width: 65%; padding-right: 30px;">Tổng chiết khấu</th>
-                                                <th class="text-left" style="font-size: 17px; width: 35%; padding-left: 20px;">
-                                                   <h4><b id="discount_to_all_amt" name="discount_to_all_amt">0 ₫</b></h4>
-                                                </th>
-                                             </tr>
+                                          
                                              <tr>
                                                 <th class="text-left" style="font-size: 17px; width: 65%; padding-right: 30px;">Tổng trước thuế</th>
                                                 <th class="text-left" style="font-size: 17px; width: 35%; padding-left: 20px;">
@@ -448,6 +443,12 @@
                                                    <h4><b id="round_off_amt" name="tot_round_off_amt">0.00</b></h4>
                                                 </th>
                                              </tr-->
+                                              <tr>
+                                                <th class="text-left" style="font-size: 17px; width: 65%; padding-right: 30px;">Tổng chiết khấu</th>
+                                                <th class="text-left" style="font-size: 17px; width: 35%; padding-left: 20px;">
+                                                   <h4><b id="discount_to_all_amt" name="discount_to_all_amt">0 ₫</b></h4>
+                                                </th>
+                                             </tr>
                                              <tr>
                                                 <th class="text-left" style="font-size: 17px; font-weight: bold; color: #d9534f; width: 65%; padding-right: 30px;">Tổng thanh toán</th>
                                                 <th class="text-left" style="font-size: 17px; width: 35%; padding-left: 20px;">
@@ -839,15 +840,17 @@
                     var tax_id = $("#tr_tax_id_"+i).val();
                     var tax_name = $("#td_data_"+i+"_12").html();
                     var tax_rate = $("#tr_tax_value_"+i).val();
-                    
+                    var unitPrice = parseFloat($("#td_data_"+i+"_10").val().trim()) || 0;
+                    var discountItem = parseFloat($("#td_data_"+i+"_8").val().trim()) || 0;
                     // Debug log
                     console.log("Row " + i + ": qty=" + qty + ", item_subtotal=" + item_subtotal + 
                                ", tax_amt_item=" + tax_amt_item + ", tax_type=" + tax_type);
                     
                     actual_taxable=actual_taxable + (unit_cost * qty);
-                    
+                    console.log('unitPrice: ' + unitPrice);
                     // Cộng vào subtotal tổng (đã được tính đúng trong calculate_tax)
-                    subtotal = subtotal + item_subtotal;
+                    // subtotal = subtotal + item_subtotal;
+                    subtotal = subtotal + (unitPrice * qty) - discountItem; //Thêm lại đơn giá để tránh lỗi làm tròn số
                     
                     if(tax_amt_item >= 0){
                       tax_amt=tax_amt + tax_amt_item;
@@ -902,19 +905,34 @@
              
              taxable=taxable+subtotal;
              
+             
+             
+             // Calculate totals for new fields
+             // var total_before_tax = subtotal + other_charges_total_amt - discount;
+             var total_before_tax = subtotal + other_charges_total_amt;
+             var total_after_tax = total_before_tax + tax_amt;
+             
+             // Update new summary fields
+             $("#total_before_tax_amt").html(formatCurrency(total_before_tax));
+             $("#total_tax_amt").html(formatCurrency(tax_amt));
+             $("#total_after_tax_amt").html(formatCurrency(total_after_tax));
+
+             var totalPayment = total_after_tax;
              //discount_to_all_amt
              var discount_input = parseDirectNumber($("#discount_to_all_input").val());
              var discount=0;
              if(discount_input>0){
                  var discount_type=$("#discount_to_all_type").val();
                  if(discount_type=='in_fixed'){
-                   taxable-=discount_input;
+                  //  taxable-=discount_input;
+                   totalPayment-=discount_input;
                    discount=discount_input;
                    //Minus
                  }
                  else if(discount_type=='in_percentage'){
-                     discount=(taxable*discount_input)/100;
-                    taxable-=discount;
+                    //  discount=(taxable*discount_input)/100;
+                    discount=(total_after_tax*discount_input)/100;
+                    totalPayment-=discount;
          
                  }
              }
@@ -924,15 +942,8 @@
                
              $("#discount_to_all_amt").html(formatCurrency(discount));  
              $("#hidden_discount_to_all_amt").val(discount);  
-             
-             // Calculate totals for new fields
-             var total_before_tax = subtotal + other_charges_total_amt - discount;
-             var total_after_tax = total_before_tax + tax_amt;
-             
-             // Update new summary fields
-             $("#total_before_tax_amt").html(formatCurrency(total_before_tax));
-             $("#total_tax_amt").html(formatCurrency(tax_amt));
-             $("#total_after_tax_amt").html(formatCurrency(total_after_tax));
+
+
              
              // Display tax breakdown
              var tax_breakdown_html = '';
@@ -963,7 +974,8 @@
              
              $("#tax_breakdown_section").html(tax_breakdown_html);
              
-             subtotal_round=round_off(total_after_tax);//round_off() method custom defined
+             // subtotal_round=round_off(total_after_tax);//round_off() method custom defined 
+             subtotal_round=round_off(totalPayment);//round_off() method custom defined 
              subtotal_diff=subtotal_round-total_after_tax;
          
              $("#round_off_amt").html(formatCurrency(subtotal_diff)); 
