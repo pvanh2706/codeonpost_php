@@ -15,7 +15,8 @@ $(document).ready(function(){
             return true;
          }
 
-         var selectionBoxId = $(getCustomerSelectionId());
+         // var selectionBoxId = $(getCustomerSelectionId());
+         var selectionBoxId = $('#customer_id');
 
          selectionBoxId.select2({
             allowClear: true,
