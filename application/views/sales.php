@@ -450,7 +450,7 @@ function round_off($amount) {
                                             <div class="table-responsive" style="width: 100%; border: dashed 1px;">
                                                 <table class="table table-hover table-bordered" style="width:100%; display: block; max-height: 450px; overflow: auto;" id="sales_table">
                                                     <thead class="custom_thead">
-                                                        <tr class="bg-primary" >
+                                                        <!-- <tr class="bg-primary" >
                                                            <th rowspan='2' style="width:20%">S.Phẩm</th>
                                                            <th rowspan='2' style="width:8%;min-width: 120px;">S.Lượng</th>
                                                            <th rowspan='2' style="width:10%">Đ.Giá (<?= $CI->currency() ?>)</th>
@@ -461,6 +461,16 @@ function round_off($amount) {
                                                            <th rowspan='2' style="width:12%" class="tax-total-column">T.Sau thuế (<?= $CI->currency() ?>)</th>
                                                             <th rowspan='2' style="width:12%">T.Tạm tính (<?= $CI->currency() ?>)</th>
                                                            <th rowspan='2' style="width:8%">T.Tác</th>
+                                                        </tr> -->
+                                                        <tr class="bg-primary" >
+                                                           <th rowspan='2' style="width:25%">S.Ph?m</th>
+                                                           <th rowspan='2' style="width:10%;min-width: 180px;">S.Lu?ng</th>
+                                                           <th rowspan='2' style="width:15%">Ð.Giá (<?= $CI->currency() ?>)</th> 
+                                                           <th rowspan='2' style="width:15%">C.Kh?u (<?= $CI->currency() ?>)</th>
+                                                           <!--th rowspan='2' style="width:10%" class="<?=tax_disable_class()?>"><?= $this->lang->line('tax_amount'); ?></th>
+                                                           <th rowspan='2' style="width:5%" class="<?=tax_disable_class()?>"><?= $this->lang->line('tax'); ?></th-->
+                                                           <th rowspan='2' style="width:15%">T.Tính (<?= $CI->currency() ?>)</th>
+                                                           <th rowspan='2' style="width:10%">T.Tác</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody style=""></tbody>

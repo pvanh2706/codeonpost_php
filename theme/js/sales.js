@@ -430,7 +430,7 @@ function return_row_with_data(item_id, item_unit_name = ""){
        	$("#hidden_rowcount").val(parseFloat(rowcount)+1);
         success.currentTime = 0;
         success.play();
-        enable_or_disable_item_discount();
+        // enable_or_disable_item_discount();
         
         // Format tiền tệ cho các input trong dòng mới
         formatNewRowInputs(rowcount);
