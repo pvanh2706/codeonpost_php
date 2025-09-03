@@ -1116,9 +1116,10 @@ function round_off($amount) {
              $('#td_' + rowId + '_tax_amount').html(formatNumber(taxAmount));
              $('#td_' + rowId + '_before_tax').html(formatNumber(afterDiscount));
              $('#td_' + rowId + '_after_tax').html(formatNumber(totalWithTax));
+            //  $('#td_data_' + rowId + '_9').html(formatNumber(totalWithTax));
              
              // *** THAY ĐỔI: Cập nhật cột tạm tính chỉ hiển thị số tiền TRƯỚC THUẾ ***
-             $('#td_data_' + rowId + '_9').html('<span class="text-right">' + formatNumber(afterDiscount) + '</span>');
+             $('#td_data_' + rowId + '_9').html('<span class="text-right">' + formatNumber(totalWithTax) + '</span>');
              
              // Trả về giá trị số nguyên để tính toán
              return {
@@ -1135,7 +1136,7 @@ function round_off($amount) {
              var result = calculateDetailedTax(i);
              
              // *** THAY ĐỔI: Cập nhật tổng cuối cùng với giá trị TRƯỚC THUẾ cho cột tạm tính ***
-             $('#td_data_' + i + '_9').val(result.afterDiscount);
+             $('#td_data_' + i + '_9').val(result.totalWithTax);
              
              // *** FIX: Cập nhật hidden input cho thuế (td_data_X_11) ***
              // Kiểm tra nếu hidden input td_data_X_11 chưa tồn tại thì tạo mới
@@ -1178,7 +1179,7 @@ function round_off($amount) {
                          }
                          $('#td_data_' + i + '_11').val(taxAmount);
                          // Lưu giá trị TRƯỚC THUẾ vào td_data_X_9 thay vì totalWithTax
-                         $('#td_data_' + i + '_9').val(afterDiscount);
+                         $('#td_data_' + i + '_9').val(totalWithTax);
                          
                          totals.quantity += qty;
                          totals.subtotal += lineTotal;
