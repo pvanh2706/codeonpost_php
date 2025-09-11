@@ -181,6 +181,14 @@ $("#save,#update").on("click", function (e) {
     //if(confirm("Bạn có chắc chắn muốn lưu không ??")){
         e.preventDefault();
         data = new FormData($('#sales-form')[0]);//form name
+        
+        // Replace dots in amount values with empty string
+        for (let [key, value] of data.entries()) {
+            if (typeof value === 'string' && key.includes('amount')) {
+                data.set(key, value.replace(/\./g, ''));
+            }
+        }
+        
         /*Check XSS Code*/
         if(!xss_validation(data)){ return false; }
     // =================== TÍNH TOÁN HÓA ĐƠN ĐIỆN TỬ ===================
