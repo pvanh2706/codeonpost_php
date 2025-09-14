@@ -322,7 +322,7 @@
 		
     <?php if ($this->session->userdata('inv_userid') == '1') { ?>
 		<?php if($CI->permissions('places_add') || $CI->permissions('places_view')) { ?>
-		<li class="country-active-li city-list-active-li country-list-active-li state-active-li state-list-active-li city-active-li treeview">
+		<li class="country-active-li city-list-active-li country-list-active-li state-active-li state-list-active-li city-active-li treeview" style="display: none;">
             <a href="#">
                 <i class="fa fa-paper-plane-o text-aqua"></i> <span>Định vị Admin</span>
                 <span class="pull-right-container">
@@ -410,7 +410,7 @@
     <!-- Users -->
     <?php if ($this->session->userdata('inv_userid') == '1') { ?>
     <?php if($CI->permissions('users_add') || $CI->permissions('users_view') || $CI->permissions('roles_view')) { ?>
-    <li class="users-view-active-li users-active-li roles-list-active-li role-active-li treeview">
+    <li class="users-view-active-li users-active-li roles-list-active-li role-active-li treeview" style="display: none;">
       <a href="#">
         <i class="fa fa-users text-aqua"></i> <span>Người dùng Admin</span>
         <span class="pull-right-container">
@@ -445,7 +445,7 @@
     <!-- SMS -->
     <?php if ($this->session->userdata('inv_userid') == '1') { ?>
      <?php if($CI->permissions('send_sms') || $CI->permissions('sms_template_view') || $CI->permissions('sms_api_view')) { ?>
-     <li class="sms-active-li sms-api-active-li sms-template-active-li sms-templates-list-active-li treeview">
+     <li class="sms-active-li sms-api-active-li sms-template-active-li sms-templates-list-active-li treeview" style="display: none;">
           <a href="#">
             <i class="fa fa-envelope text-aqua"></i> <span><?= $this->lang->line('sms'); ?> Admin</span>
             <span class="pull-right-container">
@@ -469,7 +469,7 @@
     
     
     <?php if($CI->permissions('send_email') || $CI->permissions('email_api')) : ?>
-        <li class="email-active-li email-api-active-li treeview">
+        <li class="email-active-li email-api-active-li treeview" style="display: none;">
           <a href="#">
             <i class="fa fa-envelope text-aqua"></i> <span>Email VNAC <?= $this->session->userdata('inv_userid'); ?></span>
             <span class="pull-right-container">
