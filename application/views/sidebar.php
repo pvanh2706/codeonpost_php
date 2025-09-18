@@ -410,7 +410,7 @@
     <!-- Users -->
     <?php if ($this->session->userdata('inv_userid') == '1') { ?>
     <?php if($CI->permissions('users_add') || $CI->permissions('users_view') || $CI->permissions('roles_view')) { ?>
-    <li class="users-view-active-li users-active-li roles-list-active-li role-active-li treeview" style="display: none;">
+    <li class="users-view-active-li users-active-li roles-list-active-li role-active-li treeview">
       <a href="#">
         <i class="fa fa-users text-aqua"></i> <span>Người dùng Admin</span>
         <span class="pull-right-container">
